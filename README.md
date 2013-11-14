@@ -4,27 +4,27 @@ Collection of C utilities taken and cleaned up from my other projects
 
 ## Building
 
-   mkdir target &&  cd target
-   cmake -DCMAKE_INSTALL_PREFIX=build ..
-   make
+    mkdir target && cd target                # - create build target directory
+    cmake -DCMAKE_INSTALL_PREFIX=build ..    # - run CMake, set install directory
+    make                                     # - compile
 
 ## Running tests
 
-   cd target
-   make test
+    cd target                                # - cd to your target directory
+    make test                                # - run tests
 
 ## Installing
 
-   No systemwide install yet provided.
-   The utilites are small and mainly meant to be copied to your project.
-   However library containing all the utilities is built with the cmake.
+No systemwide install yet provided.
+
+The utilites are small and mainly meant to be copied to your project.
+However library containing all the utilities is built with the cmake.
 
 ## Some rules what goes here
-
-   1. Each utility should be independant.
-   2. Each utility should contain tests.
-   3. Each utility should have use more than once.
+* Each utility should be independant.
+* Each utility should contain tests.
+* Each utility should have use more than once.
 
 ## License
 
-   zlib, see LICENSE file for more information
+zlib, see LICENSE file for more information

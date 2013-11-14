@@ -1,4 +1,4 @@
-# Endian aware memory buffer implementation.
+# Endian aware buffers
 
 Useful for reading your usual buffers and files.
 
