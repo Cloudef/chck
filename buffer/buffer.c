@@ -11,6 +11,7 @@
 
 enum { RETURN_OK = 1, RETURN_FAIL = 0 };
 
+/* \brief is current machine big endian? */
 static int chckIsBigEndian(void)
 {
    union {
@@ -20,13 +21,16 @@ static int chckIsBigEndian(void)
    return bint.c[0] == 1;
 }
 
-static void chckFlipEndian(void *v, size_t size)
+/* \brief flip bits for buffer of given size */
+void chckFlipEndian(void *v, size_t size, size_t memb)
 {
-   size_t s;
+   size_t s, m;
    unsigned char b[size];
    assert(v);
-   memcpy(b, v, size);
-   for (s = 0; s < size; ++s) memset(v+s, b[size - s - 1], 1);
+   for (m = 0; m < memb; ++m) {
+      memcpy(b, v+(m*size), size);
+      for (s = 0; s < size; ++s) memset(v+(m*size)+s, b[size - s - 1], 1);
+   }
 }
 
 /* \brief free buffer */
@@ -77,6 +81,46 @@ fail:
    return NULL;
 }
 
+/* \brief resize buffer. allocates new buffer, if the buffer wasn't created by chckBuffer */
+int chckBufferResize(chckBuffer *buf, size_t size)
+{
+   void *tmp = NULL;
+   assert(size != 0 && size != buf->size);
+
+   if (buf->freeBuffer && size > buf->size)
+      tmp = realloc(buf->buffer, size);
+
+   if (!tmp) {
+      if (!(tmp = malloc(size)))
+         return RETURN_FAIL;
+
+      /* memcpy much bytes as we can from old buffer's curpos */
+      if (size < buf->size) {
+         if (buf->buffer + (buf->size - size) < buf->curpos) {
+            memcpy(tmp, buf->buffer + (buf->size - size), size);
+         } else {
+            memcpy(tmp, buf->curpos, size);
+         }
+      } else {
+         memcpy(tmp, buf->buffer, size);
+      }
+
+      if (buf->freeBuffer) free(buf->buffer);
+   }
+
+   /* set new buffer position */
+   if (buf->curpos - buf->buffer > (long)size) {
+      buf->curpos = tmp + (buf->size - size);
+   } else {
+      buf->curpos = tmp + (buf->curpos - buf->buffer);
+   }
+
+   buf->size = size;
+   buf->buffer = tmp;
+   buf->freeBuffer = 1;
+   return RETURN_OK;
+}
+
 /* \brief is current buffer endianess same as our machine? */
 int chckBufferIsNativeEndian(chckBuffer *buf) { return chckIsBigEndian() == buf->endianess; }
 
@@ -118,7 +162,7 @@ int chckBufferReadUInt16(chckBuffer *buf, unsigned short *i)
    if (chckBufferRead(&r, sizeof(r), 1, buf) != 1)
       return RETURN_FAIL;
 
-   if (!chckBufferIsNativeEndian(buf)) chckFlipEndian(&r, sizeof(r));
+   if (!chckBufferIsNativeEndian(buf)) chckFlipEndian(&r, sizeof(r), 1);
    *i = r;
    return RETURN_OK;
 }
@@ -135,7 +179,7 @@ int chckBufferReadUInt32(chckBuffer *buf, unsigned int *i)
    if (chckBufferRead(&r, sizeof(r), 1, buf) != 1)
       return RETURN_FAIL;
 
-   if (!chckBufferIsNativeEndian(buf)) chckFlipEndian(&r, sizeof(r));
+   if (!chckBufferIsNativeEndian(buf)) chckFlipEndian(&r, sizeof(r), 1);
    *i = r;
    return RETURN_OK;
 }

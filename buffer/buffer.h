@@ -18,8 +18,10 @@ typedef struct chckBuffer {
    char freeBuffer;
 } chckBuffer;
 
+void chckFlipEndian(void *v, size_t size, size_t memb);
 chckBuffer* chckBufferNewFromPointer(const void *ptr, size_t size, chckBufferEndianType endianess);
 chckBuffer* chckBufferNew(size_t size, chckBufferEndianType endianess);
+int chckBufferResize(chckBuffer *buf, size_t size);
 void chckBufferFree(chckBuffer *buf);
 int chckBufferIsNativeEndian(chckBuffer *buf);
 size_t chckBufferRead(void *dst, size_t size, size_t memb, chckBuffer *buf);
