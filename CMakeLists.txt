@@ -1,0 +1,42 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+PROJECT(chck)
+INCLUDE(CTest)
+SET(GLHCK_NAME "Chck")
+SET(GLHCK_DESCRIPTION "Collection of C utilities taken and cleaned up from my other projects")
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${chck_SOURCE_DIR}/CMake/modules)
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY test)
+SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY lib)
+SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY lib)
+
+# General build options
+OPTION(CHCK_BUILD_TESTS "Build tests" ON)
+
+# Warnings
+IF (MSVC)
+   IF (CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+      STRING(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+   ELSE ()
+      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+   ENDIF ()
+ELSEIF (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+   SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -Wall -Wextra -Wno-variadic-macros -Wno-long-long")
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-variadic-macros -Wno-long-long")
+ENDIF ()
+
+SET(SOURCE buffer)
+SET(LIBSRC "")
+SET(LIBINC "")
+
+FOREACH (src ${SOURCE})
+   LIST(APPEND LIBSRC ${src}/${src}.c)
+   LIST(APPEND LIBINC ${chck_SOURCE_DIR}/${src})
+   ADD_EXECUTABLE(${src}_test ${src}/test.c ${src}/${src}.c)
+   INCLUDE_DIRECTORIES(${chck_SOURCE_DIR}/${src})
+   TARGET_LINK_LIBRARIES(${src}_test)
+   ADD_TEST(${src}_test test/${src}_test)
+ENDFOREACH (src)
+
+INCLUDE_DIRECTORIES(${LIBINC})
+ADD_DEFINITIONS(-fPIC)
+ADD_LIBRARY(chck ${LIBSRC})
+TARGET_LINK_LIBRARIES(chck)
