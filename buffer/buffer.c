@@ -9,10 +9,30 @@
 #  include <malloc.h>
 #endif
 
+#if defined(__GNUC__) || defined(__CYGWIN__)
+#  include <byteswap.h>
+#  define bswap16 __bswap_16
+#  define bswap32 __bswap_32
+#  define HAS_BYTESWAP 1
+#elif defined(_MSC_VER)
+#  define bswap16 _byteswap_ushort
+#  define bswap32 _byteswap_ulong
+#  define HAS_BYTESWAP 1
+#else
+#  define HAS_BYTESWAP 0
+#endif
+
 enum { RETURN_OK = 1, RETURN_FAIL = 0 };
 
+/* \brief awesome buffer struct */
+typedef struct _chckBuffer {
+   size_t size;
+   void *buffer, *curpos;
+   char endianess, freeBuffer;
+} chckBuffer;
+
 /* \brief is current machine big endian? */
-static int chckIsBigEndian(void)
+int chckBufferIsBigEndian(void)
 {
    union {
       uint32_t i;
@@ -21,15 +41,22 @@ static int chckIsBigEndian(void)
    return bint.c[0] == 1;
 }
 
-/* \brief flip bits for buffer of given size */
-void chckFlipEndian(void *v, size_t size, size_t memb)
+/* \brief flip bytes for buffer of given size */
+void chckBufferSwap(void *v, size_t size, size_t memb)
 {
-   size_t s, m;
-   unsigned char b[size];
-   assert(v);
+   size_t m;
+   assert(v && size > 1);
+
    for (m = 0; m < memb; ++m) {
+#if HAS_BYTESWAP
+      if (size == sizeof(uint32_t)) *((uint32_t*)v+(m*size)) = bswap32(*((uint32_t*)v+(m*size)));
+      if (size == sizeof(uint16_t)) *((uint16_t*)v+(m*size)) = bswap16(*((uint16_t*)v+(m*size)));
+#else
+      size_t s;
+      unsigned char b[size];
       memcpy(b, v+(m*size), size);
       for (s = 0; s < size; ++s) memset(v+(m*size)+s, b[size - s - 1], 1);
+#endif
    }
 }
 
@@ -41,7 +68,7 @@ void chckBufferFree(chckBuffer *buf)
    free(buf);
 }
 
-/* \brief create new buffer with pointer and size, buffer won't be copied nor freed! */
+/* \brief create new buffer with pointer and size, pointer won't be copied nor freed! */
 chckBuffer* chckBufferNewFromPointer(const void *ptr, size_t size, chckBufferEndianType endianess)
 {
    chckBuffer *buf;
@@ -49,14 +76,7 @@ chckBuffer* chckBufferNewFromPointer(const void *ptr, size_t size, chckBufferEnd
    if (!(buf = calloc(1, sizeof(chckBuffer))))
       return NULL;
 
-   if (endianess == CHCK_BUFFER_ENDIAN_NATIVE) {
-      buf->endianess = chckIsBigEndian();
-   } else {
-      buf ->endianess = endianess;
-   }
-
-   buf->size = size;
-   buf->buffer = buf->curpos = (void*)ptr;
+   chckBufferSetPointer(buf, ptr, size, endianess);
    return buf;
 }
 
@@ -80,6 +100,29 @@ fail:
    if (data) free(data);
    return NULL;
 }
+
+/* \brief set new pointer to the buffer, pointer won't be freed or copied! */
+void chckBufferSetPointer(chckBuffer *buf, const void *ptr, size_t size, chckBufferEndianType endianess)
+{
+   assert(buf);
+
+   if (buf->buffer && buf->freeBuffer) free(buf->buffer);
+
+   if (endianess == CHCK_BUFFER_ENDIAN_NATIVE) {
+      buf->endianess = chckBufferIsBigEndian();
+   } else {
+      buf->endianess = endianess;
+   }
+
+   buf->size = size;
+   buf->buffer = buf->curpos = (void*)ptr;
+}
+
+/* \brief get buffer pointer for low-level access */
+void* chckBufferGetPointer(chckBuffer *buf) { return buf->buffer; }
+
+/* \brief get offset pointer for low-level access */
+void* chckBufferGetOffsetPointer(chckBuffer *buf) { return buf->curpos; }
 
 /* \brief resize buffer. allocates new buffer, if the buffer wasn't created by chckBuffer */
 int chckBufferResize(chckBuffer *buf, size_t size)
@@ -121,8 +164,68 @@ int chckBufferResize(chckBuffer *buf, size_t size)
    return RETURN_OK;
 }
 
+/* \brief seek buffer */
+void chckBufferSeek(chckBuffer *buf, long offset, int whence)
+{
+   assert(buf);
+   assert(whence == SEEK_SET || whence == SEEK_END || whence == SEEK_CUR);
+
+   switch (whence) {
+      case SEEK_SET:
+         if (buf->buffer + offset > buf->buffer + buf->size) {
+            buf->curpos = buf->buffer + buf->size;
+         } else if (offset >= 0) {
+            buf->curpos = buf->buffer + offset;
+         }
+      break;
+      case SEEK_CUR:
+         if (buf->curpos + offset > buf->buffer + buf->size) {
+            buf->curpos = buf->curpos + buf->size;
+         } else if (buf->curpos + offset < buf->buffer) {
+            buf->curpos = buf->buffer;
+         } else {
+            buf->curpos = buf->curpos + offset;
+         }
+      break;
+      case SEEK_END:
+         buf->curpos = buf->buffer + buf->size;
+      break;
+      default:break;
+   }
+}
+
+/* \brief get current position in buffer */
+size_t chckBufferGetOffset(chckBuffer *buf) { return buf->curpos - buf->buffer; }
+
+/* \brief get current buffer size */
+size_t chckBufferGetSize(chckBuffer *buf) { return buf->size; }
+
 /* \brief is current buffer endianess same as our machine? */
-int chckBufferIsNativeEndian(chckBuffer *buf) { return chckIsBigEndian() == buf->endianess; }
+int chckBufferIsNativeEndian(chckBuffer *buf) { return chckBufferIsBigEndian() == buf->endianess; }
+
+/* \brief fill bytes to buffer (do not go forward) */
+size_t chckBufferFill(const void *src, size_t size, size_t memb, chckBuffer *buf)
+{
+   assert(src && buf);
+
+   if (size * memb > buf->size - (buf->curpos - buf->buffer))
+      return 0;
+
+   memcpy(buf->curpos, src, size * memb);
+   return memb;
+}
+
+/* \brief fill bytes to buffer from file (do not go forward) */
+size_t chckBufferFillFromFile(FILE *src, size_t size, size_t memb, chckBuffer *buf)
+{
+   assert(src && buf);
+
+   if (size * memb > buf->size - (buf->curpos - buf->buffer))
+      return 0;
+
+   fread(buf->curpos, size, memb, src);
+   return memb;
+}
 
 /* \brief read bytes from buffer */
 size_t chckBufferRead(void *dst, size_t size, size_t memb, chckBuffer *buf)
@@ -140,13 +243,9 @@ size_t chckBufferRead(void *dst, size_t size, size_t memb, chckBuffer *buf)
 /* \brief read 8 bit unsigned integer from buffer */
 int chckBufferReadUInt8(chckBuffer *buf, unsigned char *i)
 {
-   uint8_t r;
    assert(i);
-
-   if (chckBufferRead(&r, sizeof(r), 1, buf) != 1)
+   if (chckBufferRead(i, 1, 1, buf) != 1)
       return RETURN_FAIL;
-
-   *i = r;
    return RETURN_OK;
 }
 
@@ -162,7 +261,7 @@ int chckBufferReadUInt16(chckBuffer *buf, unsigned short *i)
    if (chckBufferRead(&r, sizeof(r), 1, buf) != 1)
       return RETURN_FAIL;
 
-   if (!chckBufferIsNativeEndian(buf)) chckFlipEndian(&r, sizeof(r), 1);
+   if (!chckBufferIsNativeEndian(buf)) chckBufferSwap(&r, sizeof(r), 1);
    *i = r;
    return RETURN_OK;
 }
@@ -179,7 +278,7 @@ int chckBufferReadUInt32(chckBuffer *buf, unsigned int *i)
    if (chckBufferRead(&r, sizeof(r), 1, buf) != 1)
       return RETURN_FAIL;
 
-   if (!chckBufferIsNativeEndian(buf)) chckFlipEndian(&r, sizeof(r), 1);
+   if (!chckBufferIsNativeEndian(buf)) chckBufferSwap(&r, sizeof(r), 1);
    *i = r;
    return RETURN_OK;
 }
@@ -208,7 +307,7 @@ int chckBufferReadString(chckBuffer *buf, size_t bytes, char **str)
          return RETURN_FAIL;
       len = u.l16;
    } else {
-      if (chckBufferRead(&u.l8, bytes, 1, buf) != 1)
+      if (chckBufferReadUInt8(buf, &u.l8) != RETURN_OK)
          return RETURN_FAIL;
       len = u.l8;
    }
@@ -218,6 +317,88 @@ int chckBufferReadString(chckBuffer *buf, size_t bytes, char **str)
          return RETURN_FAIL;
       chckBufferRead(*str, 1, len, buf);
    }
+   return RETURN_OK;
+}
+
+/* \brief write bytes to buffer */
+size_t chckBufferWrite(const void *src, size_t size, size_t memb, chckBuffer *buf)
+{
+   memb = chckBufferFill(src, size, memb, buf);
+   buf->curpos += size * memb;
+   return memb;
+}
+
+/* \brief write bytes to buffer from file */
+size_t chckBufferWriteFromFile(FILE *src, size_t size, size_t memb, chckBuffer *buf)
+{
+   memb = chckBufferFillFromFile(src, size, memb, buf);
+   buf->curpos += size * memb;
+   return memb;
+}
+
+/* \brief write 8 bit unsigned integer to buffer */
+int chckBufferWriteUInt8(chckBuffer *buf, unsigned char i)
+{
+   assert(i);
+   if (chckBufferWrite(&i, 1, 1, buf) != 1)
+      return RETURN_FAIL;
+   return RETURN_OK;
+}
+
+/* \brief write 8 bit signed integer to buffer */
+int chckBufferWriteInt8(chckBuffer *buf, char i) { return chckBufferWriteUInt8(buf, (unsigned char)i); }
+
+/* \brief write 16 bit unsigned integer to buffer */
+int chckBufferWriteUInt16(chckBuffer *buf, unsigned short i)
+{
+   uint16_t r = i;
+   assert(i);
+
+   if (!chckBufferIsNativeEndian(buf)) chckBufferSwap(&r, sizeof(r), 1);
+
+   if (chckBufferWrite(&r, sizeof(r), 1, buf) != 1)
+      return RETURN_FAIL;
+
+   return RETURN_OK;
+}
+
+/* \brief write 16 bit signed integer to buffer */
+int chckBufferWriteInt16(chckBuffer *buf, short i) { return chckBufferWriteUInt16(buf, (unsigned short)i); }
+
+/* \brief write 32 bit unsigned integer to buffer */
+int chckBufferWriteUInt32(chckBuffer *buf, unsigned int i)
+{
+   uint32_t r = i;
+   assert(i);
+
+   if (!chckBufferIsNativeEndian(buf)) chckBufferSwap(&r, sizeof(r), 1);
+
+   if (chckBufferWrite(&r, sizeof(r), 1, buf) != 1)
+      return RETURN_FAIL;
+
+   return RETURN_OK;
+}
+
+/* \brief write 32 bit signed integer to buffer */
+int chckBufferWriteInt32(chckBuffer *buf, int i) { return chckBufferWriteUInt32(buf, (unsigned int)i); }
+
+/* \brief write string to buffer */
+int chckBufferWriteString(chckBuffer *buf, size_t len, const char *str)
+{
+   assert(buf);
+
+   if (len > 0xffff) {
+      if (chckBufferWriteUInt32(buf, len) != RETURN_OK)
+         return RETURN_FAIL;
+   } else if (len > 0xff) {
+      if (chckBufferWriteUInt16(buf, len) != RETURN_OK)
+         return RETURN_FAIL;
+   } else {
+      if (chckBufferWriteUInt8(buf, len) != RETURN_OK)
+         return RETURN_FAIL;
+   }
+
+   if (len) chckBufferWrite(str, 1, len, buf);
    return RETURN_OK;
 }
 
