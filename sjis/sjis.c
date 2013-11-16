@@ -52,8 +52,10 @@ char* chckSJISToUTF8(const unsigned char *sjis, size_t size, size_t *outSize, in
 
    for (i = 0, d = 0; i < size; ++i, ++d) {
       if (d >= dsize) chckResizeBuf(&dec, &dsize, dsize * 2);
+      dec[d] = 0x00; /* this is the unexpected case */
+
       /* modified ASCII */
-      if (sjis[i] >= 0x20 && sjis[i] <= 0x7e) {
+      if (sjis[i] <= 0x7f) {
          if (sjis[i] == 0x5c) { // YEN
             chckPutBuf(&dec, &d, &dsize, "\xc2\xa5");
          } else if (sjis[i] == 0x7e) { // OVERLINE
@@ -120,8 +122,10 @@ unsigned char* chckUTF8ToSJIS(const char *input, size_t size, size_t *outSize, i
 
    for (i = 0, d = 0; i < size; ++i, ++d) {
       if (d + 1 >= dsize) chckResizeBuf(&dec, &dsize, (dsize + 1) * 2);
+      dec[d] = 0x00; /* this is the unexpected case */
+
       /* ASCII */
-      if (utf8[i] >= 0x20 && utf8[i] <= 0x7e) {
+      if (utf8[i] <= 0x7f) {
          if (utf8[i] == 0x5c) { // BACKSLASH
             chckPutBuf(&dec, &d, &dsize, "\x81\x5f");
          } else if (utf8[i] == 0x7e) { // TILDE
