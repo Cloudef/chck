@@ -24,6 +24,7 @@ int main(void)
       char *u8;
       u8 = chckSJISToUTF8(sjis, sizeof(sjis), NULL, 1);
       assert(memcmp(utf8, u8, sizeof(utf8)) == 0);
+      free(u8);
    }
 
    /* TEST: UTF8 to SJIS */
@@ -31,6 +32,7 @@ int main(void)
       unsigned char *sj;
       sj = chckUTF8ToSJIS(utf8, sizeof(utf8), NULL, 1);
       assert(memcmp(sjis, sj, sizeof(sjis)) == 0);
+      free(sj);
    }
 
    return EXIT_SUCCESS;

@@ -19,6 +19,7 @@ static int chckResizeBuf(unsigned char **buf, size_t *size, size_t nsize)
       if (!(tmp = malloc(nsize)))
          return RETURN_FAIL;
       memcpy(tmp, *buf, (nsize>*size?*size:nsize));
+      free(*buf);
    }
 
    *buf = tmp;
