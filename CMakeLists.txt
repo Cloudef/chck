@@ -20,7 +20,7 @@ ELSEIF (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-variadic-macros -Wno-long-long")
 ENDIF ()
 
-SET(SOURCE buffer)
+SET(SOURCE buffer sjis)
 SET(LIBSRC "")
 SET(LIBINC "")
 
