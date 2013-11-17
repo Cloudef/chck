@@ -9,8 +9,7 @@ int main(void)
 {
    int i;
    short s;
-   char c;
-   char *str;
+   char c, *str;
 
    /* TEST: little endian buffer */
    {
@@ -44,15 +43,24 @@ int main(void)
       chckBufferFree(buf);
    }
 
-   /* TEST: native buffer write && read */
+   /* TEST: native buffer write && read && resize */
    {
       i = 8; s = 6;
-      chckBuffer *buf = chckBufferNew(5+sizeof(int32_t)+sizeof(int16_t), CHCK_BUFFER_ENDIAN_NATIVE);
+      chckBuffer *buf = chckBufferNew(5, CHCK_BUFFER_ENDIAN_NATIVE);
+      assert(chckBufferIsNativeEndian(buf) == 1);
+
       chckBufferWriteString(buf, 4, "test");
+      chckBufferResize(buf, 5+sizeof(int32_t)+sizeof(int16_t));
+      assert(chckBufferGetSize(buf) == 5+sizeof(int32_t)+sizeof(int16_t));
+      assert(chckBufferGetOffset(buf) == 5);
+      assert(chckBufferGetOffsetPointer(buf) != chckBufferGetPointer(buf));
+
       chckBufferWriteUInt32(buf, i);
       chckBufferWriteUInt16(buf, s);
       assert(chckBufferGetOffset(buf) - chckBufferGetSize(buf) == 0);
+
       chckBufferSeek(buf, 0, SEEK_SET);
+      assert(chckBufferGetOffset(buf) == 0);
 
       chckBufferReadString(buf, 1, &str);
       assert(!strcmp(str, "test"));
@@ -64,17 +72,26 @@ int main(void)
       chckBufferFree(buf);
    }
 
-   /* TEST: non-native buffer write && read */
+   /* TEST: non-native buffer write && read && resize */
    {
       i = 8; s = 6;
       chckBufferEndianType endianess = CHCK_BUFFER_ENDIAN_BIG;
       if (chckBufferIsBigEndian()) endianess = CHCK_BUFFER_ENDIAN_LITTLE;
-      chckBuffer *buf = chckBufferNew(5+sizeof(int32_t)+sizeof(int16_t), endianess);
+      chckBuffer *buf = chckBufferNew(5, endianess);
+      assert(chckBufferIsNativeEndian(buf) == 0);
+
       chckBufferWriteString(buf, 4, "test");
+      chckBufferResize(buf, 5+sizeof(int32_t)+sizeof(int16_t));
+      assert(chckBufferGetSize(buf) == 5+sizeof(int32_t)+sizeof(int16_t));
+      assert(chckBufferGetOffset(buf) == 5);
+      assert(chckBufferGetOffsetPointer(buf) != chckBufferGetPointer(buf));
+
       chckBufferWriteUInt32(buf, i);
       chckBufferWriteUInt16(buf, s);
       assert(chckBufferGetOffset(buf) - chckBufferGetSize(buf) == 0);
+
       chckBufferSeek(buf, 0, SEEK_SET);
+      assert(chckBufferGetOffset(buf) == 0);
 
       chckBufferReadString(buf, 1, &str);
       assert(!strcmp(str, "test"));
