@@ -78,31 +78,49 @@ int main(void)
    /* TEST: non-native buffer write && read && resize */
    {
       i = 8; s = 6;
-      chckBufferEndianType endianess = CHCK_BUFFER_ENDIAN_BIG;
-      if (chckBufferIsBigEndian()) endianess = CHCK_BUFFER_ENDIAN_LITTLE;
-      chckBuffer *buf = chckBufferNew(5, endianess);
+      chckBuffer *buf = chckBufferNew(5, notnative);
       assert(chckBufferIsNativeEndian(buf) == 0);
 
-      chckBufferWriteString(buf, 4, "test");
-      chckBufferResize(buf, 5+sizeof(int32_t)+sizeof(int16_t));
+      assert(chckBufferWriteString(buf, 4, "test") == 1);
+      assert(chckBufferResize(buf, 5+sizeof(int32_t)+sizeof(int16_t)) == 1);
       assert(chckBufferGetSize(buf) == 5+sizeof(int32_t)+sizeof(int16_t));
       assert(chckBufferGetOffset(buf) == 5);
       assert(chckBufferGetOffsetPointer(buf) != chckBufferGetPointer(buf));
 
-      chckBufferWriteUInt32(buf, i);
-      chckBufferWriteUInt16(buf, s);
+      assert(chckBufferWriteUInt32(buf, i) == 1);
+      assert(chckBufferWriteUInt16(buf, s) == 1);
       assert(chckBufferGetOffset(buf) - chckBufferGetSize(buf) == 0);
 
-      chckBufferSeek(buf, 0, SEEK_SET);
+      assert(chckBufferSeek(buf, 0, SEEK_SET) == chckBufferGetOffset(buf));
       assert(chckBufferGetOffset(buf) == 0);
 
-      chckBufferReadString(buf, 1, &str);
-      assert(!strcmp(str, "test"));
-      chckBufferReadInt32(buf, &i);
+      assert(chckBufferReadString(buf, 1, &str) == 1);
+      assert(strcmp(str, "test") == 0); free(str);
+      assert(chckBufferReadInt32(buf, &i) == 1);
       assert(i == 8);
-      chckBufferReadInt16(buf, &s);
+      assert(chckBufferReadInt16(buf, &s) == 1);
       assert(s == 6);
       assert(chckBufferGetOffset(buf) - chckBufferGetSize(buf) == 0);
+      chckBufferFree(buf);
+   }
+
+   /* TEST: zlib compression && decompression */
+   {
+      static const char uncompressed[] = ".....................";
+      static const char compressed[] = { 0x78, 0x9c, 0xd3, 0xd3, 0xc3, 0x2, 0x18, 0x0, 0x2d, 0x5e, 0x3, 0xc7 };
+      chckBuffer *buf = chckBufferNewFromPointer(uncompressed, sizeof(uncompressed), CHCK_BUFFER_ENDIAN_NATIVE);
+#if HAS_ZLIB
+      assert(chckBufferCompressZlib(buf) == 1);
+      assert(chckBufferGetSize(buf) == sizeof(compressed));
+      assert(memcmp(chckBufferGetPointer(buf), compressed, sizeof(compressed)) == 0);
+
+      assert(chckBufferDecompressZlib(buf) == 1);
+      assert(chckBufferGetSize(buf) == sizeof(uncompressed));
+      assert(memcmp(chckBufferGetPointer(buf), uncompressed, sizeof(uncompressed)) == 0);
+#else
+      assert(chckBufferCompressZlib(buf) == 0);
+      assert(chckBufferDecompressZlib(buf) == 0);
+#endif
       chckBufferFree(buf);
    }
 

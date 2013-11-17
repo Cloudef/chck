@@ -22,6 +22,10 @@
 #  define HAS_BYTESWAP 0
 #endif
 
+#if HAS_ZLIB
+#  include <zlib.h>
+#endif
+
 enum { RETURN_OK = 1, RETURN_FAIL = 0 };
 
 /* \brief awesome buffer struct */
@@ -402,6 +406,86 @@ int chckBufferWriteString(chckBuffer *buf, size_t len, const char *str)
 
    if (len) chckBufferWrite(str, 1, len, buf);
    return RETURN_OK;
+}
+
+/* \brief compress buffer using zlib */
+int chckBufferCompressZlib(chckBuffer *buf)
+{
+#if HAS_ZLIB
+   int ret;
+   void *compressed = NULL, *tmp;
+   size_t destSize, bufSize;
+
+   destSize = bufSize = compressBound(buf->size);
+   if (!(compressed = malloc(destSize)))
+      goto fail;
+
+   while ((ret = compress(compressed, &destSize, buf->buffer, buf->size)) == Z_BUF_ERROR) {
+      if (!(tmp = realloc(compressed, bufSize * 2))) {
+         if (!(tmp = malloc(bufSize * 2))) goto fail;
+         free(compressed);
+      }
+      compressed = tmp;
+      destSize = bufSize *= 2;
+   }
+   if (ret != Z_OK) goto fail;
+
+   if (buf->buffer && buf->freeBuffer) free(buf->buffer);
+   buf->size = bufSize;
+   buf->buffer = buf->curpos = compressed;
+   buf->freeBuffer = 1;
+
+   if (bufSize != destSize) chckBufferResize(buf, destSize);
+   return RETURN_OK;
+
+fail:
+   if (compressed) free(compressed);
+   return RETURN_FAIL;
+#else
+   (void)buf;
+   assert(0 && "not compiled with zlib support");
+   return RETURN_FAIL;
+#endif
+}
+
+/* \brief decompress buffer using zlib */
+int chckBufferDecompressZlib(chckBuffer *buf)
+{
+#if HAS_ZLIB
+   int ret;
+   void *decompressed = NULL, *tmp;
+   size_t destSize, bufSize;
+
+   destSize = bufSize = buf->size * 2;
+   if (!(decompressed = malloc(destSize)))
+      goto fail;
+
+   while ((ret = uncompress(decompressed, &destSize, buf->buffer, buf->size)) == Z_BUF_ERROR) {
+      if (!(tmp = realloc(decompressed, bufSize * 2))) {
+         if (!(tmp = malloc(bufSize * 2))) goto fail;
+         free(decompressed);
+      }
+      decompressed = tmp;
+      destSize = bufSize *= 2;
+   }
+   if (ret != Z_OK) goto fail;
+
+   if (buf->buffer && buf->freeBuffer) free(buf->buffer);
+   buf->size = bufSize;
+   buf->buffer = buf->curpos = decompressed;
+   buf->freeBuffer = 1;
+
+   if (bufSize != destSize) chckBufferResize(buf, destSize);
+   return RETURN_OK;
+
+fail:
+   if (decompressed) free(decompressed);
+   return RETURN_FAIL;
+#else
+   (void)buf;
+   assert(0 && "not compiled with zlib support");
+   return RETURN_FAIL;
+#endif
 }
 
 /* vim: set ts=8 sw=3 tw=0 :*/

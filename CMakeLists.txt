@@ -8,6 +8,22 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY test)
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY lib)
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY lib)
 
+# Sources
+SET(SOURCE buffer sjis)
+SET(LIBSRC "") # sources to be compiled
+SET(LIBINC "") # include directories
+SET(LIBLIB "") # libraries to be linked
+SET(LIBDEF "") # compile defines
+SET(LIBPUB "") # public headers
+
+# Optional features
+FIND_PACKAGE(ZLIB)
+IF (ZLIB_FOUND)
+   LIST(APPEND buffer_INC ${ZLIB_INCLUDE_DIRS})
+   LIST(APPEND buffer_DEF -DHAS_ZLIB=1)
+   LIST(APPEND buffer_LIB ${ZLIB_LIBRARIES})
+ENDIF (ZLIB_FOUND)
+
 # Warnings
 IF (MSVC)
    IF (CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
@@ -20,22 +36,25 @@ ELSEIF (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-variadic-macros -Wno-long-long")
 ENDIF ()
 
-SET(SOURCE buffer sjis)
-SET(LIBSRC "")
-SET(LIBINC "")
-
+# Collect data for static lib and create tests
 FOREACH (src ${SOURCE})
    LIST(APPEND LIBSRC ${src}/${src}.c)
-   LIST(APPEND LIBINC ${chck_SOURCE_DIR}/${src})
+   LIST(APPEND LIBINC ${${src}_INC})
+   LIST(APPEND LIBLIB ${${src}_LIB})
+   LIST(APPEND LIBDEF ${${src}_DEF})
+   LIST(APPEND LIBPUB ${src}/${src}.h)
+
+   INCLUDE_DIRECTORIES(${${src}_INC})
+   ADD_DEFINITIONS(-fPIC ${${src}_DEF})
    ADD_EXECUTABLE(${src}_test ${src}/test.c ${src}/${src}.c)
-   INCLUDE_DIRECTORIES(${chck_SOURCE_DIR}/${src})
-   TARGET_LINK_LIBRARIES(${src}_test)
+   TARGET_LINK_LIBRARIES(${src}_test ${${src}_LIB})
    ADD_TEST(${src}_test test/${src}_test)
 ENDFOREACH (src)
 
+# Compile static lib
 INCLUDE_DIRECTORIES(${LIBINC})
-ADD_DEFINITIONS(-fPIC)
-ADD_LIBRARY(chck ${LIBSRC})
+ADD_DEFINITIONS(-fPIC ${LIBDEF})
+ADD_LIBRARY(chck ${LIBSRC} ${LIBLIB})
 TARGET_LINK_LIBRARIES(chck)
 
 # vim: set ts=8 sw=3 tw=0

@@ -56,6 +56,10 @@ int chckBufferWriteUInt32(chckBuffer *buf, unsigned int i);
 int chckBufferWriteInt32(chckBuffer *buf, int i);
 int chckBufferWriteString(chckBuffer *buf, size_t len, const char *str);
 
+/* -DHAS_ZLIB=1 -lz */
+int chckBufferCompressZlib(chckBuffer *buf);
+int chckBufferDecompressZlib(chckBuffer *buf);
+
 #endif /* __chck_buffer__ */
 
 /* vim: set ts=8 sw=3 tw=0 :*/
