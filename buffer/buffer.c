@@ -64,7 +64,7 @@ void chckBufferSwap(void *v, size_t size, size_t memb)
    }
 }
 
-/* \brief free buffer */
+/* \brief free buffer and internal buffer if needed */
 void chckBufferFree(chckBuffer *buf)
 {
    assert(buf);
@@ -72,7 +72,7 @@ void chckBufferFree(chckBuffer *buf)
    free(buf);
 }
 
-/* \brief create new buffer with pointer and size, pointer won't be copied nor freed! */
+/* \brief create new buffer with internal buffer and size, internal buffer won't be copied nor freed! */
 chckBuffer* chckBufferNewFromPointer(const void *ptr, size_t size, chckBufferEndianType endianess)
 {
    chckBuffer *buf;
@@ -84,7 +84,7 @@ chckBuffer* chckBufferNewFromPointer(const void *ptr, size_t size, chckBufferEnd
    return buf;
 }
 
-/* \brief create new buffer, buffer with the size will be allocated */
+/* \brief create new buffer, internal buffer with the size will be allocated */
 chckBuffer* chckBufferNew(size_t size, chckBufferEndianType endianess)
 {
    void *data;
@@ -105,7 +105,7 @@ fail:
    return NULL;
 }
 
-/* \brief set new pointer to the buffer, pointer won't be freed or copied! */
+/* \brief set new internal buffer, internal buffer won't be freed or copied! */
 void chckBufferSetPointer(chckBuffer *buf, const void *ptr, size_t size, chckBufferEndianType endianess)
 {
    assert(buf);
@@ -128,7 +128,15 @@ void* chckBufferGetPointer(chckBuffer *buf) { return buf->buffer; }
 /* \brief get offset pointer for low-level access */
 void* chckBufferGetOffsetPointer(chckBuffer *buf) { return buf->curpos; }
 
-/* \brief resize buffer. allocates new buffer, if the buffer wasn't created by chckBuffer */
+/* \brief steal buffer pointer
+ * the internal buffer won't be freed when chckBufferFree is called */
+void* chckBufferStealPointer(chckBuffer *buf) {
+   buf->freeBuffer = 0;
+   return buf->buffer;
+}
+
+/* \brief resize buffer
+ * allocates new internal buffer, if the internal buffer is either stolen or not allocated by us */
 int chckBufferResize(chckBuffer *buf, size_t size)
 {
    void *tmp = NULL;
@@ -408,7 +416,8 @@ int chckBufferWriteString(chckBuffer *buf, size_t len, const char *str)
    return RETURN_OK;
 }
 
-/* \brief compress buffer using zlib */
+/* \brief compress buffer using zlib
+ * internal buffer will be replaced with compressed buffer */
 int chckBufferCompressZlib(chckBuffer *buf)
 {
 #if HAS_ZLIB
@@ -448,7 +457,8 @@ fail:
 #endif
 }
 
-/* \brief decompress buffer using zlib */
+/* \brief decompress buffer using zlib
+ * internal buffer will be replaced with decompressed buffer */
 int chckBufferDecompressZlib(chckBuffer *buf)
 {
 #if HAS_ZLIB

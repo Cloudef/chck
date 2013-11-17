@@ -14,6 +14,15 @@ int main(void)
    chckBufferEndianType notnative = CHCK_BUFFER_ENDIAN_BIG;
    if (chckBufferIsBigEndian()) notnative = CHCK_BUFFER_ENDIAN_LITTLE;
 
+   /* TEST: buffer stealing */
+   {
+      void *stolen;
+      chckBuffer *buf = chckBufferNew(1, CHCK_BUFFER_ENDIAN_NATIVE);
+      assert((stolen = chckBufferStealPointer(buf)) == chckBufferGetPointer(buf));
+      chckBufferFree(buf);
+      free(stolen); // should not SIGSEGV
+   }
+
    /* TEST: little endian buffer */
    {
       static const char test[] = "\x12this integer is 5:\x5\x0\x0\0\1\0\1";
