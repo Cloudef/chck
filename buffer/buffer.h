@@ -28,7 +28,7 @@ void* chckBufferGetPointer(chckBuffer *buf);
 void* chckBufferGetOffsetPointer(chckBuffer *buf);
 int chckBufferResize(chckBuffer *buf, size_t size);
 
-void chckBufferSeek(chckBuffer *buf, long offset, int whence);
+size_t chckBufferSeek(chckBuffer *buf, long offset, int whence);
 size_t chckBufferGetOffset(chckBuffer *buf);
 size_t chckBufferGetSize(chckBuffer *buf);
 

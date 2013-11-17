@@ -165,7 +165,7 @@ int chckBufferResize(chckBuffer *buf, size_t size)
 }
 
 /* \brief seek buffer */
-void chckBufferSeek(chckBuffer *buf, long offset, int whence)
+size_t chckBufferSeek(chckBuffer *buf, long offset, int whence)
 {
    assert(buf);
    assert(whence == SEEK_SET || whence == SEEK_END || whence == SEEK_CUR);
@@ -192,6 +192,8 @@ void chckBufferSeek(chckBuffer *buf, long offset, int whence)
       break;
       default:break;
    }
+
+   return chckBufferGetOffset(buf);
 }
 
 /* \brief get current position in buffer */
