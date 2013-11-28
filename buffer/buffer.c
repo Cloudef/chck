@@ -9,7 +9,11 @@
 #  include <malloc.h>
 #endif
 
-#if defined(__GNUC__) || defined(__CYGWIN__)
+#if defined(__clang__)
+#  define bswap16 __builtin_bswap16
+#  define bswap32 __builtin_bswap32
+#  define HAS_BYTESWAP 1
+#elif defined(__GNUC__) || defined(__CYGWIN__)
 #  include <byteswap.h>
 #  define bswap16 __bswap_16
 #  define bswap32 __bswap_32
@@ -33,7 +37,7 @@ typedef struct _chckBuffer {
    size_t size;
    void *buffer, *curpos;
    char endianess, freeBuffer;
-} chckBuffer;
+} _chckBuffer;
 
 /* \brief is current machine big endian? */
 int chckBufferIsBigEndian(void)
