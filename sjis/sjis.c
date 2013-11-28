@@ -1,13 +1,8 @@
 #include "sjis.h"
 #include "utf8sjis.h"
+#include <stdlib.h> /* for calloc, free, etc... */
 #include <string.h> /* for memcpy/strlen */
 #include <assert.h> /* for assert */
-
-#ifdef __APPLE__
-#  include <malloc/malloc.h>
-#  else
-#  include <malloc.h>
-#endif
 
 enum { RETURN_OK = 1, RETURN_FAIL = 0 };
 
