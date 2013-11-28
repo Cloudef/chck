@@ -1,13 +1,8 @@
 #include "buffer.h"
+#include <stdlib.h> /* for calloc, free, etc.. */
 #include <stdint.h> /* for standard integers */
 #include <assert.h> /* for assert */
 #include <string.h> /* for memcpy/memset */
-
-#ifdef __APPLE__
-#  include <malloc/malloc.h>
-#  else
-#  include <malloc.h>
-#endif
 
 #if defined(__clang__)
 #  define bswap16 __builtin_bswap16
