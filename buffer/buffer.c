@@ -8,7 +8,7 @@
 #  define bswap16 __builtin_bswap16
 #  define bswap32 __builtin_bswap32
 #  define HAS_BYTESWAP 1
-#elif defined(__GNUC__) || defined(__CYGWIN__)
+#elif (defined(__GNUC__) || defined(__CYGWIN__)) && !defined(__MINGW32__) && !defined(__MINGW64__)
 #  include <byteswap.h>
 #  define bswap16 __bswap_16
 #  define bswap32 __bswap_32
@@ -422,7 +422,7 @@ int chckBufferCompressZlib(chckBuffer *buf)
 #if HAS_ZLIB
    int ret;
    void *compressed = NULL, *tmp;
-   size_t destSize, bufSize;
+   unsigned long destSize, bufSize;
 
    destSize = bufSize = compressBound(buf->size);
    if (!(compressed = malloc(destSize)))
@@ -463,7 +463,7 @@ int chckBufferDecompressZlib(chckBuffer *buf)
 #if HAS_ZLIB
    int ret;
    void *decompressed = NULL, *tmp;
-   size_t destSize, bufSize;
+   unsigned long destSize, bufSize;
 
    destSize = bufSize = buf->size * 2;
    if (!(decompressed = malloc(destSize)))
