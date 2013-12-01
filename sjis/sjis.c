@@ -10,9 +10,9 @@ enum { RETURN_OK = 1, RETURN_FAIL = 0 };
 static int chckResizeBuf(unsigned char **buf, size_t *size, size_t nsize)
 {
    void *tmp;
+
    if (nsize < *size || !(tmp = realloc(*buf, nsize))) {
-      if (!(tmp = malloc(nsize)))
-         return RETURN_FAIL;
+      if (!(tmp = malloc(nsize))) return RETURN_FAIL;
       memcpy(tmp, *buf, (nsize>*size?*size:nsize));
       free(*buf);
    }
