@@ -104,7 +104,11 @@ char* chckGetExecutablePath(void)
    const char *path = NULL;
    char *exepath = NULL;
 
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(EMSCRIPTEN)
+   (void)path;
+   (void)exepath;
+   return NULL;
+#elif defined(_WIN32) || defined(_WIN64)
    if (_pgmptr && !(exepath = chckStrdup(_pgmptr))) return NULL;
    if (exepath) return exepath;
 #elif defined(BSD) /* works on all BSD's? */
@@ -133,6 +137,8 @@ char* chckGetExecutablePath(void)
 #elif defined(_WIN32) || defined(_WIN64)
    path = NULL;
 #elif defined(__APPLE__) && defined(__MACH__)
+   path = NULL;
+#elif defined(EMSCRIPTEN)
    path = NULL;
 #else
 #  error insert your OS here
