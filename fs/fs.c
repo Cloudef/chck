@@ -48,30 +48,40 @@ static int chckResizeBuf(char **buf, size_t *size, size_t nsize)
    return RETURN_OK;
 }
 
-/* \brief readlink with any arbitary bufsize */
-static char* chckReadlink(const char *path)
+/* \brief read executable path cross-platform way, with arbitary sized buffer */
+static char* chckGetExecutablePathFrom(const char *path)
 {
    char *buf;
    ssize_t rsize;
    size_t size = 1024;
 
+#if (defined(__APPLE__) && defined(__MACH__))
+   (void)path;
+   unsigned int bsize = 0;
+   _NSGetExecutablePath(buf, &bsize);
+   if (bsize == 0) goto fail;
+   if (!(buf = malloc(bsize))) goto fail;
+   _NSGetExecutablePath(buf, &bsize);
+   buf[bsize] = 0;
+   size = rsize = bsize;
+#elif defined(_WIN32) || defined(_WIN64)
+   (void)path;
    if (!(buf = malloc(size))) goto fail;
-#if defined(_WIN32) || defined(_WIN64)
-   (void)path;
    while ((size_t)(rsize = GetModuleFileName(NULL, buf, size)) > size) {
-#elif (defined(__APPLE__) && defined(__MACH__))
-   (void)path;
-   while ((size_t)(rsize = _NSGetExecutablePath(buf, size)) > size) {
-#else
-   while ((size_t)(rsize = readlink(path, buf, size)) > size) {
-#endif
       if (rsize <= 0) goto fail;
       if (chckResizeBuf(&buf, &size, size * 2) != RETURN_OK) goto fail;
    }
+#else
+   if (!(buf = malloc(size))) goto fail;
+   while ((size_t)(rsize = readlink(path, buf, size)) > size) {
+      if (rsize <= 0) goto fail;
+      if (chckResizeBuf(&buf, &size, size * 2) != RETURN_OK) goto fail;
+   }
+#endif
 
    if (rsize <= 0) goto fail;
    if (rsize != -1 && size != (size_t)rsize) {
-      chckResizeBuf(&buf, &size, (size_t)rsize+1);
+      if (chckResizeBuf(&buf, &size, (size_t)rsize+1) != RETURN_OK) goto fail;
       buf[rsize] = 0;
    }
 
@@ -122,12 +132,14 @@ char* chckGetExecutablePath(void)
    path = "/proc/self/path/a.out";
 #elif defined(_WIN32) || defined(_WIN64)
    path = NULL;
+#elif defined(__APPLE__) && defined(__MACH__)
+   path = NULL;
 #else
 #  error insert your OS here
 #endif
 
    /* free this when not needed */
-   exepath = chckReadlink(path);
+   exepath = chckGetExecutablePathFrom(path);
    return exepath;
 }
 
