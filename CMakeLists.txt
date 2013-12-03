@@ -40,7 +40,7 @@ ENDIF ()
 SET(FPIC "-fPIC")
 IF (WIN32)
    SET(FPIC "")
-endif ()
+ENDIF ()
 
 # Collect data for static lib and create tests
 FOREACH (src ${SOURCE})
