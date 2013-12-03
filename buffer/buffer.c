@@ -8,7 +8,7 @@
 #  define bswap16 __builtin_bswap16
 #  define bswap32 __builtin_bswap32
 #  define HAS_BYTESWAP 1
-#elif (defined(__GNUC__) || defined(__CYGWIN__)) && !defined(__MINGW32__) && !defined(__MINGW64__)
+#elif defined(__GLIBC__) && !defined(__MINGW32__) && !defined(__MINGW64__)
 #  include <byteswap.h>
 #  define bswap16 __bswap_16
 #  define bswap32 __bswap_32
