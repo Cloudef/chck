@@ -54,7 +54,12 @@ FOREACH (src ${SOURCE})
    ADD_DEFINITIONS(${FPIC} ${${src}_DEF})
    ADD_EXECUTABLE(${src}_test ${src}/test.c ${src}/${src}.c)
    TARGET_LINK_LIBRARIES(${src}_test ${${src}_LIB})
-   ADD_TEST(${src}_test test/${src}_test)
+
+   IF (WIN32)
+      ADD_TEST(${src}_test test/${src}_test.exe)
+   ELSE ()
+      ADD_TEST(${src}_test test/${src}_test)
+   ENDIF ()
 ENDFOREACH (src)
 
 # Compile static lib
