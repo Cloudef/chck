@@ -4,11 +4,11 @@
 #include <assert.h> /* for assert */
 #include <string.h> /* for memcpy/memset */
 
-#if defined(__clang__)
+#if defined(__clang__) || (__GNUC__ >= 4 && __GNUC_MINOR__ >= 3 && !defined(__MINGW32__) && !defined(__MINGW64__))
 #  define bswap16 __builtin_bswap16
 #  define bswap32 __builtin_bswap32
 #  define HAS_BYTESWAP 1
-#elif defined(__GLIBC__) && !defined(__MINGW32__) && !defined(__MINGW64__)
+#elif defined(__GLIBC__)
 #  include <byteswap.h>
 #  define bswap16 __bswap_16
 #  define bswap32 __bswap_32
