@@ -51,18 +51,18 @@ int chckBufferIsBigEndian(void)
 /* \brief flip bytes for buffer of given size */
 void chckBufferSwap(void *v, size_t size, size_t memb)
 {
-   size_t m;
+   void *p;
    assert(v && size > 1);
 
-   for (m = 0; m < memb; ++m) {
+   for (p = v; p < v+(memb*size); p += size) {
 #if HAS_BYTESWAP
-      if (size == sizeof(uint32_t)) *((uint32_t*)v+(m*size)) = bswap32(*((uint32_t*)v+(m*size)));
-      if (size == sizeof(uint16_t)) *((uint16_t*)v+(m*size)) = bswap16(*((uint16_t*)v+(m*size)));
+      if (size == sizeof(uint32_t)) *((uint32_t*)p) = bswap32(*((uint32_t*)p));
+      if (size == sizeof(uint16_t)) *((uint16_t*)p) = bswap16(*((uint16_t*)p));
 #else
       size_t s;
       unsigned char b[size];
-      memcpy(b, v+(m*size), size);
-      for (s = 0; s < size; ++s) memset(v+(m*size)+s, b[size - s - 1], 1);
+      memcpy(b, p, size);
+      for (s = 0; s < size; ++s) memset(p + s, b[size - s - 1], 1);
 #endif
    }
 }
