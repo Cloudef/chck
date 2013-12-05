@@ -36,10 +36,11 @@ ELSEIF (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-variadic-macros -Wno-long-long")
 ENDIF ()
 
-# -fPIC when we need
-SET(FPIC "-fPIC")
-IF (WIN32)
-   SET(FPIC "")
+IF (UNIX AND CMAKE_COMPILER_IS_GNUCC)
+   SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+   IF (${CMAKE_VERSION} VERSION_LESS 2.8.9)
+      ADD_DEFINITIONS(-fPIC)
+   ENDIF ()
 ENDIF ()
 
 # Collect data for static lib and create tests
@@ -51,7 +52,7 @@ FOREACH (src ${SOURCE})
    LIST(APPEND LIBPUB ${src}/${src}.h)
 
    INCLUDE_DIRECTORIES(${${src}_INC})
-   ADD_DEFINITIONS(${FPIC} ${${src}_DEF})
+   ADD_DEFINITIONS(${${src}_DEF})
    ADD_EXECUTABLE(${src}_test ${src}/test.c ${src}/${src}.c)
    TARGET_LINK_LIBRARIES(${src}_test ${${src}_LIB})
 
@@ -64,7 +65,7 @@ ENDFOREACH (src)
 
 # Compile static lib
 INCLUDE_DIRECTORIES(${LIBINC})
-ADD_DEFINITIONS(${FPIC} ${LIBDEF})
+ADD_DEFINITIONS(${LIBDEF})
 ADD_LIBRARY(chck ${LIBSRC} ${LIBLIB})
 TARGET_LINK_LIBRARIES(chck)
 
