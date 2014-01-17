@@ -36,7 +36,7 @@ size_t chckBufferGetSize(chckBuffer *buf);
 int chckBufferIsNativeEndian(chckBuffer *buf);
 
 size_t chckBufferFill(const void *src, size_t size, size_t memb, chckBuffer *buf);
-size_t chckBufferFillFromFile(FILE *src, size_t, size_t memb, chckBuffer *buf);
+size_t chckBufferFillFromFile(FILE *src, size_t size, size_t memb, chckBuffer *buf);
 
 size_t chckBufferRead(void *dst, size_t size, size_t memb, chckBuffer *buf);
 int chckBufferReadUInt8(chckBuffer *buf, unsigned char *i);
