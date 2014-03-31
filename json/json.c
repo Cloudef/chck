@@ -99,8 +99,9 @@ static void chckJsonDecoderThrow(chckJsonDecoder *decoder, chckJsonError code, c
 
 static char chckJsonDecoderSkip(chckJsonDecoder *decoder, size_t numChars)
 {
+   size_t i;
    assert(decoder && numChars > 0);
-   decoder->currentChar += numChars;
+   for (i = 0; i < numChars && *decoder->currentChar; ++decoder->currentChar, ++i);
    return *decoder->currentChar;
 }
 
