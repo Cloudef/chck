@@ -368,21 +368,21 @@ static chckJson* chckJsonDecoderDecodeValue(chckJsonDecoder *decoder, chckJson *
    }
 
    const struct jsonDecodeEntry {
-      chckJsonType type;
+      int type;
       const char **except;
       void (*function)(chckJsonDecoder *decoder, chckJson *json);
    } *decodeTable = (const struct jsonDecodeEntry[]){
-         { 0, (const char*[]){ ",", NULL }, NULL },
+         { -1, (const char*[]){ ",", NULL }, NULL },
          { CHCK_JSON_TYPE_STRING, (const char*[]){ "\"", NULL }, chckJsonDecoderDecodeString },
          { CHCK_JSON_TYPE_OBJECT, (const char*[]){ "{", NULL }, chckJsonDecoderDecodeObject },
          { CHCK_JSON_TYPE_ARRAY, (const char*[]){ "[", NULL }, chckJsonDecoderDecodeArray },
          { CHCK_JSON_TYPE_BOOL, (const char*[]){ "true", "false", NULL }, chckJsonDecoderDecodeBool },
          { CHCK_JSON_TYPE_NULL, (const char*[]){ "null", NULL }, chckJsonDecoderDecodeNull },
-         { 0, (const char*[]){ "/", NULL }, chckJsonDecoderDecodeComment },
+         { -1, (const char*[]){ "/", NULL }, chckJsonDecoderDecodeComment },
          { CHCK_JSON_TYPE_NUMBER,
             (const char*[]){ "+", "-", ".", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", NULL },
             chckJsonDecoderDecodeNumber },
-         { 0, NULL, NULL }
+         { -1, NULL, NULL }
       };
 
    for (i = 0; !found && decodeTable[i].except; ++i) {
@@ -397,11 +397,11 @@ static chckJson* chckJsonDecoderDecodeValue(chckJsonDecoder *decoder, chckJson *
          continue;
 
       if (!decodeTable[i].function)
-         return NULL;
+         return parent;
 
-      if (!(json = chckJsonNew(decodeTable[i].type))) {
+      if (decodeTable[i].type != -1 && !(json = chckJsonNew(decodeTable[i].type))) {
          chckJsonDecoderThrow(decoder, CHCK_JSON_ERROR_OUT_OF_MEMORY, "Cannot allocate json object");
-         return NULL;
+         return parent;
       }
 
       decodeTable[i].function(decoder, json);
@@ -417,7 +417,7 @@ static chckJson* chckJsonDecoderDecodeValue(chckJsonDecoder *decoder, chckJson *
       }
    }
 
-   return json;
+   return (json ? json : parent);
 }
 
 chckJson* chckJsonDecoderDecode(chckJsonDecoder *decoder, const char *data)

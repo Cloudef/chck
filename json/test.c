@@ -80,7 +80,7 @@ int main(void)
             free(encode);
          }
 
-         chckJsonFreeAll(djson);
+         if (djson) chckJsonFreeAll(djson);
          assert(result == 1 && "Standard JSON tests should pass!");
       }
 
@@ -128,7 +128,7 @@ int main(void)
          const char *json = tests[i];
          printf("%s\n", json);
          chckJson *djson = chckJsonDecoderDecode(decoder, json);
-         chckJsonFreeAll(djson);
+         if (djson) chckJsonFreeAll(djson);
          assert(result == 0 && "Non standard JSON tests should fail!");
       }
 
@@ -158,7 +158,7 @@ int main(void)
          const char *json = tests[i];
          printf("%s\n", json);
          chckJson *djson = chckJsonDecoderDecode(decoder, json);
-         chckJsonFreeAll(djson);
+         if (djson) chckJsonFreeAll(djson);
          assert(result == 1 && "Comments extension should pass!");
       }
 
@@ -185,7 +185,7 @@ int main(void)
          const char *json = tests[i];
          printf("%s\n", json);
          chckJson *djson = chckJsonDecoderDecode(decoder, json);
-         chckJsonFreeAll(djson);
+         if (djson) chckJsonFreeAll(djson);
          assert(result == 0 && "Bad comments should not pass!");
       }
 
