@@ -55,7 +55,7 @@ int main(void)
          "{ \"a\":true}", /* Support boolean */
          "{ \"a\" : true }", /* Support non trimed data */
          "{ \"v\":1.7976931348623157E308}", /* Double precision floating point */
-         "{ \"a\":{ \"b\":0 }, \"c\":[ { \"d\":0 } ] }",
+         "{ \"a\":{ \"b\":[0,1,2,333,5], \"www\":\"私\" }, \"c\":[ { \"d\":0 } ] }",
          NULL
       };
 
