@@ -24,7 +24,7 @@ static char *chckStrdup(char *str)
    char *cpy;
    size_t size = strlen(str);
 
-   if (!(cpy = calloc(1, size+1)))
+   if (!(cpy = calloc(1, size + 1)))
       return NULL;
 
    memcpy(cpy, str, size);
@@ -39,7 +39,7 @@ static int chckResizeBuf(char **buf, size_t *size, size_t nsize)
 
    if (nsize < *size || !(tmp = realloc(*buf, nsize))) {
       if (!(tmp = malloc(nsize))) return RETURN_FAIL;
-      memcpy(tmp, *buf, (nsize>*size?*size:nsize));
+      memcpy(tmp, *buf, (nsize > *size ? *size : nsize));
       free(*buf);
    }
 
