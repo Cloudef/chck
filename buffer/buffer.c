@@ -44,7 +44,7 @@ int chckBufferIsBigEndian(void)
    union {
       uint32_t i;
       char c[4];
-   } bint = {0x01020304};
+   } bint = { 0x01020304 };
    return bint.c[0] == 1;
 }
 
@@ -54,7 +54,7 @@ void chckBufferSwap(void *v, size_t size, size_t memb)
    void *p;
    assert(v && size > 1);
 
-   for (p = v; p < v+(memb*size); p += size) {
+   for (p = v; p < v + (memb * size); p += size) {
 #if HAS_BYTESWAP
       if (size == sizeof(uint32_t)) *((uint32_t*)p) = bswap32(*((uint32_t*)p));
       if (size == sizeof(uint16_t)) *((uint16_t*)p) = bswap16(*((uint16_t*)p));
