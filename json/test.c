@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <ctype.h>
 
 void errorcb(chckJsonDecoder *decoder, unsigned int line, unsigned int position, const char *linePtr, chckJsonError code, const char *message)
 {
@@ -15,6 +16,20 @@ void errorcb(chckJsonDecoder *decoder, unsigned int line, unsigned int position,
 
    void *userdata = chckJsonDecoderGetUserdata(decoder);
    *(int*)userdata = 0;
+}
+
+int compareNoWhitespace(const char *a, const char *b)
+{
+   while (1) {
+      while (*a && isspace(*a)) ++a;
+      while (*b && isspace(*b)) ++b;
+      if (*a != *b)
+         return 0;
+      else if (!*a || !*b)
+         break;
+      ++a, ++b;
+   }
+   return (*a == *b);
 }
 
 int main(void)
@@ -40,8 +55,7 @@ int main(void)
          "{ \"a\":true}", /* Support boolean */
          "{ \"a\" : true }", /* Support non trimed data */
          "{ \"v\":1.7976931348623157E308}", /* Double precision floating point */
-         "{\"X\":\"s", /* Trucated value */
-         "{\"X", /* Trucated key */
+         "{ \"a\":{ \"b\":0 }, \"c\":[ { \"d\":0 } ] }",
          NULL
       };
 
@@ -55,8 +69,18 @@ int main(void)
       for (i = 0; tests[i]; ++i) {
          result = 1;
          const char *json = tests[i];
-         printf("%s\n", tests[i]);
-         chckJsonDecoderDecode(decoder, json);
+         printf("%s\n", json);
+         chckJson *djson = chckJsonDecoderDecode(decoder, json);
+
+         /* don't run tests on jsons that contain unicode.
+          * we don't encode unicode to hexdecimal for size reasons. */
+         if (strstr(json, "\\u") == 0) {
+            char *encode = chckJsonEncode(djson, NULL);
+            assert(compareNoWhitespace(encode, json) == 1);
+            free(encode);
+         }
+
+         chckJsonFreeAll(djson);
          assert(result == 1 && "Standard JSON tests should pass!");
       }
 
@@ -87,6 +111,8 @@ int main(void)
          "{ \"NaN\":NaN}", /* NaN Test Value */
          "{ a,b:123}", /* Support non protected keys contains , */
          "{ a]b:123}", /* Support non protected keys contains ] */
+         "{\"X\":\"s", /* Trucated value */
+         "{\"X", /* Trucated key */
          NULL
       };
 
@@ -100,7 +126,9 @@ int main(void)
       for (i = 0; tests[i]; ++i) {
          result = 1;
          const char *json = tests[i];
-         chckJsonDecoderDecode(decoder, json);
+         printf("%s\n", json);
+         chckJson *djson = chckJsonDecoderDecode(decoder, json);
+         chckJsonFreeAll(djson);
          assert(result == 0 && "Non standard JSON tests should fail!");
       }
 
@@ -128,11 +156,85 @@ int main(void)
       for (i = 0; tests[i]; ++i) {
          result = 1;
          const char *json = tests[i];
-         chckJsonDecoderDecode(decoder, json);
+         printf("%s\n", json);
+         chckJson *djson = chckJsonDecoderDecode(decoder, json);
+         chckJsonFreeAll(djson);
          assert(result == 1 && "Comments extension should pass!");
       }
 
       chckJsonDecoderFree(decoder);
+   }
+
+   /* TEST: decoding bad comments using comments extension */
+   {
+      const char *tests[] = {
+         "/* Unclosed C comment",
+         NULL
+      };
+
+      int result = 1;
+      chckJsonDecoder *decoder = chckJsonDecoderNew();
+      assert(decoder != NULL);
+      chckJsonDecoderUserdata(decoder, &result);
+      chckJsonDecoderAllowComments(decoder, 1);
+      chckJsonDecoderErrorCallback(decoder, errorcb);
+
+      int i;
+      for (i = 0; tests[i]; ++i) {
+         result = 1;
+         const char *json = tests[i];
+         printf("%s\n", json);
+         chckJson *djson = chckJsonDecoderDecode(decoder, json);
+         chckJsonFreeAll(djson);
+         assert(result == 0 && "Bad comments should not pass!");
+      }
+
+      chckJsonDecoderFree(decoder);
+   }
+
+   /* TEST: building and encoding a json tree */
+   {
+      const char *json = "{\"a\":256, \"b\":{[\"c\":[]]}, \"t\":true, \"f\":false, \"n\":null}";
+
+      chckJson *r = chckJsonNew(CHCK_JSON_TYPE_OBJECT);
+      chckJson *a = chckJsonNewString("a");
+      chckJsonChild(r, a);
+
+      chckJson *n256 = chckJsonNewNumberLong(256);
+      chckJsonChild(a, n256);
+
+      chckJson *b = chckJsonNewStringf("%c", 'b');
+      chckJsonNext(a, b);
+
+      chckJson *bc = chckJsonNew(CHCK_JSON_TYPE_OBJECT);
+      chckJsonChild(b, bc);
+
+      chckJson *bca = chckJsonNew(CHCK_JSON_TYPE_ARRAY);
+      chckJsonChild(bc, bca);
+
+      chckJson *c = chckJsonNewString("c");
+      chckJsonChild(bca, c);
+
+      chckJson *ca = chckJsonNew(CHCK_JSON_TYPE_ARRAY);
+      chckJsonChild(c, ca);
+
+      chckJson *t = chckJsonNewString("t");
+      chckJsonChild(t, chckJsonNewBool(1));
+      chckJsonNext(b, t);
+
+      chckJson *f = chckJsonNewString("f");
+      chckJsonChild(f, chckJsonNewBool(0));
+      chckJsonNext(t, f);
+
+      chckJson *n = chckJsonNewString("n");
+      chckJsonChild(n, chckJsonNew(CHCK_JSON_TYPE_NULL));
+      chckJsonNext(f, n);
+
+      char *encode = chckJsonEncode(r, NULL);
+      printf("%s\n", encode);
+      assert(compareNoWhitespace(encode, json) == 1);
+      free(encode);
+      chckJsonFreeAll(r);
    }
 
    return EXIT_SUCCESS;
