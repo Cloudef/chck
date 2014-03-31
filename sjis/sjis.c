@@ -13,7 +13,7 @@ static int chckResizeBuf(unsigned char **buf, size_t *size, size_t nsize)
 
    if (nsize < *size || !(tmp = realloc(*buf, nsize))) {
       if (!(tmp = malloc(nsize))) return RETURN_FAIL;
-      memcpy(tmp, *buf, (nsize>*size?*size:nsize));
+      memcpy(tmp, *buf, (nsize > *size ? *size : nsize));
       free(*buf);
    }
 
@@ -30,7 +30,7 @@ static int chckPutBuf(unsigned char **buf, size_t *o, size_t *size, const char *
       return RETURN_FAIL;
 
    memcpy(*buf + *o, bytes, len);
-   if (len > 1) *o += len - 1;
+   *o += len;
    return RETURN_OK;
 }
 
@@ -45,8 +45,7 @@ char* chckSJISToUTF8(const unsigned char *sjis, size_t size, size_t *outSize, in
    if (!(dec = malloc(dsize)))
       goto fail;
 
-   for (i = 0, d = 0; i < size; ++i, ++d) {
-      if (d >= dsize) chckResizeBuf(&dec, &dsize, dsize * 2);
+   for (i = 0, d = 0; i < size; ++i) {
       dec[d] = 0x00; /* this is the unexpected case */
 
       /* modified ASCII */
@@ -56,7 +55,7 @@ char* chckSJISToUTF8(const unsigned char *sjis, size_t size, size_t *outSize, in
          } else if (sjis[i] == 0x7e) { // OVERLINE
             chckPutBuf(&dec, &d, &dsize, "\xe2\x80\xbe");
          } else {
-            dec[d] = sjis[i];
+            chckPutBuf(&dec, &d, &dsize, (const char[]){ sjis[i], 0 });
          }
       }
 
@@ -65,7 +64,7 @@ char* chckSJISToUTF8(const unsigned char *sjis, size_t size, size_t *outSize, in
          char halfWidthKatakana[4] = { 0xef, 0xbd, sjis[i], 0x00 };
          if (sjis[i] >= 0xc0) {
             halfWidthKatakana[2] = 0xbe;
-            halfWidthKatakana[3] = 0x80+sjis[i]-0xc0;
+            halfWidthKatakana[3] = 0x80 + sjis[i] - 0xc0;
          }
          chckPutBuf(&dec, &d, &dsize, halfWidthKatakana);
       }
@@ -74,7 +73,7 @@ char* chckSJISToUTF8(const unsigned char *sjis, size_t size, size_t *outSize, in
       if (sjis[i] >= 0x81 && sjis[i] <= 0xfc) {
          const chckMapSJISToUTF8 *data = NULL;
          for (mb = 0; mb < mbSJISToUTF8MapLength; ++mb) {
-            if (!memcmp(mbSJISToUTF8Map[mb].sjis, sjis+i, 2)) {
+            if (!memcmp(mbSJISToUTF8Map[mb].sjis, sjis + i, 2)) {
                data = &mbSJISToUTF8Map[mb];
                break;
             }
@@ -91,8 +90,8 @@ char* chckSJISToUTF8(const unsigned char *sjis, size_t size, size_t *outSize, in
    }
 
    /* resize buffer to real size */
-   terminate = (terminate?1:0);
-   size = d + (dec[d-1]!=0x00?terminate:0);
+   terminate = (terminate ? 1 : 0);
+   size = d + (dec[d-1] != 0x00 ? terminate : 0);
    chckResizeBuf(&dec, &dsize, size);
    if (terminate && dec[d-1] != 0x00) dec[d] = 0x00;
    if (outSize) *outSize = size;
@@ -115,8 +114,7 @@ unsigned char* chckUTF8ToSJIS(const char *input, size_t size, size_t *outSize, i
    if (!(dec = malloc(dsize)))
       goto fail;
 
-   for (i = 0, d = 0; i < size; ++i, ++d) {
-      if (d + 1 >= dsize) chckResizeBuf(&dec, &dsize, (dsize + 1) * 2);
+   for (i = 0, d = 0; i < size; ++i) {
       dec[d] = 0x00; /* this is the unexpected case */
 
       /* ASCII */
@@ -126,25 +124,25 @@ unsigned char* chckUTF8ToSJIS(const char *input, size_t size, size_t *outSize, i
          } else if (utf8[i] == 0x7e) { // TILDE
             chckPutBuf(&dec, &d, &dsize, "\x81\x60");
          } else {
-            dec[d] = utf8[i];
+            chckPutBuf(&dec, &d, &dsize, (const char[]){ utf8[i], 0 });
          }
       }
 
       /* half-width katakana */
-      if (utf8[i+1] >= 0xbd && utf8[i+1] <= 0xbe) {
-         char halfWidthKatakana[2] = { utf8[i+2], 0x00 };
-         if (utf8[i+1] >= 0xbe) halfWidthKatakana[0] = 0xc0+utf8[i+2]-0x80;
+      if (utf8[i + 1] >= 0xbd && utf8[i + 1] <= 0xbe) {
+         char halfWidthKatakana[2] = { utf8[i + 2], 0x00 };
+         if (utf8[i + 1] >= 0xbe) halfWidthKatakana[0] = 0xc0 + utf8[i + 2] - 0x80;
          chckPutBuf(&dec, &d, &dsize, halfWidthKatakana);
       }
 
       /* multibyte */
-      if ((utf8[i+1] & 0xc0) == 0x80) {
+      if ((utf8[i + 1] & 0xc0) == 0x80) {
          char mblen = 0;
          const chckMapSJISToUTF8 *data = NULL;
-         while ((utf8[i+mblen+1] & 0xc0) == 0x80) ++mblen;
+         while ((utf8[i + mblen + 1] & 0xc0) == 0x80) ++mblen;
 
          for (mb = 0; mb < mbSJISToUTF8MapLength; ++mb) {
-            if (!memcmp(mbSJISToUTF8Map[mb].utf8, utf8+i, mblen+1)) {
+            if (!memcmp(mbSJISToUTF8Map[mb].utf8, utf8 + i, mblen + 1)) {
                data = &mbSJISToUTF8Map[mb];
                break;
             }
@@ -161,8 +159,8 @@ unsigned char* chckUTF8ToSJIS(const char *input, size_t size, size_t *outSize, i
    }
 
    /* resize buffer to real size */
-   terminate = (terminate?1:0);
-   size = d + (dec[d-1]!=0x00?terminate:0);
+   terminate = (terminate ? 1 : 0);
+   size = d + (dec[d-1] != 0x00 ? terminate : 0);
    chckResizeBuf(&dec, &dsize, size);
    if (terminate && dec[d-1] != 0) dec[d] = 0x00;
    if (outSize) *outSize = size;
