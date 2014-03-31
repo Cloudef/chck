@@ -295,9 +295,6 @@ static void chckJsonDecoderDecodeNumber(chckJsonDecoder *decoder, chckJson *json
    } else {
       free(string);
    }
-
-   /* go back one char, since number might end on any token */
-   decoder->currentChar -= 1;
 }
 
 static void chckJsonDecoderDecodeString(chckJsonDecoder *decoder, chckJson *json)
