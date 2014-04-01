@@ -87,6 +87,61 @@ int main(void)
       chckJsonDecoderFree(decoder);
    }
 
+   /* TEST: copying */
+   {
+      /* http://code.google.com/p/json-smart/wiki/FeaturesTests */
+      const char *tests[] = {
+         "{}", /* Support Empty Object */
+         "{ \"v\":\"1\"}", /* Support simple Object String value */
+         "{ \"v\":\"1\"\r\n}", /* Space Tester */
+         "{ \"v\":1}", /* Support simple Object int value */
+         "{ \"v\":\"ab'c\"}", /* Support simple Quote in String */
+         "{ \"PI\":3.141E-10}", /* Support simple Object float value */
+         "{ \"PI\":3.141e-10}", /* Support lowcase float value */
+         "{ \"v\":12345123456789}", /* Long number support */
+         "{ \"v\":123456789123456789123456789}", /* Bigint number support */
+         "[ { }, { },[]]", /* Array of empty Object */
+         "{ \"v\":\"\\u2000\\u20ff\"}", /* Support lowercase Unicode Text */
+         "{ \"v\":\"\\u2000\\u20FF\"}", /* Support uppercase Unicode Text */
+         "{ \"a\":\"hp://foo\"}", /* Support non protected / text */
+         "{ \"a\":null}", /* Support null */
+         "{ \"a\":true}", /* Support boolean */
+         "{ \"a\" : true }", /* Support non trimed data */
+         "{ \"v\":1.7976931348623157E308}", /* Double precision floating point */
+         "{ \"a\":{ \"b\":[0,1,2,333,5], \"www\":\"私\" }, \"c\":[ { \"d\":0 } ] }",
+         NULL
+      };
+
+      int result = 1;
+      chckJsonDecoder *decoder = chckJsonDecoderNew();
+      assert(decoder != NULL);
+      chckJsonDecoderUserdata(decoder, &result);
+      chckJsonDecoderErrorCallback(decoder, errorcb);
+
+      int i;
+      for (i = 0; tests[i]; ++i) {
+         result = 1;
+         const char *json = tests[i];
+         printf("%s\n", json);
+         chckJson *djson = chckJsonDecoderDecode(decoder, json);
+         chckJson *copy = chckJsonCopy(djson);
+         if (djson) chckJsonFreeAll(djson);
+
+         /* don't run tests on jsons that contain unicode.
+          * we don't encode unicode to hexdecimal for size reasons. */
+         if (strstr(json, "\\u") == 0) {
+            char *encode = chckJsonEncode(copy, NULL);
+            assert(compareNoWhitespace(encode, json) == 1);
+            free(encode);
+         }
+
+         if (copy) chckJsonFreeAll(copy);
+         assert(result == 1 && "Standard JSON tests should pass!");
+      }
+
+      chckJsonDecoderFree(decoder);
+   }
+
    /* TEST: decoding non RFC 4627 standard JSON */
    {
       /* NON RFC 4627 Tests */
