@@ -41,6 +41,7 @@ chckJson* chckJsonNewNumberLong(double jlong);
 chckJson* chckJsonNewNumberDouble(double jdouble);
 chckJson* chckJsonNewNumberf(const char *fmt, ...);
 chckJson* chckJsonNewBool(unsigned char boolean);
+chckJson* chckJsonCopy(const chckJson *json);
 void chckJsonFree(chckJson *json);
 void chckJsonFreeAll(chckJson *json);
 chckJsonType chckJsonGetType(chckJson *json);
