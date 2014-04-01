@@ -799,7 +799,7 @@ void chckJsonDouble(chckJson *json, double jdouble)
    if (json->type == CHCK_JSON_TYPE_BOOL) {
       json->boolean = (unsigned char)jdouble;
    } else {
-      chckJsonStringf(json, "%lf", jdouble);
+      chckJsonStringf(json, "%f", jdouble);
    }
 }
 
