@@ -161,6 +161,9 @@ int main(void)
          "{} // C++ comment", /* Support a C++ comment */
 
          /* Trap tests */
+         "{ { }, [ ] }", /* Support object inside object */
+         "{ { }, { }, }", /* Support trailing separator */
+         "{ , , , }", /* Support no-op separators */
          "{ \"v\":s1' s2}", /* Support non protected String value having quote 1 */
          "{ \"v\":s1\" \"s2}", /* Support non protected String value having quote 2 */
          "{ \"NaN\":NaN}", /* NaN Test Value */
