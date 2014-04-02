@@ -657,56 +657,39 @@ chckJson* chckJsonNewBool(unsigned char boolean)
 
 chckJson* chckJsonCopy(const chckJson *json)
 {
-   chckJson* copy;
-   const chckJson* child;
-   chckJson** tail;
-   switch (json->type) 
-   {
+   chckJson *copy;
+   const chckJson *child;
+   chckJson **tail;
+
+   switch (json->type) {
       case CHCK_JSON_TYPE_BOOL:
-      {
-         copy = chckJsonNewBool(copy->boolean);
+         copy = chckJsonNewBool(json->boolean);
          break;
-      }
+
       case CHCK_JSON_TYPE_NULL:
-      {
          copy = chckJsonNew(CHCK_JSON_TYPE_NULL);
          break;
-      }
+
       case CHCK_JSON_TYPE_NUMBER:
-      {
-         copy = chckJsonNewNumberf("%s", json->string);
-         break;
-      }
       case CHCK_JSON_TYPE_STRING:
-      {
-         copy = chckJsonNewString(json->string);
+         copy = chckJsonNew(json->type);
+         chckJsonString(copy, json->string);
          break;
-      }
+
       case CHCK_JSON_TYPE_ARRAY:
-      {
-         copy = chckJsonNew(CHCK_JSON_TYPE_ARRAY);
-         for(tail = &copy->child, child = json->child; child; child = child->next, tail = &(*tail)->next)
-         {
-            *tail = chckJsonCopy(child);
-         }
-         break;
-      }
       case CHCK_JSON_TYPE_OBJECT:
-      {
-         copy = chckJsonNew(CHCK_JSON_TYPE_OBJECT);
-         for(tail = &copy->child, child = json->child; child; child = child->next, tail = &(*tail)->next)
-         {
-            *tail = chckJsonCopy(child);
-            (*tail)->child = chckJsonCopy(child->child);
-         }
+         copy = chckJsonNew(json->type);
          break;
-      }
 
       default:
-      {
          assert(0 && "Unknown JSON type");
          break;
-      }
+   }
+
+   for(tail = &copy->child, child = json->child; child; child = child->next, tail = &(*tail)->next) {
+      *tail = chckJsonCopy(child);
+      if (child->child)
+         (*tail)->child = chckJsonCopy(child->child);
    }
 
    return copy;
