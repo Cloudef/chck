@@ -105,6 +105,18 @@ static char chckJsonDecoderSkip(chckJsonDecoder *decoder, size_t numChars)
    return *decoder->currentChar;
 }
 
+static char chckJsonDecoderPeek(chckJsonDecoder *decoder, int skipWhitespace)
+{
+   const char *str = decoder->currentChar;
+   assert(decoder);
+
+   if (!*str)
+      return *str;
+
+   do { str++; } while (*decoder->currentChar == '\n' || (skipWhitespace && isspace(*str)));
+   return *str;
+}
+
 static char chckJsonDecoderAdvance(chckJsonDecoder *decoder, int skipWhitespace)
 {
    assert(decoder);
@@ -218,46 +230,47 @@ static void chckJsonDecoderStringInsert(chckJsonDecoder *decoder, char **inOutSt
    *inOutLen = len;
 }
 
-static void chckJsonDecoderDecodeObject(chckJsonDecoder *decoder, chckJson *json)
+static void chckJsonDecoderDecodeContainer(chckJsonDecoder *decoder, chckJson *json, char open, char close, int valueType, const char *valueException)
 {
-   chckJson *parent = json;
-   assert(*decoder->currentChar == '{');
+   int delim = 0;
+   chckJson *parent = json, *old = NULL;
+   assert(decoder && *decoder->currentChar == open);
 
    while (chckJsonDecoderAdvance(decoder, 1)) {
-      if (*decoder->currentChar == '}')
+      if (*decoder->currentChar == close)
          break;
 
+      old = parent;
       parent = chckJsonDecoderDecodeValue(decoder, parent, (parent == json));
+      delim = (*decoder->currentChar == ',');
+      if (parent == old) continue;
 
-      if (*decoder->currentChar == '}')
+      if (valueType != -1 && parent->type != (chckJsonType)valueType) {
+         chckJsonDecoderThrow(decoder, CHCK_JSON_ERROR_UNEXPECTED, valueException);
+         continue;
+      }
+
+      if (*decoder->currentChar == close)
          break;
    }
 
-   if (*decoder->currentChar != '}')
-      chckJsonDecoderThrow(decoder, CHCK_JSON_ERROR_UNEXPECTED, "Expected '}' before end of data");
+   if (delim)
+      chckJsonDecoderThrow(decoder, CHCK_JSON_ERROR_UNEXPECTED, "Expected 'value' after delimiter");
+
+   if (*decoder->currentChar != close)
+      chckJsonDecoderThrow(decoder, CHCK_JSON_ERROR_UNEXPECTED, "Expected '%c' before end of data", close);
 
    chckJsonDecoderAdvance(decoder, 0);
 }
 
+static void chckJsonDecoderDecodeObject(chckJsonDecoder *decoder, chckJson *json)
+{
+   chckJsonDecoderDecodeContainer(decoder, json, '{', '}', CHCK_JSON_TYPE_STRING, "Expected 'string : value' inside 'object'");
+}
+
 static void chckJsonDecoderDecodeArray(chckJsonDecoder *decoder, chckJson *json)
 {
-   chckJson *parent = json;
-   assert(*decoder->currentChar == '[');
-
-   while (chckJsonDecoderAdvance(decoder, 1)) {
-      if (*decoder->currentChar == ']')
-         break;
-
-      parent = chckJsonDecoderDecodeValue(decoder, parent, (parent == json));
-
-      if (*decoder->currentChar == ']')
-         break;
-   }
-
-   if (*decoder->currentChar != ']')
-      chckJsonDecoderThrow(decoder, CHCK_JSON_ERROR_UNEXPECTED, "Expected ']' before end of data");
-
-   chckJsonDecoderAdvance(decoder, 0);
+   chckJsonDecoderDecodeContainer(decoder, json, '[', ']', -1, NULL);
 }
 
 static void chckJsonDecoderDecodeBool(chckJsonDecoder *decoder, chckJson *json)
@@ -359,12 +372,6 @@ static chckJson* chckJsonDecoderDecodeValue(chckJsonDecoder *decoder, chckJson *
    chckJson *json = NULL;
    int found = 0;
 
-   if (parent && *decoder->currentChar == ':') {
-      chckJsonDecoderAdvance(decoder, 1);
-      chckJsonDecoderDecodeValue(decoder, parent, 1);
-      return parent;
-   }
-
    const struct jsonDecodeEntry {
       int type;
       const char **except;
@@ -413,6 +420,12 @@ static chckJson* chckJsonDecoderDecodeValue(chckJsonDecoder *decoder, chckJson *
       } else {
          chckJsonNext(parent, json);
       }
+   }
+
+   if (json && chckJsonDecoderPeek(decoder, 1) == ':') {
+      chckJsonDecoderAdvance(decoder, 1);
+      chckJsonDecoderAdvance(decoder, 1);
+      chckJsonDecoderDecodeValue(decoder, json, 1);
    }
 
    return (json ? json : parent);

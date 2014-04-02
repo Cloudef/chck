@@ -76,6 +76,7 @@ int main(void)
           * we don't encode unicode to hexdecimal for size reasons. */
          if (strstr(json, "\\u") == 0) {
             char *encode = chckJsonEncode(djson, NULL);
+            puts(encode);
             assert(compareNoWhitespace(encode, json) == 1);
             free(encode);
          }
@@ -162,7 +163,7 @@ int main(void)
 
          /* Trap tests */
          "{ { }, [ ] }", /* Support object inside object */
-         "{ { }, { }, }", /* Support trailing separator */
+         "{ \"a\":0, \"b\":1, }", /* Support trailing separator */
          "{ , , , }", /* Support no-op separators */
          "{ \"v\":s1' s2}", /* Support non protected String value having quote 1 */
          "{ \"v\":s1\" \"s2}", /* Support non protected String value having quote 2 */
@@ -198,8 +199,10 @@ int main(void)
       const char *tests[] = {
          "/* this is a C comment */ { /* this is a C comment 2 */ } /* this is a C comment 3 */",
          "{} // This is a C++ comment",
+         "[] // This is a C++ comment",
          "// C++ comment that blocks rest { \"object\":0 }",
          "{ \"object\": { \"number\": 1 /* C Comment */ } }",
+         "[ \"object\": [ \"number\": 1 /* C Comment */ ] ]",
          NULL
       };
 
