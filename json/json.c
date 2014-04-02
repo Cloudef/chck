@@ -657,7 +657,7 @@ chckJson* chckJsonNewBool(unsigned char boolean)
 
 chckJson* chckJsonCopy(const chckJson *json)
 {
-   chckJson *copy;
+   chckJson **tail, *child, *copy;
 
    switch (json->type) {
       case CHCK_JSON_TYPE_BOOL:
@@ -684,11 +684,8 @@ chckJson* chckJsonCopy(const chckJson *json)
          break;
    }
 
-   if (json->child)
-      copy->child = chckJsonCopy(json->child);
-
-   if (json->next)
-      copy->next = chckJsonCopy(json->next);
+   for (tail = &copy->child, child = json->child; child; child = child->next, tail = &(*tail)->next)
+      *tail = chckJsonCopy(child);
 
    return copy;
 }
@@ -703,15 +700,28 @@ void chckJsonFree(chckJson *json)
    free(json);
 }
 
+void chckJsonFreeChilds(chckJson *json)
+{
+   chckJson *next, *n;
+
+   for (next = json->child; next; next = n) {
+      n = next->next;
+      chckJsonFreeChilds(next);
+      chckJsonFree(next);
+   }
+}
+
 void chckJsonFreeAll(chckJson *json)
 {
+   chckJson *next, *n;
    assert(json);
 
-   if (json->child)
-      chckJsonFreeAll(json->child);
+   chckJsonFreeChilds(json);
 
-   if (json->next)
-      chckJsonFreeAll(json->next);
+   for (next = json->next; next; next = n) {
+      n = next->next;
+      chckJsonFreeAll(next);
+   }
 
    chckJsonFree(json);
 }
