@@ -608,7 +608,7 @@ chckJson* chckJsonNewStringf(const char *fmt, ...)
    return json;
 }
 
-chckJson* chckJsonNewNumberLong(double jlong)
+chckJson* chckJsonNewNumberLong(long jlong)
 {
    chckJson *json;
 
@@ -793,6 +793,13 @@ void chckJsonChildPush(chckJson *json, unsigned int idx, chckJson *child)
    if (p && j) p->next = child;
    else if (!p && j) json->child = child;
    child->next = j;
+}
+
+void chckJsonChildAppend(chckJson *json, chckJson *child)
+{
+   chckJson **j;
+   for(j = &json->child; *j; j = &(*j)->next);
+   *j = child;
 }
 
 void chckJsonString(chckJson *json, const char *str)
