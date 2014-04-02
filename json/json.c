@@ -807,7 +807,7 @@ chckJson* chckJsonGetChildAt(chckJson* json, unsigned int idx)
 void chckJsonChildPush(chckJson *json, unsigned int idx, chckJson *child)
 {
    unsigned int i;
-   chckJson *j, *p;
+   chckJson *j, *p = NULL;
    assert(json);
 
    for (i = 0, j = json->child; j && i < idx; p = j, j = j->next, ++i);
