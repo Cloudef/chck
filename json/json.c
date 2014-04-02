@@ -658,8 +658,6 @@ chckJson* chckJsonNewBool(unsigned char boolean)
 chckJson* chckJsonCopy(const chckJson *json)
 {
    chckJson *copy;
-   const chckJson *child;
-   chckJson **tail;
 
    switch (json->type) {
       case CHCK_JSON_TYPE_BOOL:
@@ -686,11 +684,11 @@ chckJson* chckJsonCopy(const chckJson *json)
          break;
    }
 
-   for(tail = &copy->child, child = json->child; child; child = child->next, tail = &(*tail)->next) {
-      *tail = chckJsonCopy(child);
-      if (child->child)
-         (*tail)->child = chckJsonCopy(child->child);
-   }
+   if (json->child)
+      copy->child = chckJsonCopy(json->child);
+
+   if (json->next)
+      copy->next = chckJsonCopy(json->next);
 
    return copy;
 }
