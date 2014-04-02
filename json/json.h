@@ -1,6 +1,10 @@
 #ifndef __chck_json__
 #define __chck_json__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef size_t
 #  include <stddef.h> /* for size_t */
 #endif
@@ -65,6 +69,10 @@ long chckJsonGetLong(chckJson *json);
 void chckJsonDouble(chckJson *json, double jdouble);
 double chckJsonGetDouble(chckJson *json);
 char* chckJsonEncode(chckJson *json, size_t *outSize);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __chck_json__ */
 
