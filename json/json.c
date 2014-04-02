@@ -608,7 +608,7 @@ chckJson* chckJsonNewStringf(const char *fmt, ...)
    return json;
 }
 
-chckJson* chckJsonNewNumberLong(double jlong)
+chckJson* chckJsonNewNumberLong(long jlong)
 {
    chckJson *json;
 

@@ -37,7 +37,7 @@ chckJson* chckJsonDecoderDecode(chckJsonDecoder *decoder, const char *data);
 chckJson* chckJsonNew(chckJsonType type);
 chckJson* chckJsonNewString(const char *str);
 chckJson* chckJsonNewStringf(const char *fmt, ...);
-chckJson* chckJsonNewNumberLong(double jlong);
+chckJson* chckJsonNewNumberLong(long jlong);
 chckJson* chckJsonNewNumberDouble(double jdouble);
 chckJson* chckJsonNewNumberf(const char *fmt, ...);
 chckJson* chckJsonNewBool(unsigned char boolean);

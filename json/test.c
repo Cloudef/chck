@@ -295,15 +295,16 @@ int main(void)
    /* TEST: Array operations */
    {
       chckJson* array = chckJsonNew(CHCK_JSON_TYPE_ARRAY);
-      chckJsonChildAppend(array, chckJsonNewNumberf("1"));
-      chckJsonChildAppend(array, chckJsonNewNumberf("2"));
-      chckJsonChildAppend(array, chckJsonNewNumberf("3"));
+      chckJsonChildAppend(array, chckJsonNewNumberLong(1));
+      chckJsonChildAppend(array, chckJsonNewNumberLong(2));
+      chckJsonChildAppend(array, chckJsonNewNumberLong(3));
       unsigned int arraySize;
       chckJsonGetChild(array, &arraySize);
       assert(arraySize == 3 && "Array size");
-      assert(chckJsonGetLong(chckJsonGetChildAt(array, 0)) == 1 && "Array order 1");
-      assert(chckJsonGetLong(chckJsonGetChildAt(array, 1)) == 2 && "Array order 2");
-      assert(chckJsonGetLong(chckJsonGetChildAt(array, 2)) == 3 && "Array order 3");
+      assert(chckJsonGetLong(chckJsonGetChildAt(array, 0)) == 1l && "Array order 1");
+      assert(chckJsonGetLong(chckJsonGetChildAt(array, 1)) == 2l && "Array order 2");
+      assert(chckJsonGetLong(chckJsonGetChildAt(array, 2)) == 3l && "Array order 3");
+      chckJsonFreeAll(array);
    }
 
    return EXIT_SUCCESS;
