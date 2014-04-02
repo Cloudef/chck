@@ -53,6 +53,7 @@ chckJson* chckJsonGetChild(chckJson *json, unsigned int *numChilds);
 chckJson* chckJsonChildPop(chckJson *json, unsigned int idx);
 chckJson* chckJsonGetChildAt(chckJson *json, unsigned int idx);
 void chckJsonChildPush(chckJson *json, unsigned int idx, chckJson *child);
+void chckJsonChildAppend(chckJson *json, chckJson *child);
 void chckJsonString(chckJson *json, const char *str);
 const char* chckJsonGetString(chckJson *json);
 void chckJsonStringf(chckJson *json, const char *fmt, ...);

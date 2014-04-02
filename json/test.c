@@ -292,6 +292,20 @@ int main(void)
       chckJsonFreeAll(r);
    }
 
+   /* TEST: Array operations */
+   {
+      chckJson* array = chckJsonNew(CHCK_JSON_TYPE_ARRAY);
+      chckJsonChildAppend(array, chckJsonNewNumberf("1"));
+      chckJsonChildAppend(array, chckJsonNewNumberf("2"));
+      chckJsonChildAppend(array, chckJsonNewNumberf("3"));
+      unsigned int arraySize;
+      chckJsonGetChild(array, &arraySize);
+      assert(arraySize == 3 && "Array size");
+      assert(chckJsonGetLong(chckJsonGetChildAt(array, 0)) == 1 && "Array order 1");
+      assert(chckJsonGetLong(chckJsonGetChildAt(array, 1)) == 2 && "Array order 2");
+      assert(chckJsonGetLong(chckJsonGetChildAt(array, 2)) == 3 && "Array order 3");
+   }
+
    return EXIT_SUCCESS;
 }
 
