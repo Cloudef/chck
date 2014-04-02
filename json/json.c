@@ -753,6 +753,16 @@ chckJson* chckJsonGetNext(chckJson *json)
    return json->next;
 }
 
+chckJson* chckJsonGetNextAt(chckJson *json, unsigned int idx)
+{
+   unsigned int i;
+   chckJson *j = NULL;
+   assert(json);
+
+   for (i = 0, j = json; j && i < idx; j = j->next, ++i);
+   return j;
+}
+
 void chckJsonChild(chckJson *json, chckJson *child)
 {
    assert(json);
@@ -783,6 +793,11 @@ chckJson* chckJsonChildPop(chckJson *json, unsigned int idx)
    if (p && j) p->next = j->next;
    else if (!p && j) json->child = j->next;
    return j;
+}
+
+chckJson* chckJsonGetChildAt(chckJson* json, unsigned int idx)
+{
+   return chckJsonGetNextAt(json->child, idx);
 }
 
 void chckJsonChildPush(chckJson *json, unsigned int idx, chckJson *child)
