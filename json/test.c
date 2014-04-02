@@ -307,6 +307,23 @@ int main(void)
       chckJsonFreeAll(array);
    }
 
+   /* TEST: Object operations */
+   {
+      chckJson* object = chckJsonNew(CHCK_JSON_TYPE_OBJECT);
+      chckJsonProperty(object, "foo", chckJsonNewNumberLong(1));
+      chckJsonProperty(object, "bar", chckJsonNewNumberLong(2));
+      chckJsonProperty(object, "baz", chckJsonNewNumberLong(3));
+      assert(chckJsonGetLong(chckJsonGetProperty(object, "foo")) == 1l && "Object property 1");
+      assert(chckJsonGetLong(chckJsonGetProperty(object, "bar")) == 2l && "Object property 2");
+      assert(chckJsonGetLong(chckJsonGetProperty(object, "baz")) == 3l && "Object property 3");
+      chckJsonProperty(object, "foo", chckJsonNewNumberLong(4));
+      chckJsonProperty(object, "bar", chckJsonNewNumberLong(5));
+      chckJsonProperty(object, "baz", chckJsonNewNumberLong(6));
+      assert(chckJsonGetLong(chckJsonGetProperty(object, "foo")) == 4l && "Object property overwrite 1");
+      assert(chckJsonGetLong(chckJsonGetProperty(object, "bar")) == 5l && "Object property overwrite 2");
+      assert(chckJsonGetLong(chckJsonGetProperty(object, "baz")) == 6l && "Object property overwrite 3");
+      chckJsonFreeAll(object);
+   }
    return EXIT_SUCCESS;
 }
 
