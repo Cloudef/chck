@@ -69,4 +69,7 @@ ADD_DEFINITIONS(${LIBDEF})
 ADD_LIBRARY(chck ${LIBSRC} ${LIBLIB})
 TARGET_LINK_LIBRARIES(chck)
 
+# Documentation
+ADD_SUBDIRECTORY(doxygen)
+
 # vim: set ts=8 sw=3 tw=0
