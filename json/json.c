@@ -107,13 +107,13 @@ static char chckJsonDecoderSkip(chckJsonDecoder *decoder, size_t numChars)
 
 static char chckJsonDecoderPeek(chckJsonDecoder *decoder, int skipWhitespace)
 {
-   const char *str = decoder->currentChar;
+   const char *str;
    assert(decoder);
 
-   if (!*str)
+   if (!(str = decoder->currentChar))
       return *str;
 
-   do { str++; } while (*decoder->currentChar == '\n' || (skipWhitespace && isspace(*str)));
+   for (++str; *str && (*str == '\n' || (skipWhitespace && isspace(*str))); ++str);
    return *str;
 }
 
