@@ -338,6 +338,7 @@ static void chckJsonDecoderDecodeString(chckJsonDecoder *decoder, chckJson *json
 
 static void chckJsonDecoderDecodeComment(chckJsonDecoder *decoder, chckJson *json)
 {
+   char peek;
    (void)json;
 
    if (!decoder->allowComments) {
@@ -345,13 +346,15 @@ static void chckJsonDecoderDecodeComment(chckJsonDecoder *decoder, chckJson *jso
       return;
    }
 
-   if (*decoder->currentChar == '/' && *(decoder->currentChar + 1) != '/' && *(decoder->currentChar + 1) != '*') {
+   peek = chckJsonDecoderPeek(decoder, 0);
+
+   if (*decoder->currentChar == '/' && peek != '/' && peek != '*') {
       chckJsonDecoderThrow(decoder, CHCK_JSON_ERROR_UNEXPECTED, "Expected '/' or '*' after opening '/'");
       return;
    }
 
    unsigned int commentLine = decoder->currentLine;
-   int cStyleComment = (*(decoder->currentChar + 1) == '*');
+   int cStyleComment = (peek == '*');
    while (chckJsonDecoderAdvance(decoder, 1)) {
       if (cStyleComment) {
          if (*decoder->currentChar == '/' && *(decoder->currentChar - 1) == '*')
@@ -364,6 +367,10 @@ static void chckJsonDecoderDecodeComment(chckJsonDecoder *decoder, chckJson *jso
 
    if (cStyleComment && *decoder->currentChar != '/')
       chckJsonDecoderThrow(decoder, CHCK_JSON_ERROR_UNEXPECTED, "Expected '*/' before end of data");
+
+   /* go back one character since we end C++ comment after \n */
+   if (!cStyleComment)
+      decoder->currentChar--;
 }
 
 static chckJson* chckJsonDecoderDecodeValue(chckJsonDecoder *decoder, chckJson *parent, int isContainer)

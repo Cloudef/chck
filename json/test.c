@@ -201,6 +201,7 @@ int main(void)
          "{} // This is a C++ comment",
          "[] // This is a C++ comment",
          "// C++ comment that blocks rest { \"object\":0 }",
+         "{\n // C++ comment that should not block since newline \n}",
          "{ \"object\": { \"number\": 1 /* C Comment */ } }",
          "[ \"object\": [ \"number\": 1 /* C Comment */ ] ]",
          NULL
