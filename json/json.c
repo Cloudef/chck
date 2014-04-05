@@ -298,14 +298,14 @@ static void chckJsonDecoderDecodeBool(chckJsonDecoder *decoder, chckJson *json)
 {
    assert(memcmp(decoder->currentChar, "true", 4) == 0 || memcmp(decoder->currentChar, "false", 5) == 0);
    json->boolean = (memcmp(decoder->currentChar, "true", 4) == 0);
-   chckJsonDecoderSkip(decoder, (json->boolean ? 4 : 5));
+   chckJsonDecoderSkip(decoder, (json->boolean ? 3 : 4));
 }
 
 static void chckJsonDecoderDecodeNull(chckJsonDecoder *decoder, chckJson *json)
 {
    (void)json;
    assert(memcmp(decoder->currentChar, "null", 4) == 0);
-   chckJsonDecoderSkip(decoder, 4);
+   chckJsonDecoderSkip(decoder, 3);
 }
 
 static void chckJsonDecoderDecodeNumber(chckJsonDecoder *decoder, chckJson *json)
