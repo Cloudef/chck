@@ -9,10 +9,8 @@ void errorcb(chckJsonDecoder *decoder, unsigned int line, unsigned int position,
 {
    printf("[%u, %u]: %s (%d)\n", line, position, message, code);
 
-   if (linePtr) {
-      printf("%s\n", linePtr);
-      printf("%*s%c\n", position - 1, " ", '^');
-   }
+   if (linePtr)
+      printf("%s\n%*s%c\n", linePtr, position - 1, " ", '^');
 
    void *userdata = chckJsonDecoderGetUserdata(decoder);
    *(int*)userdata = 0;
