@@ -110,7 +110,7 @@ static char chckJsonDecoderPeek(chckJsonDecoder *decoder, int skipWhitespace)
    const char *str;
    assert(decoder);
 
-   if (!(str = decoder->currentChar))
+   if (!*(str = decoder->currentChar))
       return *str;
 
    for (++str; *str && (*str == '\n' || (skipWhitespace && isspace(*str))); ++str);
