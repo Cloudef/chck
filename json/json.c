@@ -117,7 +117,7 @@ static char chckJsonDecoderPeek(chckJsonDecoder *decoder, int skipWhitespace, in
       for (++str; *str && (*str == '\n' || (skipWhitespace && isspace(*str))); ++str);
       if (skipComments && decoder->allowComments && *str == '/' && (*(str + 1) == '/' || *(str + 1) == '*')) {
          int cStyle = (*(str + 1) == '*');
-         for (++str; *str && ((cStyle && (*str != '*' || *(str + 1) != '/')) || (!cStyle && *str != '\n')); ++str);
+         for (str = str + 2; *str && ((cStyle && (*str != '*' || *(str + 1) != '/')) || (!cStyle && *str != '\n')); ++str);
          if (cStyle) ++str;
       } else {
          break;
@@ -374,10 +374,14 @@ static void chckJsonDecoderDecodeComment(chckJsonDecoder *decoder, chckJson *jso
 
    unsigned int commentLine = decoder->currentLine;
    int cStyleComment = (peek == '*');
+
+   chckJsonDecoderAdvance(decoder, 1);
    while (chckJsonDecoderAdvance(decoder, 1)) {
       if (cStyleComment) {
-         if (*decoder->currentChar == '/' && *(decoder->currentChar - 1) == '*')
+         if (*decoder->currentChar == '*' && *(decoder->currentChar + 1) == '/') {
+            chckJsonDecoderAdvance(decoder, 1);
             break;
+         }
       } else {
          if (decoder->currentLine > commentLine)
             break;

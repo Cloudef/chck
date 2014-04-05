@@ -210,6 +210,7 @@ int main(void)
          "[ \"object\": [ \"number\": 1 /* C Comment */ ] ]",
          "{ \"a\" /* Comment between */ : /* Again */ \"b\" }",
          "[ \"a\" /* Comment between */ , /* Again */ \"b\" ]",
+         "[ \"a\" /*/ <- This is not a C Comment */ ]",
          NULL
       };
 
@@ -240,6 +241,7 @@ int main(void)
          "/ / Not a comment",
          "/ * Not a comment",
          "/* Not a C comment * /",
+         "/*/ <- Not a C comment",
          NULL
       };
 
