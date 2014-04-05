@@ -11,6 +11,7 @@ extern "C" {
 
 typedef enum chckJsonError {
    CHCK_JSON_ERROR_UNEXPECTED = 1,
+   CHCK_JSON_ERROR_MULTIPLE_ROOT,
    CHCK_JSON_ERROR_COMMENTS_DISABLED,
    CHCK_JSON_ERROR_OUT_OF_MEMORY,
 } chckJsonError;

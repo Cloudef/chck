@@ -479,6 +479,9 @@ chckJson* chckJsonDecoderDecode(chckJsonDecoder *decoder, const char *data)
       if (!decoder->json && parent) decoder->json = parent;
    } while (chckJsonDecoderAdvance(decoder, 1));
 
+   if (decoder->json && decoder->json->next)
+      chckJsonDecoderThrow(decoder, CHCK_JSON_ERROR_MULTIPLE_ROOT, "JSON contains multiple root objects", *decoder->currentChar);
+
    return decoder->json;
 }
 

@@ -158,6 +158,8 @@ int main(void)
          "{v:15.06%}", /* Support non protected start like text value */
          "{} /* C comment */", /* Support a C comment */
          "{} // C++ comment", /* Support a C++ comment */
+         "{}, {}", /* Support multiple root */
+         "{} {}", /* Support multiple root without delimiter */
 
          /* Trap tests */
          "{ \"a\"\"b\" }", /* Support values without delimiter */
