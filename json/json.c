@@ -246,6 +246,9 @@ static void chckJsonDecoderDecodeContainer(chckJsonDecoder *decoder, chckJson *j
    chckJson *parent = json, *old = NULL;
    assert(decoder && *decoder->currentChar == open);
 
+   if (chckJsonDecoderPeek(decoder, 1, 1) == ',')
+      chckJsonDecoderThrow(decoder, CHCK_JSON_ERROR_UNEXPECTED, "Expected a value, not delimiter");
+
    while (chckJsonDecoderAdvance(decoder, 1)) {
       if (*decoder->currentChar == close)
          break;

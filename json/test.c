@@ -167,6 +167,7 @@ int main(void)
          "{ { }, [ ] }", /* Support object inside object */
          "{ \"a\":0, \"b\":1, }", /* Support trailing separator */
          "{ \"a\":0,, \"b\":1, }", /* Support trailing separators */
+         "{ , }", /* Support no-op separator */
          "{ , , , }", /* Support no-op separators */
          "{ \"v\":s1' s2}", /* Support non protected String value having quote 1 */
          "{ \"v\":s1\" \"s2}", /* Support non protected String value having quote 2 */
