@@ -162,8 +162,11 @@ int main(void)
          "{} // C++ comment", /* Support a C++ comment */
 
          /* Trap tests */
+         "{ \"a\"\"b\" }", /* Support values without delimiter */
+         "{ \"a\":0 \"a\":\"b\" }", /* Support values without delimiter */
          "{ { }, [ ] }", /* Support object inside object */
          "{ \"a\":0, \"b\":1, }", /* Support trailing separator */
+         "{ \"a\":0,, \"b\":1, }", /* Support trailing separators */
          "{ , , , }", /* Support no-op separators */
          "{ \"v\":s1' s2}", /* Support non protected String value having quote 1 */
          "{ \"v\":s1\" \"s2}", /* Support non protected String value having quote 2 */
@@ -204,6 +207,8 @@ int main(void)
          "{\n // C++ comment that should not block since newline \n}",
          "{ \"object\": { \"number\": 1 /* C Comment */ } }",
          "[ \"object\": [ \"number\": 1 /* C Comment */ ] ]",
+         "{ \"a\" /* Comment between */ : /* Again */ \"b\" }",
+         "[ \"a\" /* Comment between */ , /* Again */ \"b\" ]",
          NULL
       };
 
@@ -231,6 +236,9 @@ int main(void)
    {
       const char *tests[] = {
          "/* Unclosed C comment",
+         "/ / Not a comment",
+         "/ * Not a comment",
+         "/* Not a C comment * /",
          NULL
       };
 

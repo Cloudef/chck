@@ -105,7 +105,7 @@ static char chckJsonDecoderSkip(chckJsonDecoder *decoder, size_t numChars)
    return *decoder->currentChar;
 }
 
-static char chckJsonDecoderPeek(chckJsonDecoder *decoder, int skipWhitespace)
+static char chckJsonDecoderPeek(chckJsonDecoder *decoder, int skipWhitespace, int skipComments)
 {
    const char *str;
    assert(decoder);
@@ -113,7 +113,16 @@ static char chckJsonDecoderPeek(chckJsonDecoder *decoder, int skipWhitespace)
    if (!*(str = decoder->currentChar))
       return *str;
 
-   for (++str; *str && (*str == '\n' || (skipWhitespace && isspace(*str))); ++str);
+   do {
+      for (++str; *str && (*str == '\n' || (skipWhitespace && isspace(*str))); ++str);
+      if (skipComments && decoder->allowComments && *str == '/' && (*(str + 1) == '/' || *(str + 1) == '*')) {
+         int cStyle = (*(str + 1) == '*');
+         for (++str; *str && ((cStyle && (*str != '*' || *(str + 1) != '/')) || (!cStyle && *str != '\n')); ++str);
+         if (cStyle) ++str;
+      } else {
+         break;
+      }
+   } while (*str);
    return *str;
 }
 
@@ -232,6 +241,7 @@ static void chckJsonDecoderStringInsert(chckJsonDecoder *decoder, char **inOutSt
 
 static void chckJsonDecoderDecodeContainer(chckJsonDecoder *decoder, chckJson *json, char open, char close, int valueType, const char *valueException)
 {
+   char peek;
    int delim = 0;
    chckJson *parent = json, *old = NULL;
    assert(decoder && *decoder->currentChar == open);
@@ -240,18 +250,26 @@ static void chckJsonDecoderDecodeContainer(chckJsonDecoder *decoder, chckJson *j
       if (*decoder->currentChar == close)
          break;
 
+      peek = chckJsonDecoderPeek(decoder, 1, 1);
+      if (*decoder->currentChar == ',' && peek == ',')
+         chckJsonDecoderThrow(decoder, CHCK_JSON_ERROR_UNEXPECTED, "Expected value between delimiters");
+
       old = parent;
       parent = chckJsonDecoderDecodeValue(decoder, parent, (parent == json));
       delim = (*decoder->currentChar == ',');
       if (parent == old) continue;
 
-      if (valueType != -1 && parent->type != (chckJsonType)valueType) {
+      if (valueType != -1 && (parent->type != (chckJsonType)valueType || !parent->child)) {
          chckJsonDecoderThrow(decoder, CHCK_JSON_ERROR_UNEXPECTED, valueException);
          continue;
       }
 
       if (*decoder->currentChar == close)
          break;
+
+      peek = chckJsonDecoderPeek(decoder, 1, 1);
+      if (!delim && peek != ',' && peek != close)
+         chckJsonDecoderThrow(decoder, CHCK_JSON_ERROR_UNEXPECTED, "Expected delimiter after 'value'");
    }
 
    if (delim)
@@ -294,12 +312,11 @@ static void chckJsonDecoderDecodeNumber(chckJsonDecoder *decoder, chckJson *json
    assert(isdigit(*decoder->currentChar) || *decoder->currentChar == '-' || *decoder->currentChar == '+' || *decoder->currentChar == '.');
 
    do {
-      if (!isdigit(*decoder->currentChar) && *decoder->currentChar != '-' && *decoder->currentChar != '+' &&
-          *decoder->currentChar != 'e' && *decoder->currentChar != 'E' && *decoder->currentChar != '.') {
-         break;
-      }
-
       chckJsonDecoderStringInsert(decoder, &string, &len, &alloc);
+
+      const char peek = chckJsonDecoderPeek(decoder, 1, 1);
+      if (!isdigit(peek) && peek != '-' && peek != '+' && peek != 'e' && peek != 'E' && peek != '.')
+         break;
    } while (chckJsonDecoderAdvance(decoder, 0));
 
    if (len > 0) {
@@ -338,7 +355,6 @@ static void chckJsonDecoderDecodeString(chckJsonDecoder *decoder, chckJson *json
 
 static void chckJsonDecoderDecodeComment(chckJsonDecoder *decoder, chckJson *json)
 {
-   char peek;
    (void)json;
 
    if (!decoder->allowComments) {
@@ -346,7 +362,7 @@ static void chckJsonDecoderDecodeComment(chckJsonDecoder *decoder, chckJson *jso
       return;
    }
 
-   peek = chckJsonDecoderPeek(decoder, 0);
+   const char peek = chckJsonDecoderPeek(decoder, 0, 0);
 
    if (*decoder->currentChar == '/' && peek != '/' && peek != '*') {
       chckJsonDecoderThrow(decoder, CHCK_JSON_ERROR_UNEXPECTED, "Expected '/' or '*' after opening '/'");
@@ -429,9 +445,10 @@ static chckJson* chckJsonDecoderDecodeValue(chckJsonDecoder *decoder, chckJson *
       }
    }
 
-   if (json && chckJsonDecoderPeek(decoder, 1) == ':') {
-      chckJsonDecoderAdvance(decoder, 1);
-      chckJsonDecoderAdvance(decoder, 1);
+   if (json && chckJsonDecoderPeek(decoder, 1, 1) == ':') {
+      while (*decoder->currentChar && *decoder->currentChar != ':') chckJsonDecoderAdvance(decoder, 1);
+      const char peek = chckJsonDecoderPeek(decoder, 1, 1);
+      while (*decoder->currentChar && *decoder->currentChar != peek) chckJsonDecoderAdvance(decoder, 1);
       chckJsonDecoderDecodeValue(decoder, json, 1);
    }
 
