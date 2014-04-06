@@ -241,7 +241,8 @@ namespace json
          if(type() != Type::OBJECT)
             throw ValueException("Value is not an object");
 
-         return Value(chckJsonCopy(chckJsonGetProperty(_value, property.data())));
+         chckJson* v = chckJsonGetProperty(_value, property.data());
+         return Value(v != nullptr ? chckJsonCopy(v) : nullptr);
       }
 
       bool has(std::string const& property) const
