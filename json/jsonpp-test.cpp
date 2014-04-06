@@ -38,7 +38,7 @@ bool compareIgnoringWhitespace(std::string const& a, std::string const& b)
    return aa == bb;
 }
 
-int main(int argc, char** argv)
+int main(void)
 {
    // Test initializations and assignment
    for(std::string const& str : tests)
