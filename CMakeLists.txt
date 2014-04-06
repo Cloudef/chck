@@ -16,6 +16,9 @@ SET(LIBLIB "") # libraries to be linked
 SET(LIBDEF "") # compile defines
 SET(LIBPUB "") # public headers
 
+# C++ interface
+SET(json_TEST "jsonpp-test.cpp")
+
 # Optional features
 FIND_PACKAGE(ZLIB)
 IF (ZLIB_FOUND)
@@ -43,6 +46,9 @@ IF (UNIX AND CMAKE_COMPILER_IS_GNUCC)
    ENDIF ()
 ENDIF ()
 
+# We use C++11 for C++ stuff
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 # Collect data for static lib and create tests
 FOREACH (src ${SOURCE})
    LIST(APPEND LIBSRC ${src}/${src}.c)
@@ -50,17 +56,21 @@ FOREACH (src ${SOURCE})
    LIST(APPEND LIBLIB ${${src}_LIB})
    LIST(APPEND LIBDEF ${${src}_DEF})
    LIST(APPEND LIBPUB ${src}/${src}.h)
+   SET(tests "test.c" ${${src}_TEST})
 
-   INCLUDE_DIRECTORIES(${${src}_INC})
-   ADD_DEFINITIONS(${${src}_DEF})
-   ADD_EXECUTABLE(${src}_test ${src}/test.c ${src}/${src}.c)
-   TARGET_LINK_LIBRARIES(${src}_test ${${src}_LIB})
+   FOREACH (testsrc ${tests})
+      GET_FILENAME_COMPONENT(test ${testsrc} NAME_WE)
+      INCLUDE_DIRECTORIES(${${src}_INC})
+      ADD_DEFINITIONS(${${src}_DEF})
+      ADD_EXECUTABLE(${src}_${test} ${src}/${testsrc} ${src}/${src}.c)
+      TARGET_LINK_LIBRARIES(${src}_${test} ${${src}_LIB})
 
-   IF (WIN32)
-      ADD_TEST(${src}_test test/${src}_test.exe)
-   ELSE ()
-      ADD_TEST(${src}_test test/${src}_test)
-   ENDIF ()
+      IF (WIN32)
+         ADD_TEST(${src}_${test} test/${src}_${test}.exe)
+      ELSE ()
+         ADD_TEST(${src}_${test} test/${src}_${test})
+      ENDIF ()
+   ENDFOREACH (testsrc)
 ENDFOREACH (src)
 
 # Compile static lib
