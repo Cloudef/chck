@@ -136,41 +136,44 @@ namespace json
       Type type() const
       {
          Type type = Type::NONE;
-         switch(chckJsonGetType(_value))
+         if(_value != nullptr)
          {
-            case CHCK_JSON_TYPE_NULL:
+            switch(chckJsonGetType(_value))
             {
-               type = Type::NULL_JSON;
-               break;
-            }
-            case CHCK_JSON_TYPE_BOOL:
-            {
-               type = Type::BOOLEAN;
-               break;
-            }
-            case CHCK_JSON_TYPE_NUMBER:
-            {
-               type = Type::NUMBER;
-               break;
-            }
-            case CHCK_JSON_TYPE_STRING:
-            {
-               type = Type::STRING;
-               break;
-            }
-            case CHCK_JSON_TYPE_ARRAY:
-            {
-               type = Type::ARRAY;
-               break;
-            }
-            case CHCK_JSON_TYPE_OBJECT:
-            {
-               type = Type::OBJECT;
-               break;
-            }
-            default:
-            {
-               throw ValueException("Unknown value type!");
+               case CHCK_JSON_TYPE_NULL:
+               {
+                  type = Type::NULL_JSON;
+                  break;
+               }
+               case CHCK_JSON_TYPE_BOOL:
+               {
+                  type = Type::BOOLEAN;
+                  break;
+               }
+               case CHCK_JSON_TYPE_NUMBER:
+               {
+                  type = Type::NUMBER;
+                  break;
+               }
+               case CHCK_JSON_TYPE_STRING:
+               {
+                  type = Type::STRING;
+                  break;
+               }
+               case CHCK_JSON_TYPE_ARRAY:
+               {
+                  type = Type::ARRAY;
+                  break;
+               }
+               case CHCK_JSON_TYPE_OBJECT:
+               {
+                  type = Type::OBJECT;
+                  break;
+               }
+               default:
+               {
+                  throw ValueException("Unknown value type!");
+               }
             }
          }
          return type;
