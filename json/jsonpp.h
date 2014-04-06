@@ -392,6 +392,13 @@ namespace json
          return result;
       }
 
+      chckJson* extract()
+      {
+         chckJson* result = _value;
+         _value = nullptr;
+         return result;
+      }
+
    private:
       static std::shared_ptr<internal::Local> getLocal()
       {
