@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
-#include <thread>
 #include <memory>
 #include <unordered_map>
 #include <fstream>
@@ -13,86 +12,6 @@
 
 namespace json
 {
-   namespace internal
-   {
-      class Shared;
-
-      std::weak_ptr<Shared> _sharedRef;
-      std::shared_ptr<Shared> getShared()
-      {
-         std::shared_ptr<Shared> result = _sharedRef.lock();
-         if(!result)
-         {
-            result = std::make_shared<Shared>();
-            _sharedRef = result;
-         }
-         return result;
-      }
-
-
-      struct Local
-      {
-         Local(std::weak_ptr<Shared> shared) : shared(shared.lock()), decoder(chckJsonDecoderNew())
-         {
-
-         }
-
-         ~Local()
-         {
-            chckJsonDecoderFree(decoder);
-         }
-
-         std::shared_ptr<Shared> shared;
-         chckJsonDecoder* decoder;
-      };
-
-      class Shared
-      {
-      public:
-         Shared() : _prevId(0), _prevLocal(), _locals()
-         {
-
-         }
-
-         ~Shared()
-         {
-
-         }
-
-         std::shared_ptr<Local> getLocal()
-         {
-            std::shared_ptr<Local> result;
-            std::thread::id id = std::this_thread::get_id();
-            if(id == _prevId)
-            {
-               result = _prevLocal.lock();
-            }
-
-            if(!result)
-            {
-               result = _locals[id].lock();
-
-               if(!result)
-               {
-                  result = std::make_shared<Local>(getShared());
-                  _locals.insert({id, std::weak_ptr<Local>(result)});
-               }
-
-               _prevId = id;
-               _prevLocal = result;
-            }
-
-            return result;
-         }
-
-      private:
-         std::thread::id _prevId;
-         std::weak_ptr<Local> _prevLocal;
-         std::unordered_map<std::thread::id, std::weak_ptr<Local>> _locals;
-      };
-
-   }
-
    class Value
    {
    public:
@@ -134,8 +53,7 @@ namespace json
          return Value(values);
       }
 
-      Value(chckJson* value = nullptr) : _value(value),
-         _local(getLocal())
+      Value(chckJson* value = nullptr) : _value(value)
       {
 
       }
@@ -178,8 +96,7 @@ namespace json
          }
       }
 
-      Value(Value const& other) : _value(other._value != nullptr ? chckJsonCopy(other._value) : nullptr),
-         _local(getLocal())
+      Value(Value const& other) : Value(other._value != nullptr ? chckJsonCopy(other._value) : nullptr)
       {
 
       }
@@ -358,10 +275,10 @@ namespace json
 
       static Value parse(std::string const& str)
       {
-         auto shared = internal::getShared();
-         auto local = shared->getLocal();
-         chckJsonDecoder* decoder = local->decoder;
-         return chckJsonDecoderDecode(decoder, str.data());
+         chckJsonDecoder* decoder = chckJsonDecoderNew();
+         chckJson* result = chckJsonDecoderDecode(decoder, str.data());
+         chckJsonDecoderFree(decoder);
+         return result;
       }
 
       static Value parse(std::istream& stream)
@@ -400,13 +317,6 @@ namespace json
       }
 
    private:
-      static std::shared_ptr<internal::Local> getLocal()
-      {
-         return internal::getShared()->getLocal();
-      }
-
-      std::shared_ptr<internal::Local> _local;
-
       chckJson* _value;
 
    };
