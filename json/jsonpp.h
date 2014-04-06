@@ -320,20 +320,6 @@ namespace json
       chckJson* _value;
 
    };
-
-   Value object(std::unordered_map<std::string, Value> properties = {})
-   {
-      return Value::object(properties);
-   }
-   Value null()
-   {
-      return Value::null();
-   }
-
-   Value array(std::initializer_list<Value> values = {})
-   {
-      return Value::array(values);
-   }
 }
 #endif // JSONPP_H
 
