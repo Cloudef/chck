@@ -79,7 +79,7 @@ int main(int argc, char** argv)
       assert(array.at(2).booleanValue() == true);
       assert(array.at(3).stringValue() == "yay!");
 
-      json::Value array2 = {1, 1.0, true, json::null(), {1, 2, 3}};
+      json::Value array2 = {1, 1.0, true, json::Value::null(), {1, 2, 3}};
       assert(array2.size() == 5);
       assert(array2.at(0).longValue() == 1);
       assert(array2.at(1).doubleValue() < 1.1 && array2.at(1).doubleValue() > 0.9);
@@ -92,7 +92,7 @@ int main(int argc, char** argv)
 
    // Test object operations
    {
-      json::Value object = json::object({
+      json::Value object = json::Value::object({
             {"foo", 1},
             {"bar", false},
             {"bag", "<o/"}
