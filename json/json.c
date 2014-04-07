@@ -734,8 +734,12 @@ chckJson* chckJsonCopy(const chckJson *json)
          break;
    }
 
+   if (!copy)
+      return NULL;
+
    for (tail = &copy->child, child = json->child; child; child = child->next, tail = &(*tail)->next)
-      *tail = chckJsonCopy(child);
+      if (!(*tail = chckJsonCopy(child)))
+         break;
 
    return copy;
 }
