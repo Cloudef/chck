@@ -311,7 +311,7 @@ static void chckJsonDecoderDecodeNull(chckJsonDecoder *decoder, chckJson *json)
 static void chckJsonDecoderDecodeNumber(chckJsonDecoder *decoder, chckJson *json)
 {
    char *string = NULL;
-   size_t len = 0, alloc;
+   size_t len = 0, alloc = 0;
    assert(isdigit(*decoder->currentChar) || *decoder->currentChar == '-' || *decoder->currentChar == '+' || *decoder->currentChar == '.');
 
    do {
@@ -334,7 +334,7 @@ static void chckJsonDecoderDecodeNumber(chckJsonDecoder *decoder, chckJson *json
 static void chckJsonDecoderDecodeString(chckJsonDecoder *decoder, chckJson *json)
 {
    char *string = NULL;
-   size_t len = 0, alloc;
+   size_t len = 0, alloc = 0;
    assert(json && *decoder->currentChar == '\"');
 
    while (chckJsonDecoderAdvance(decoder, 0)) {
