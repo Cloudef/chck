@@ -10,6 +10,7 @@ enum { RETURN_OK = 1, RETURN_FAIL = 0 };
 static int chckResizeBuf(unsigned char **buf, size_t *size, size_t nsize)
 {
    void *tmp;
+   assert(nsize > 0);
 
    if (nsize < *size || !(tmp = realloc(*buf, nsize))) {
       if (!(tmp = malloc(nsize))) return RETURN_FAIL;

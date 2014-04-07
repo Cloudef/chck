@@ -867,18 +867,33 @@ void chckJsonChildAppend(chckJson *json, chckJson *child)
 
 void chckJsonProperty(chckJson *json, const char* name, chckJson *value)
 {
-   chckJson** j;
-   for (j = &json->child; *j && strcmp(name, (*j)->string); j = &(*j)->next);
-   if (*j) chckJsonFreeAll((*j)->child);
-   else *j = chckJsonNewString(name);
-   (*j)->child = value;
+   chckJson **j;
+   assert(name);
+
+   for (j = &json->child; *j; j = &(*j)->next)
+      if ((*j)->string && !strcmp(name, (*j)->string))
+         break;
+
+   if (*j) {
+      chckJsonFreeAll((*j)->child);
+   } else {
+      *j = chckJsonNewString(name);
+   }
+
+   if (*j)
+      (*j)->child = value;
 }
 
 chckJson* chckJsonGetProperty(chckJson *json, const char* name)
 {
-   chckJson** j;
-   for (j = &json->child; *j && strcmp(name, (*j)->string); j = &(*j)->next);
-   return (*j ? (*j)->child : NULL);
+   chckJson *j;
+   assert(name);
+
+   for (j = json->child; j; j = j->next)
+      if (j->string && !strcmp(name, j->string))
+         break;
+
+   return (j ? j->child : NULL);
 }
 
 void chckJsonString(chckJson *json, const char *str)
