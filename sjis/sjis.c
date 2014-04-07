@@ -90,11 +90,18 @@ char* chckSJISToUTF8(const unsigned char *sjis, size_t size, size_t *outSize, in
       }
    }
 
-   /* resize buffer to real size */
-   terminate = (terminate ? 1 : 0);
-   size = d + (dec[d-1] != 0x00 ? terminate : 0);
-   chckResizeBuf(&dec, &dsize, size);
-   if (terminate && dec[d-1] != 0x00) dec[d] = 0x00;
+   if (d > 0) {
+      /* resize buffer to real size */
+      terminate = (terminate ? 1 : 0);
+      size = d + (dec[d - 1] != 0x00 ? terminate : 0);
+      chckResizeBuf(&dec, &dsize, size);
+      if (terminate && dec[d - 1] != 0x00) dec[d] = 0x00;
+   } else {
+      size = 0;
+      if (dec) free(dec);
+      dec = NULL;
+   }
+
    if (outSize) *outSize = size;
    return (char*)dec;
 
@@ -159,11 +166,18 @@ unsigned char* chckUTF8ToSJIS(const char *input, size_t size, size_t *outSize, i
       }
    }
 
-   /* resize buffer to real size */
-   terminate = (terminate ? 1 : 0);
-   size = d + (dec[d-1] != 0x00 ? terminate : 0);
-   chckResizeBuf(&dec, &dsize, size);
-   if (terminate && dec[d-1] != 0) dec[d] = 0x00;
+   if (d > 0) {
+      /* resize buffer to real size */
+      terminate = (terminate ? 1 : 0);
+      size = d + (dec[d - 1] != 0x00 ? terminate : 0);
+      chckResizeBuf(&dec, &dsize, size);
+      if (terminate && dec[d - 1] != 0) dec[d] = 0x00;
+   } else {
+      size = 0;
+      if (dec) free(dec);
+      dec = NULL;
+   }
+
    if (outSize) *outSize = size;
    return dec;
 
