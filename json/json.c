@@ -559,6 +559,8 @@ static void _chckJsonStringf(chckJson *json, const char *fmt, va_list args)
 
 static void chckJsonSerialize(chckJson *json, unsigned char **enc, size_t *e, size_t *esize)
 {
+   chckJson *next;
+
    if (json->type == CHCK_JSON_TYPE_OBJECT) {
       chckPutBuf(enc, e, esize, "{");
    } else if (json->type == CHCK_JSON_TYPE_ARRAY) {
@@ -576,10 +578,12 @@ static void chckJsonSerialize(chckJson *json, unsigned char **enc, size_t *e, si
       chckPutBufEscaped(enc, e, esize, (json->string ? json->string : "0"));
    }
 
-   if (json->child) {
-      if (json->type != CHCK_JSON_TYPE_OBJECT && json->type != CHCK_JSON_TYPE_ARRAY)
-         chckPutBuf(enc, e, esize, ":");
-      chckJsonSerialize(json->child, enc, e, esize);
+   if (json->child && json->type != CHCK_JSON_TYPE_OBJECT && json->type != CHCK_JSON_TYPE_ARRAY)
+      chckPutBuf(enc, e, esize, ":");
+
+   for (next = json->child; next; next = next->next) {
+      chckJsonSerialize(next, enc, e, esize);
+      if (next->next) chckPutBuf(enc, e, esize, ",");
    }
 
    if (json->type == CHCK_JSON_TYPE_OBJECT) {
@@ -587,15 +591,11 @@ static void chckJsonSerialize(chckJson *json, unsigned char **enc, size_t *e, si
    } else if (json->type == CHCK_JSON_TYPE_ARRAY) {
       chckPutBuf(enc, e, esize, "]");
    }
-
-   if (json->next) {
-      chckPutBuf(enc, e, esize, ",");
-      chckJsonSerialize(json->next, enc, e, esize);
-   }
 }
 
 char* chckJsonEncode(chckJson *json, size_t *outSize)
 {
+   chckJson *next;
    unsigned char *enc;
    size_t e = 0, esize = 128;
    assert(json);
@@ -605,7 +605,10 @@ char* chckJsonEncode(chckJson *json, size_t *outSize)
    if (!(enc = malloc(esize)))
       return NULL;
 
-   chckJsonSerialize(json, &enc, &e, &esize);
+   for (next = json; next; next = next->next) {
+      chckJsonSerialize(next, &enc, &e, &esize);
+      if (next->next) chckPutBuf(&enc, &e, &esize, ",");
+   }
 
    if (e == 0) {
       free(enc);
