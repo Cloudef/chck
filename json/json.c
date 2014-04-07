@@ -774,7 +774,8 @@ void chckJsonFreeAll(chckJson *json)
 
    for (next = json->next; next; next = n) {
       n = next->next;
-      chckJsonFreeAll(next);
+      chckJsonFreeChilds(next);
+      chckJsonFree(next);
    }
 
    chckJsonFree(json);
