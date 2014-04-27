@@ -111,7 +111,7 @@ void* chckPoolAdd(chckPool *pool, size_t size)
    assert(size + 1 == pool->member);
 
    if (size + 1 != pool->member) {
-      fprintf(stderr, "chckPoolAdd: size should be same as member size when pool was created (%s)", (pool->name ? pool->name : "noname"));
+      fprintf(stderr, "chckPoolAdd: size should be same as member size when pool was created (%s)", (pool->name ? pool->name : "NULL"));
       return NULL;
    }
 
