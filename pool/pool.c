@@ -178,6 +178,9 @@ void* chckPoolIter(const chckPool *pool, size_t *iter, chckPoolItem *item)
    unsigned char *current;
    assert(pool && iter);
 
+   if (item)
+      *item = 0;
+
    if (*iter >= pool->used)
       return NULL;
 
