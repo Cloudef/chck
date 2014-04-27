@@ -182,14 +182,4 @@ void* chckPoolIter(const chckPool *pool, size_t *iter, chckPoolItem *item)
    return (*current == 0 ? NULL : current + 1);
 }
 
-void chckPoolIterCall(const chckPool *pool, void (*function)(void *item))
-{
-   assert(pool);
-
-   size_t iter;
-   void *current;
-   for (iter = 0; (current = chckPoolIter(pool, &iter, NULL));)
-      function(current);
-}
-
 /* vim: set ts=8 sw=3 tw=0 :*/

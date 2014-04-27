@@ -8,6 +8,9 @@
 typedef struct _chckArray chckArray;
 typedef size_t chckArrayIndex;
 
+#define chckArrayIterCall(array, function, ...) \
+{ size_t i; void *p; for (i = 0; (p = chckArrayIter(array, &i));) function(p, ##__VA_ARGS__); }
+
 chckArray* chckArrayNew(size_t growStep, size_t initialItems);
 void chckArrayFree(chckArray *array);
 void chckArrayFlush(chckArray *array);
@@ -18,7 +21,6 @@ void* chckArrayAddAt(chckArray *array, void *item, chckArrayIndex index);
 void chckArrayRemove(chckArray *array, void *item);
 void chckArrayRemoveAt(chckArray *array, chckArrayIndex index);
 void* chckArrayIter(const chckArray *array, size_t *iter);
-void chckArrayIterCall(const chckArray *array, void (*function)(void *item));
 
 #endif /* __chck_array__ */
 

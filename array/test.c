@@ -40,7 +40,7 @@ int main(void)
       assert(chckArrayCount(array) == 2);
       assert(iter == 2);
 
-      chckArrayIterCall(array, (void*)printint);
+      chckArrayIterCall(array, printint);
 
       chckArrayFlush(array);
       chckArrayFree(array);
