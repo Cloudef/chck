@@ -39,7 +39,7 @@ int main(void)
       assert(chckPoolCount(pool) == 2);
       assert(iter == (sizeof(struct item) + 1) * 3);
 
-      b = chckPoolAdd(pool, sizeof(struct item));
+      chckPoolAdd(pool, sizeof(struct item));
 
       iter = 0;
       while ((current = chckPoolIter(pool, &iter)))
@@ -57,7 +57,7 @@ int main(void)
       assert(chckPoolCount(pool) == 2);
       assert(iter == (sizeof(struct item) + 1) * 2);
 
-      c = chckPoolAdd(pool, sizeof(struct item));
+      chckPoolAdd(pool, sizeof(struct item));
 
       iter = 0;
       while ((current = chckPoolIter(pool, &iter)))
