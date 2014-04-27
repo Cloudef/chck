@@ -54,6 +54,23 @@ fail:
    return 0;
 }
 
+chckArray* chckArrayNewFromCArray(void *items, size_t memb, size_t growStep)
+{
+   chckArray *array;
+
+   if (!(array = chckArrayNew(growStep, 0)))
+      return NULL;
+
+   if (!chckArraySetCArray(array, items, memb))
+      goto fail;
+
+   return array;
+
+fail:
+   chckArrayFree(array);
+   return 0;
+}
+
 void chckArrayFree(chckArray *array)
 {
    assert(array);
@@ -84,7 +101,7 @@ void* chckArrayGet(const chckArray *array, chckArrayIndex index)
    return array->buffer[index];
 }
 
-void* chckArrayAddAt(chckArray *array, void *item, chckArrayIndex index)
+void* chckArrayAddAt(chckArray *array, const void *item, chckArrayIndex index)
 {
    assert(array && index <= array->items);
 
@@ -94,10 +111,10 @@ void* chckArrayAddAt(chckArray *array, void *item, chckArrayIndex index)
    if (index >= array->items)
       array->items = index + 1;
 
-   return (array->buffer[index] = item);
+   return (array->buffer[index] = (void*)item);
 }
 
-void* chckArrayAdd(chckArray *array, void *item)
+void* chckArrayAdd(chckArray *array, const void *item)
 {
    assert(array);
    return chckArrayAddAt(array, item, array->items);
@@ -113,7 +130,7 @@ void chckArrayRemoveAt(chckArray *array, chckArrayIndex index)
    array->items--;
 }
 
-void chckArrayRemove(chckArray *array, void *item)
+void chckArrayRemove(chckArray *array, const void *item)
 {
    assert(array && item);
 
@@ -138,7 +155,25 @@ void* chckArrayIter(const chckArray *array, size_t *iter)
    return array->buffer[(*iter)++];
 }
 
-void** chckArrayToCArray(chckArray *array, size_t *memb)
+int chckArraySetCArray(chckArray *array, void *items, size_t memb)
+{
+   void **copy;
+   assert(array);
+
+   chckArrayFlush(array);
+
+   if (!(copy = calloc(memb, sizeof(void*))))
+      return RETURN_FAIL;
+
+   memcpy(copy, items, memb * sizeof(void*));
+
+   array->buffer = copy;
+   array->allocated = memb * sizeof(void*);
+   array->items = memb;
+   return RETURN_OK;
+}
+
+void* chckArrayToCArray(chckArray *array, size_t *memb)
 {
    assert(array);
 

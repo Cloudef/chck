@@ -40,9 +40,34 @@ int main(void)
       assert(chckArrayCount(array) == 2);
       assert(iter == 2);
 
+      assert(((int**)chckArrayToCArray(array, NULL))[0] == a);
+      assert(((int**)chckArrayToCArray(array, NULL))[1] == c);
+
       chckArrayIterCall(array, printint);
 
       chckArrayFlush(array);
+      chckArrayFree(array);
+   }
+
+   /* TEST: array from C array */
+   {
+      const char *ptrs[] = { "a", "b", "c" };
+      const char *ptrs2[] = { "d" };
+      chckArray *array = chckArrayNewFromCArray(ptrs, 3, 32);
+
+      assert(chckArrayCount(array) == 3);
+      assert(chckArrayGet(array, 0) == ptrs[0]);
+      assert(chckArrayGet(array, 1) == ptrs[1]);
+      assert(chckArrayGet(array, 2) == ptrs[2]);
+
+      chckArraySetCArray(array, ptrs2, 1);
+      assert(chckArrayCount(array) == 1);
+      assert(chckArrayGet(array, 0) == ptrs2[0]);
+
+      chckArrayAdd(array, ptrs[0]);
+      assert(chckArrayCount(array) == 2);
+      assert(chckArrayGet(array, 1) == ptrs[0]);
+
       chckArrayFree(array);
    }
 
