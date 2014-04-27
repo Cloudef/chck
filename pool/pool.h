@@ -12,6 +12,7 @@ chckPool* chckPoolNew(const char *name, size_t growStep, size_t initialItems, si
 void chckPoolFree(chckPool *pool);
 void chckPoolFlush(chckPool *pool);
 const char* chckPoolGetName(const chckPool *pool);
+size_t chckPoolCount(const chckPool *pool);
 void* chckPoolGet(const chckPool *pool, chckPoolItem item);
 chckPoolItem chckPoolAdd(chckPool *pool, size_t size);
 void chckPoolRemove(chckPool *pool, chckPoolItem item);

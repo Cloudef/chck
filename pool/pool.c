@@ -33,11 +33,6 @@ static int chckPoolResize(chckPool *pool, size_t size)
    void *tmp = NULL;
    assert(size != 0 && size != pool->allocated);
 
-   if (pool->used > size) {
-      size_t i;
-      for (i = pool->used - size; i; i += pool->member);
-   }
-
    if (pool->buffer && pool->allocated < size)
       tmp = realloc(pool->buffer, size);
 
@@ -59,8 +54,11 @@ static int chckPoolResize(chckPool *pool, size_t size)
 
 chckPool* chckPoolNew(const char *name, size_t growStep, size_t initialItems, size_t memberSize)
 {
-   chckPool *pool;
+   chckPool *pool = NULL;
    assert(name && memberSize > 0);
+
+   if (!memberSize)
+      goto fail;
 
    if (!(pool = calloc(1, sizeof(chckPool))))
       goto fail;
@@ -77,7 +75,8 @@ chckPool* chckPoolNew(const char *name, size_t growStep, size_t initialItems, si
    return pool;
 
 fail:
-   chckPoolFree(pool);
+   if (pool)
+      chckPoolFree(pool);
    return 0;
 }
 
@@ -108,6 +107,13 @@ const char* chckPoolGetName(const chckPool *pool)
 {
    assert(pool);
    return pool->name;
+}
+
+size_t chckPoolCount(const chckPool *pool)
+{
+   size_t iter = 0, items = 0;
+   while (chckPoolIter(pool, &iter)) ++items;
+   return items;
 }
 
 void* chckPoolGet(const chckPool *pool, chckPoolItem item)

@@ -28,7 +28,7 @@ int main(void)
       while ((current = chckPoolIter(pool, &iter)))
          assert(current != NULL);
 
-      printf("%zu :: %zu\n", iter, (sizeof(struct item) + 1) * 3);
+      assert(chckPoolCount(pool) == 3);
       assert(iter == (sizeof(struct item) + 1) * 3);
       chckPoolRemove(pool, b);
 
@@ -36,7 +36,7 @@ int main(void)
       while ((current = chckPoolIter(pool, &iter)))
          assert(current != NULL);
 
-      printf("%zu :: %zu\n", iter, (sizeof(struct item) + 1) * 3);
+      assert(chckPoolCount(pool) == 2);
       assert(iter == (sizeof(struct item) + 1) * 3);
 
       b = chckPoolAdd(pool, sizeof(struct item));
@@ -45,7 +45,7 @@ int main(void)
       while ((current = chckPoolIter(pool, &iter)))
          assert(current != NULL);
 
-      printf("%zu :: %zu\n", iter, (sizeof(struct item) + 1) * 3);
+      assert(chckPoolCount(pool) == 3);
       assert(iter == (sizeof(struct item) + 1) * 3);
 
       chckPoolRemove(pool, c);
@@ -54,7 +54,7 @@ int main(void)
       while ((current = chckPoolIter(pool, &iter)))
          assert(current != NULL);
 
-      printf("%zu :: %zu\n", iter, (sizeof(struct item) + 1) * 3);
+      assert(chckPoolCount(pool) == 2);
       assert(iter == (sizeof(struct item) + 1) * 2);
 
       c = chckPoolAdd(pool, sizeof(struct item));
@@ -63,7 +63,7 @@ int main(void)
       while ((current = chckPoolIter(pool, &iter)))
          assert(current != NULL);
 
-      printf("%zu :: %zu\n", iter, (sizeof(struct item) + 1) * 3);
+      assert(chckPoolCount(pool) == 3);
       assert(iter == (sizeof(struct item) + 1) * 3);
 
       printf("The name of our pool was: %s\n", chckPoolGetName(pool));
