@@ -19,7 +19,7 @@ int main(void)
    /* TEST: pool */
    {
 
-      chckPool *pool = chckPoolNew("MyPool", 32, 3, sizeof(struct item));
+      chckPool *pool = chckPoolNew(32, 3, sizeof(struct item));
       assert(pool != NULL);
 
       chckPoolItem a = chckPoolAdd(pool, sizeof(struct item));
@@ -83,9 +83,6 @@ int main(void)
       assert(chckPoolGetAt(pool, 1) == itemB);
       assert(chckPoolGetAt(pool, 2) == itemC);
       chckPoolIterCall(pool, (void*)printa);
-
-      printf("The name of our pool was: %s\n", chckPoolGetName(pool));
-      assert(strcmp(chckPoolGetName(pool), "MyPool") == 0);
 
       chckPoolFlush(pool);
       chckPoolFree(pool);

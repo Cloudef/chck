@@ -7,22 +7,9 @@
 enum { RETURN_OK = 1, RETURN_FAIL = 0 };
 
 typedef struct _chckArray {
-   char *name;
    void **buffer;
    size_t step, items, allocated;
 } _chckArray;
-
-static char *chckStrdup(const char *str)
-{
-   char *cpy;
-   size_t size = strlen(str);
-
-   if (!(cpy = calloc(1, size + 1)))
-      return NULL;
-
-   memcpy(cpy, str, size);
-   return cpy;
-}
 
 static int chckArrayResize(chckArray *array, size_t newItems)
 {
@@ -48,15 +35,11 @@ static int chckArrayResize(chckArray *array, size_t newItems)
    return RETURN_OK;
 }
 
-chckArray* chckArrayNew(const char *name, size_t growStep, size_t initialItems)
+chckArray* chckArrayNew(size_t growStep, size_t initialItems)
 {
    chckArray *array;
-   assert(name);
 
    if (!(array = calloc(1, sizeof(chckArray))))
-      goto fail;
-
-   if (name && !(array->name = chckStrdup(name)))
       goto fail;
 
    array->step = (growStep ? growStep : 32);
@@ -74,12 +57,7 @@ fail:
 void chckArrayFree(chckArray *array)
 {
    assert(array);
-
    chckArrayFlush(array);
-
-   if (array->name)
-      free(array->name);
-
    free(array);
 }
 
@@ -92,12 +70,6 @@ void chckArrayFlush(chckArray *array)
 
    array->buffer = NULL;
    array->allocated = array->items = 0;
-}
-
-const char* chckArrayGetName(const chckArray *array)
-{
-   assert(array);
-   return array->name;
 }
 
 size_t chckArrayCount(const chckArray *array)

@@ -11,22 +11,9 @@
 enum { RETURN_OK = 1, RETURN_FAIL = 0 };
 
 typedef struct _chckPool {
-   char *name;
    unsigned char *buffer;
    size_t step, used, allocated, member;
 } _chckPool;
-
-static char *chckStrdup(const char *str)
-{
-   char *cpy;
-   size_t size = strlen(str);
-
-   if (!(cpy = calloc(1, size + 1)))
-      return NULL;
-
-   memcpy(cpy, str, size);
-   return cpy;
-}
 
 static int chckPoolResize(chckPool *pool, size_t size)
 {
@@ -52,18 +39,15 @@ static int chckPoolResize(chckPool *pool, size_t size)
    return RETURN_OK;
 }
 
-chckPool* chckPoolNew(const char *name, size_t growStep, size_t initialItems, size_t memberSize)
+chckPool* chckPoolNew(size_t growStep, size_t initialItems, size_t memberSize)
 {
    chckPool *pool = NULL;
-   assert(name && memberSize > 0);
+   assert(memberSize > 0);
 
    if (!memberSize)
       goto fail;
 
    if (!(pool = calloc(1, sizeof(chckPool))))
-      goto fail;
-
-   if (name && !(pool->name = chckStrdup(name)))
       goto fail;
 
    pool->member = memberSize + 1;
@@ -83,12 +67,7 @@ fail:
 void chckPoolFree(chckPool *pool)
 {
    assert(pool);
-
    chckPoolFlush(pool);
-
-   if (pool->name)
-      free(pool->name);
-
    free(pool);
 }
 
@@ -101,12 +80,6 @@ void chckPoolFlush(chckPool *pool)
 
    pool->buffer = NULL;
    pool->allocated = pool->used = 0;
-}
-
-const char* chckPoolGetName(const chckPool *pool)
-{
-   assert(pool);
-   return pool->name;
 }
 
 size_t chckPoolCount(const chckPool *pool)
@@ -141,7 +114,7 @@ chckPoolItem chckPoolAdd(chckPool *pool, size_t size)
    assert(size + 1 == pool->member);
 
    if (size + 1 != pool->member) {
-      fprintf(stderr, "chckPoolAdd: size should be same as member size when pool was created (%s)", (pool->name ? pool->name : "NULL"));
+      fprintf(stderr, "chckPoolAdd: size should be same as member size when pool was created");
       return 0;
    }
 

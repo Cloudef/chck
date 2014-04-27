@@ -8,10 +8,9 @@
 typedef struct _chckPool chckPool;
 typedef size_t chckPoolItem;
 
-chckPool* chckPoolNew(const char *name, size_t growStep, size_t initialItems, size_t memberSize);
+chckPool* chckPoolNew(size_t growStep, size_t initialItems, size_t memberSize);
 void chckPoolFree(chckPool *pool);
 void chckPoolFlush(chckPool *pool);
-const char* chckPoolGetName(const chckPool *pool);
 size_t chckPoolCount(const chckPool *pool);
 void* chckPoolGet(const chckPool *pool, chckPoolItem item);
 void* chckPoolGetAt(const chckPool *pool, size_t index);

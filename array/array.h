@@ -8,10 +8,9 @@
 typedef struct _chckArray chckArray;
 typedef size_t chckArrayIndex;
 
-chckArray* chckArrayNew(const char *name, size_t growStep, size_t initialItems);
+chckArray* chckArrayNew(size_t growStep, size_t initialItems);
 void chckArrayFree(chckArray *array);
 void chckArrayFlush(chckArray *array);
-const char* chckArrayGetName(const chckArray *array);
 size_t chckArrayCount(const chckArray *array);
 void* chckArrayGet(const chckArray *array, chckArrayIndex index);
 void* chckArrayAdd(chckArray *array, void *item);

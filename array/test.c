@@ -13,7 +13,7 @@ int main(void)
 {
    /* TEST: array */
    {
-      chckArray *array = chckArrayNew("MyArray", 32, 3);
+      chckArray *array = chckArrayNew(32, 3);
       assert(array != NULL);
 
       int aa = 0, bb = 1, cc = 2;
@@ -41,9 +41,6 @@ int main(void)
       assert(iter == 2);
 
       chckArrayIterCall(array, (void*)printint);
-
-      printf("The name of our array was: %s\n", chckArrayGetName(array));
-      assert(strcmp(chckArrayGetName(array), "MyArray") == 0);
 
       chckArrayFlush(array);
       chckArrayFree(array);
