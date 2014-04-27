@@ -78,6 +78,10 @@ int main(void)
       itemA->a = 1;
       itemB->a = 2;
       itemC->a = 3;
+
+      assert(chckPoolGetAt(pool, 0) == itemA);
+      assert(chckPoolGetAt(pool, 1) == itemB);
+      assert(chckPoolGetAt(pool, 2) == itemC);
       chckPoolIterCall(pool, (void*)printa);
 
       printf("The name of our pool was: %s\n", chckPoolGetName(pool));

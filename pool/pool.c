@@ -122,6 +122,19 @@ void* chckPoolGet(const chckPool *pool, chckPoolItem item)
    return (item ? pool->buffer + item : NULL);
 }
 
+void* chckPoolGetAt(const chckPool *pool, size_t index)
+{
+   void *item;
+   size_t iter, items;
+
+   for (iter = 0, items = 0; (item = chckPoolIter(pool, &iter, NULL)); ++items) {
+      if (index == items)
+         return item;
+   }
+
+   return NULL;
+}
+
 chckPoolItem chckPoolAdd(chckPool *pool, size_t size)
 {
    assert(pool);

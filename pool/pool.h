@@ -14,6 +14,7 @@ void chckPoolFlush(chckPool *pool);
 const char* chckPoolGetName(const chckPool *pool);
 size_t chckPoolCount(const chckPool *pool);
 void* chckPoolGet(const chckPool *pool, chckPoolItem item);
+void* chckPoolGetAt(const chckPool *pool, size_t index);
 chckPoolItem chckPoolAdd(chckPool *pool, size_t size);
 void* chckPoolAddEx(chckPool *pool, size_t size, chckPoolItem *item);
 void chckPoolRemove(chckPool *pool, chckPoolItem item);
