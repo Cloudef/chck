@@ -89,7 +89,7 @@ void* chckArrayAddAt(chckArray *array, void *item, chckArrayIndex index)
    assert(array && index <= array->items);
 
    if (array->allocated < index && chckArrayResize(array, array->allocated + array->step) != RETURN_OK)
-      return 0;
+      return NULL;
 
    if (index >= array->items)
       array->items = index + 1;
