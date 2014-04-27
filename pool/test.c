@@ -1,6 +1,7 @@
 #include "pool.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 int main(void)
@@ -66,6 +67,9 @@ int main(void)
 
       printf("%zu :: %zu\n", iter, (sizeof(struct item) + 1) * 3);
       assert(iter == (sizeof(struct item) + 1) * 3);
+
+      printf("The name of our pool was: %s\n", chckPoolGetName(pool));
+      assert(strcmp(chckPoolGetName(pool), "MyPool") == 0);
 
       chckPoolFlush(pool);
       chckPoolFree(pool);
