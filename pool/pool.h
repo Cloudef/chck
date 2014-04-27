@@ -17,6 +17,7 @@ void* chckPoolGet(const chckPool *pool, chckPoolItem item);
 chckPoolItem chckPoolAdd(chckPool *pool, size_t size);
 void chckPoolRemove(chckPool *pool, chckPoolItem item);
 void* chckPoolIter(const chckPool *pool, size_t *iter);
+void chckPoolIterCall(const chckPool *pool, void (*function)(void *item));
 
 #endif /* __chck_pool__ */
 

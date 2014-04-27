@@ -166,4 +166,14 @@ void* chckArrayIter(const chckArray *array, size_t *iter)
    return array->buffer[(*iter)++];
 }
 
+void chckArrayIterCall(const chckArray *array, void (*function)(void *item))
+{
+   assert(array);
+
+   size_t iter;
+   void *current;
+   for (iter = 0; (current = chckArrayIter(array, &iter));)
+      function(current);
+}
+
 /* vim: set ts=8 sw=3 tw=0 :*/

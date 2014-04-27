@@ -4,14 +4,20 @@
 #include <string.h>
 #include <assert.h>
 
+struct item {
+   int a;
+   void *b;
+};
+
+static void printa(struct item *item)
+{
+   printf("item::%d\n", item->a);
+}
+
 int main(void)
 {
    /* TEST: pool */
    {
-      struct item {
-         int a;
-         void *b;
-      };
 
       chckPool *pool = chckPoolNew("MyPool", 32, 3, sizeof(struct item));
       assert(pool != NULL);
@@ -65,6 +71,14 @@ int main(void)
 
       assert(chckPoolCount(pool) == 3);
       assert(iter == (sizeof(struct item) + 1) * 3);
+
+      struct item *itemA = chckPoolGet(pool, a);
+      struct item *itemB = chckPoolGet(pool, b);
+      struct item *itemC = chckPoolGet(pool, c);
+      itemA->a = 1;
+      itemB->a = 2;
+      itemC->a = 3;
+      chckPoolIterCall(pool, (void*)printa);
 
       printf("The name of our pool was: %s\n", chckPoolGetName(pool));
       assert(strcmp(chckPoolGetName(pool), "MyPool") == 0);

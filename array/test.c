@@ -4,6 +4,11 @@
 #include <string.h>
 #include <assert.h>
 
+static void printint(int *item)
+{
+   printf("item::%d\n", *item);
+}
+
 int main(void)
 {
    /* TEST: array */
@@ -34,6 +39,8 @@ int main(void)
 
       assert(chckArrayCount(array) == 2);
       assert(iter == 2);
+
+      chckArrayIterCall(array, (void*)printint);
 
       printf("The name of our array was: %s\n", chckArrayGetName(array));
       assert(strcmp(chckArrayGetName(array), "MyArray") == 0);
