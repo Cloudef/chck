@@ -12,7 +12,7 @@ enum { RETURN_OK = 1, RETURN_FAIL = 0 };
 
 typedef struct _chckPool {
    unsigned char *buffer;
-   size_t step, used, allocated, member;
+   size_t step, used, allocated, member, items;
 } _chckPool;
 
 static int chckPoolResize(chckPool *pool, size_t size)
@@ -84,9 +84,8 @@ void chckPoolFlush(chckPool *pool)
 
 size_t chckPoolCount(const chckPool *pool)
 {
-   size_t iter = 0, items = 0;
-   while (chckPoolIter(pool, &iter, NULL)) ++items;
-   return items;
+   assert(pool);
+   return pool->items;
 }
 
 void* chckPoolGet(const chckPool *pool, chckPoolItem item)
@@ -129,6 +128,7 @@ chckPoolItem chckPoolAdd(chckPool *pool, size_t size)
    if (next + pool->member > pool->used)
       pool->used = next + pool->member;
 
+   pool->items++;
    return next + 1;
 }
 
@@ -157,6 +157,8 @@ void chckPoolRemove(chckPool *pool, chckPoolItem item)
 
    if (pool->used + pool->member * pool->step < pool->allocated)
       chckPoolResize(pool, pool->allocated - pool->member * pool->step);
+
+   pool->items--;
 }
 
 void* chckPoolIter(const chckPool *pool, size_t *iter, chckPoolItem *item)
