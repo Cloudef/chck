@@ -138,4 +138,14 @@ void* chckArrayIter(const chckArray *array, size_t *iter)
    return array->buffer[(*iter)++];
 }
 
+void** chckArrayToCArray(chckArray *array, size_t *memb)
+{
+   assert(array);
+
+   if (memb)
+      *memb = array->items;
+
+   return array->buffer;
+}
+
 /* vim: set ts=8 sw=3 tw=0 :*/

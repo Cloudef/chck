@@ -21,6 +21,7 @@ void* chckArrayAddAt(chckArray *array, void *item, chckArrayIndex index);
 void chckArrayRemove(chckArray *array, void *item);
 void chckArrayRemoveAt(chckArray *array, chckArrayIndex index);
 void* chckArrayIter(const chckArray *array, size_t *iter);
+void** chckArrayToCArray(chckArray *array, size_t *memb);
 
 #endif /* __chck_array__ */
 
