@@ -13,20 +13,18 @@ int main(void)
          void *b;
       };
 
-      chckPool *pool = chckPoolNew("MyPool", sizeof(struct item));
+      chckPool *pool = chckPoolNew("MyPool", 32, 3, sizeof(struct item));
       assert(pool != NULL);
 
-      struct item *a = chckPoolAdd(pool, sizeof(struct item));
-      assert(a != NULL);
+      chckPoolItem a = chckPoolAdd(pool, sizeof(struct item));
+      chckPoolItem b = chckPoolAdd(pool, sizeof(struct item));
+      chckPoolItem c = chckPoolAdd(pool, sizeof(struct item));
 
-      struct item *b = chckPoolAdd(pool, sizeof(struct item));
-      assert(b != NULL);
+      assert(a != 0 && b != 0 && c != 0);
+      assert(a != b && b != c && a != c);
 
-      struct item *c = chckPoolAdd(pool, sizeof(struct item));
-      assert(c != NULL);
-
-      struct item *current;
       size_t iter = 0;
+      struct item *current;
       while ((current = chckPoolIter(pool, &iter)))
          assert(current != NULL);
 

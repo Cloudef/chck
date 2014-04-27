@@ -13,7 +13,7 @@ enum { RETURN_OK = 1, RETURN_FAIL = 0 };
 typedef struct _chckPool {
    char *name;
    unsigned char *buffer;
-   size_t used, allocated, member;
+   size_t step, used, allocated, member;
 } _chckPool;
 
 static char *chckStrdup(const char *str)
@@ -57,7 +57,7 @@ static int chckPoolResize(chckPool *pool, size_t size)
    return RETURN_OK;
 }
 
-chckPool* chckPoolNew(const char *name, size_t memberSize)
+chckPool* chckPoolNew(const char *name, size_t growStep, size_t initialItems, size_t memberSize)
 {
    chckPool *pool;
    assert(name && memberSize > 0);
@@ -69,11 +69,16 @@ chckPool* chckPoolNew(const char *name, size_t memberSize)
       goto fail;
 
    pool->member = memberSize + 1;
+   pool->step = (growStep ? growStep : 32);
+
+   if (initialItems > 0)
+      chckPoolResize(pool, initialItems * pool->member);
+
    return pool;
 
 fail:
    chckPoolFree(pool);
-   return NULL;
+   return 0;
 }
 
 void chckPoolFree(chckPool *pool)
@@ -105,51 +110,51 @@ const char* chckPoolGetName(const chckPool *pool)
    return pool->name;
 }
 
-void* chckPoolAdd(chckPool *pool, size_t size)
+void* chckPoolGet(const chckPool *pool, chckPoolItem item)
+{
+   assert(item > 0 && item < pool->used);
+   return pool->buffer + item;
+}
+
+chckPoolItem chckPoolAdd(chckPool *pool, size_t size)
 {
    assert(pool);
    assert(size + 1 == pool->member);
 
    if (size + 1 != pool->member) {
       fprintf(stderr, "chckPoolAdd: size should be same as member size when pool was created (%s)", (pool->name ? pool->name : "NULL"));
-      return NULL;
+      return 0;
    }
 
    size_t next;
    for (next = 0; next < pool->used && *(pool->buffer + next) == 1; next += pool->member);
 
-   if (pool->allocated < next + pool->member && chckPoolResize(pool, pool->allocated + pool->member * 32) != RETURN_OK)
-      return NULL;
+   if (pool->allocated < next + pool->member && chckPoolResize(pool, pool->allocated + pool->member * pool->step) != RETURN_OK)
+      return 0;
 
    *(pool->buffer + next) = 1; // exist
-   void *ptr = pool->buffer + next + 1;
 
    if (next + pool->member > pool->used)
       pool->used = next + pool->member;
 
-   return ptr;
+   return next + 1;
 }
 
-void chckPoolRemove(chckPool *pool, void *ref)
+void chckPoolRemove(chckPool *pool, chckPoolItem item)
 {
    assert(pool);
-   assert(ref);
+   assert(item > 0 && item < pool->used);
 
-   void *item;
-   size_t iter = 0;
-   while ((item = chckPoolIter(pool, &iter))) {
-      if (item != ref)
-         continue;
+   if (item >= pool->used)
+      return;
 
-      if (iter == pool->used)
-         pool->used -= pool->member;
+   memset(pool->buffer + item - 1, 0, pool->member);
 
-      memset(item - 1, 0, pool->member);
-      break;
-   }
+   if (item - 1 + pool->member >= pool->used)
+      pool->used -= pool->member;
 
-   if (pool->used + pool->member * 32 < pool->allocated)
-      chckPoolResize(pool, pool->allocated - pool->member * 32);
+   if (pool->used + pool->member * pool->step < pool->allocated)
+      chckPoolResize(pool, pool->allocated - pool->member * pool->step);
 }
 
 void* chckPoolIter(const chckPool *pool, size_t *iter)
