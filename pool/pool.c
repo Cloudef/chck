@@ -118,7 +118,7 @@ void* chckPoolAdd(chckPool *pool, size_t size)
    size_t next;
    for (next = 0; next < pool->used && *(pool->buffer + next) == 1; next += pool->member);
 
-   if (pool->allocated < next + pool->member && chckPoolResize(pool, pool->allocated + size * 32) != RETURN_OK)
+   if (pool->allocated < next + pool->member && chckPoolResize(pool, pool->allocated + pool->member * 32) != RETURN_OK)
       return NULL;
 
    *(pool->buffer + next) = 1; // exist
