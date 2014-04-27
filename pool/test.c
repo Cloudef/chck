@@ -31,7 +31,7 @@ int main(void)
 
       size_t iter = 0;
       struct item *current;
-      while ((current = chckPoolIter(pool, &iter)))
+      while ((current = chckPoolIter(pool, &iter, NULL)))
          assert(current != NULL);
 
       assert(chckPoolCount(pool) == 3);
@@ -39,7 +39,7 @@ int main(void)
       chckPoolRemove(pool, b);
 
       iter = 0;
-      while ((current = chckPoolIter(pool, &iter)))
+      while ((current = chckPoolIter(pool, &iter, NULL)))
          assert(current != NULL);
 
       assert(chckPoolCount(pool) == 2);
@@ -48,7 +48,7 @@ int main(void)
       chckPoolAdd(pool, sizeof(struct item));
 
       iter = 0;
-      while ((current = chckPoolIter(pool, &iter)))
+      while ((current = chckPoolIter(pool, &iter, NULL)))
          assert(current != NULL);
 
       assert(chckPoolCount(pool) == 3);
@@ -57,7 +57,7 @@ int main(void)
       chckPoolRemove(pool, c);
 
       iter = 0;
-      while ((current = chckPoolIter(pool, &iter)))
+      while ((current = chckPoolIter(pool, &iter, NULL)))
          assert(current != NULL);
 
       assert(chckPoolCount(pool) == 2);
@@ -66,7 +66,7 @@ int main(void)
       chckPoolAdd(pool, sizeof(struct item));
 
       iter = 0;
-      while ((current = chckPoolIter(pool, &iter)))
+      while ((current = chckPoolIter(pool, &iter, NULL)))
          assert(current != NULL);
 
       assert(chckPoolCount(pool) == 3);

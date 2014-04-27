@@ -112,14 +112,14 @@ const char* chckPoolGetName(const chckPool *pool)
 size_t chckPoolCount(const chckPool *pool)
 {
    size_t iter = 0, items = 0;
-   while (chckPoolIter(pool, &iter)) ++items;
+   while (chckPoolIter(pool, &iter, NULL)) ++items;
    return items;
 }
 
 void* chckPoolGet(const chckPool *pool, chckPoolItem item)
 {
-   assert(item > 0 && item < pool->used);
-   return pool->buffer + item;
+   assert(item < pool->used);
+   return (item ? pool->buffer + item : NULL);
 }
 
 chckPoolItem chckPoolAdd(chckPool *pool, size_t size)
@@ -146,6 +146,16 @@ chckPoolItem chckPoolAdd(chckPool *pool, size_t size)
    return next + 1;
 }
 
+void* chckPoolAddEx(chckPool *pool, size_t size, chckPoolItem *item)
+{
+   chckPoolItem i = chckPoolAdd(pool, size);
+
+   if (item)
+      *item = i;
+
+   return chckPoolGet(pool, i);
+}
+
 void chckPoolRemove(chckPool *pool, chckPoolItem item)
 {
    assert(pool);
@@ -163,7 +173,7 @@ void chckPoolRemove(chckPool *pool, chckPoolItem item)
       chckPoolResize(pool, pool->allocated - pool->member * pool->step);
 }
 
-void* chckPoolIter(const chckPool *pool, size_t *iter)
+void* chckPoolIter(const chckPool *pool, size_t *iter, chckPoolItem *item)
 {
    unsigned char *current;
    assert(pool && iter);
@@ -172,6 +182,8 @@ void* chckPoolIter(const chckPool *pool, size_t *iter)
       return NULL;
 
    do {
+      if (item)
+         *item = *iter + 1;
       current = pool->buffer + *iter;
       *iter += pool->member;
    } while (*iter < pool->used && *current == 0);
@@ -185,7 +197,7 @@ void chckPoolIterCall(const chckPool *pool, void (*function)(void *item))
 
    size_t iter;
    void *current;
-   for (iter = 0; (current = chckPoolIter(pool, &iter));)
+   for (iter = 0; (current = chckPoolIter(pool, &iter, NULL));)
       function(current);
 }
 
