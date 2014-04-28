@@ -128,6 +128,7 @@ chckPoolItem chckPoolAdd(chckPool *pool, size_t size)
    if (pool->allocated < next + pool->member && chckPoolResize(pool, pool->allocated + pool->member * pool->step) != RETURN_OK)
       return 0;
 
+   memset(pool->buffer + next, 0, pool->member);
    *(pool->buffer + next) = 1; // exist
 
    if (next + pool->member > pool->used)
