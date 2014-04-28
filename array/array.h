@@ -17,6 +17,7 @@ void chckArrayFree(chckArray *array);
 void chckArrayFlush(chckArray *array);
 size_t chckArrayCount(const chckArray *array);
 void* chckArrayGet(const chckArray *array, chckArrayIndex index);
+void* chckArrayGetLast(const chckArray *array);
 void* chckArrayAdd(chckArray *array, const void *item);
 void* chckArrayAddAt(chckArray *array, const void *item, chckArrayIndex index);
 void chckArrayRemove(chckArray *array, const void *item);

@@ -94,6 +94,11 @@ void* chckPoolGet(const chckPool *pool, chckPoolItem item)
    return (item ? pool->buffer + item : NULL);
 }
 
+void* chckPoolGetLast(const chckPool *pool)
+{
+   return (pool->items ? pool->buffer + pool->used - pool->member + 1 : NULL);
+}
+
 void* chckPoolGetAt(const chckPool *pool, size_t index)
 {
    void *item;

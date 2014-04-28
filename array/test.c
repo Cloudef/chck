@@ -67,6 +67,7 @@ int main(void)
       chckArrayAdd(array, ptrs[0]);
       assert(chckArrayCount(array) == 2);
       assert(chckArrayGet(array, 1) == ptrs[0]);
+      assert(chckArrayGetLast(array) == ptrs[0]);
 
       chckArrayFree(array);
    }

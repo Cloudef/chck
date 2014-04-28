@@ -82,6 +82,7 @@ int main(void)
       assert(chckPoolGetAt(pool, 0) == itemA);
       assert(chckPoolGetAt(pool, 1) == itemB);
       assert(chckPoolGetAt(pool, 2) == itemC);
+      assert(chckPoolGetLast(pool) == itemC);
       chckPoolIterCall(pool, printa);
 
       chckPoolFlush(pool);

@@ -101,6 +101,11 @@ void* chckArrayGet(const chckArray *array, chckArrayIndex index)
    return array->buffer[index];
 }
 
+void* chckArrayGetLast(const chckArray *array)
+{
+   return (array->items ? array->buffer[array->items - 1] : NULL);
+}
+
 void* chckArrayAddAt(chckArray *array, const void *item, chckArrayIndex index)
 {
    assert(array && index <= array->items);
