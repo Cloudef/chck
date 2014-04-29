@@ -51,7 +51,7 @@ chckArray* chckArrayNew(size_t growStep, size_t initialItems)
 
 fail:
    chckArrayFree(array);
-   return 0;
+   return NULL;
 }
 
 chckArray* chckArrayNewFromCArray(void *items, size_t memb, size_t growStep)
@@ -68,7 +68,7 @@ chckArray* chckArrayNewFromCArray(void *items, size_t memb, size_t growStep)
 
 fail:
    chckArrayFree(array);
-   return 0;
+   return NULL;
 }
 
 void chckArrayFree(chckArray *array)
