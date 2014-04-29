@@ -92,6 +92,82 @@ int main(void)
       chckPoolFree(pool);
    }
 
+   /* TEST: iter pool */
+   {
+      chckIterPool *pool = chckIterPoolNew(32, 3, sizeof(struct item));
+      assert(pool != NULL);
+
+      chckPoolIndex a, b, c;
+      chckIterPoolAdd(pool, (&(struct item){1, NULL}), &a);
+      chckIterPoolAdd(pool, NULL, &b);
+      chckIterPoolAdd(pool, NULL, &c);
+
+      assert(a == 0 && b == 1 && c == 2);
+      assert(a != b && b != c && a != c);
+
+      size_t iter = 0;
+      struct item *current;
+      while ((current = chckIterPoolIter(pool, &iter)))
+         assert(current != NULL);
+
+      assert(chckIterPoolCount(pool) == 3);
+      assert(iter == 3);
+      chckIterPoolRemove(pool, b);
+
+      iter = 0;
+      while ((current = chckIterPoolIter(pool, &iter)))
+         assert(current != NULL);
+
+      assert(chckIterPoolCount(pool) == 2);
+      assert(iter == 2);
+
+      chckIterPoolAdd(pool, NULL, NULL);
+
+      iter = 0;
+      while ((current = chckIterPoolIter(pool, &iter)))
+         assert(current != NULL);
+
+      assert(chckIterPoolCount(pool) == 3);
+      assert(iter == 3);
+
+      chckIterPoolRemove(pool, c);
+
+      iter = 0;
+      while ((current = chckIterPoolIter(pool, &iter)))
+         assert(current != NULL);
+
+      assert(chckIterPoolCount(pool) == 2);
+      assert(iter == 2);
+
+      chckIterPoolAdd(pool, NULL, NULL);
+
+      iter = 0;
+      while ((current = chckIterPoolIter(pool, &iter)))
+         assert(current != NULL);
+
+      assert(chckIterPoolCount(pool) == 3);
+      assert(iter == 3);
+
+      struct item *itemA = chckIterPoolGet(pool, a);
+      struct item *itemB = chckIterPoolGet(pool, b);
+      struct item *itemC = chckIterPoolGet(pool, c);
+      itemA->a = 1;
+      itemB->a = 2;
+      itemC->a = 3;
+
+      assert(chckIterPoolGet(pool, 0) == itemA);
+      assert(chckIterPoolGet(pool, 1) == itemB);
+      assert(chckIterPoolGet(pool, 2) == itemC);
+      assert(chckIterPoolGetLast(pool) == itemC);
+      assert(&((struct item*)chckIterPoolToCArray(pool, NULL))[0] == itemA);
+      assert(&((struct item*)chckIterPoolToCArray(pool, NULL))[1] == itemB);
+      assert(&((struct item*)chckIterPoolToCArray(pool, NULL))[2] == itemC);
+      chckIterPoolIterCall(pool, printa);
+
+      chckIterPoolFlush(pool);
+      chckIterPoolFree(pool);
+   }
+
    return EXIT_SUCCESS;
 }
 

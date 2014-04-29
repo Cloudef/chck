@@ -11,11 +11,6 @@ typedef struct _chckPoolBuffer {
    size_t step, used, allocated, count, member;
 } _chckPoolBuffer;
 
-typedef struct _chckPool {
-   _chckPoolBuffer items;
-   _chckPoolBuffer removed;
-} _chckPool;
-
 static int chckPoolBufferResize(_chckPoolBuffer *pb, size_t size)
 {
    void *tmp = NULL;
@@ -38,6 +33,17 @@ static int chckPoolBufferResize(_chckPoolBuffer *pb, size_t size)
    pb->buffer = tmp;
    pb->allocated = size;
    return RETURN_OK;
+}
+
+static void chckPoolBufferInit(_chckPoolBuffer *pb, size_t growStep, size_t capacity, size_t memberSize)
+{
+   assert(memberSize > 0);
+
+   pb->member = memberSize;
+   pb->step = (growStep ? growStep : 32);
+
+   if (capacity > 0)
+      chckPoolBufferResize(pb, capacity * memberSize);
 }
 
 static void chckPoolBufferFlush(_chckPoolBuffer *pb)
@@ -81,6 +87,64 @@ static void chckPoolBufferRemove(_chckPoolBuffer *pb, chckPoolIndex index)
    pb->count--;
 }
 
+static void chckPoolBufferRemoveMove(_chckPoolBuffer *pb, chckPoolIndex index)
+{
+   if (index >= pb->count)
+      return;
+
+   if (index * pb->member + pb->member < pb->used)
+      memmove(pb->buffer + index * pb->member, pb->buffer + (index + 1) * pb->member, pb->used - (index + 1) * pb->member);
+
+   pb->used -= pb->member;
+
+   if (pb->used + pb->member * pb->step < pb->allocated)
+      chckPoolBufferResize(pb, pb->allocated - pb->member * pb->step);
+
+   pb->count--;
+}
+
+static void* chckPoolBufferIter(const _chckPoolBuffer *pb, size_t *iter)
+{
+   assert(iter);
+
+   if (*iter >= pb->count)
+      return NULL;
+
+   return pb->buffer + (*iter)++ * pb->member;
+}
+
+static int chckPoolBufferSetCArray(_chckPoolBuffer *pb, void *items, size_t memb)
+{
+   void *copy = NULL;
+
+   if (items && memb > 0) {
+      if (!(copy = calloc(memb, pb->member)))
+         return RETURN_FAIL;
+
+      memcpy(copy, items, pb->member);
+   }
+
+   chckPoolBufferFlush(pb);
+
+   pb->buffer = copy;
+   pb->used = pb->allocated = memb * pb->member;
+   pb->count = memb;
+   return RETURN_OK;
+}
+
+static void* chckPoolBufferToCArray(_chckPoolBuffer *pb, size_t *outMemb)
+{
+   if (outMemb)
+      *outMemb = pb->count;
+
+   return pb->buffer;
+}
+
+typedef struct _chckPool {
+   _chckPoolBuffer items;
+   _chckPoolBuffer removed;
+} _chckPool;
+
 static size_t chckPoolGetFreeSlot(chckPool *pool)
 {
    if (pool->removed.count > 0) {
@@ -92,7 +156,7 @@ static size_t chckPoolGetFreeSlot(chckPool *pool)
    return pool->items.used;
 }
 
-chckPool* chckPoolNew(size_t growStep, size_t initialItems, size_t memberSize)
+chckPool* chckPoolNew(size_t growStep, size_t capacity, size_t memberSize)
 {
    chckPool *pool = NULL;
    assert(memberSize > 0);
@@ -103,13 +167,8 @@ chckPool* chckPoolNew(size_t growStep, size_t initialItems, size_t memberSize)
    if (!(pool = calloc(1, sizeof(chckPool))))
       goto fail;
 
-   pool->items.member = memberSize;
-   pool->removed.member = sizeof(chckPoolIndex);
-   pool->removed.step = pool->items.step = (growStep ? growStep : 32);
-
-   if (initialItems > 0)
-      chckPoolBufferResize(&pool->items, initialItems * pool->items.member);
-
+   chckPoolBufferInit(&pool->items, growStep, capacity, memberSize);
+   chckPoolBufferInit(&pool->removed, growStep, 0, sizeof(chckPoolIndex));
    return pool;
 
 fail:
@@ -179,7 +238,7 @@ void chckPoolRemove(chckPool *pool, chckPoolIndex index)
 {
    assert(pool);
 
-   char last = (index == pool->items.count - 1);
+   unsigned char last = (index == pool->items.count - 1);
    chckPoolBufferRemove(&pool->items, index);
 
    if (!last)
@@ -188,57 +247,150 @@ void chckPoolRemove(chckPool *pool, chckPoolIndex index)
 
 void* chckPoolIter(const chckPool *pool, chckPoolIndex *iter)
 {
-   size_t i;
-   char removed;
-   unsigned char *current;
    assert(pool && iter);
 
-   if (*iter >= pool->items.count)
-      return NULL;
+   void *current = NULL;
+   unsigned char removed = (*iter < pool->items.count);
 
-   do {
-      current = pool->items.buffer + *iter * pool->items.member;
+   while (removed) {
+      current = chckPoolBufferIter(&pool->items, iter);
 
+      size_t i;
       for (removed = 0, i = 0; i < pool->removed.count; ++i) {
          chckPoolIndex index = *(chckPoolIndex*)pool->removed.buffer + i * pool->removed.member;
-         if (index != *iter)
+         if (index == *iter - 1)
             continue;
 
          removed = 1;
          break;
       }
-
-      *iter += 1;
-   } while (*iter < pool->items.count && removed);
+   }
 
    return current;
 }
 
 int chckPoolSetCArray(chckPool *pool, void *items, size_t memb)
 {
-   void *copy;
    assert(pool);
 
-   if (!(copy = calloc(memb, pool->items.member)))
+   if (chckPoolBufferSetCArray(&pool->items, items, memb) != RETURN_OK)
       return RETURN_FAIL;
 
-   chckPoolFlush(pool);
-   memcpy(copy, items, pool->items.member);
-
-   pool->items.buffer = copy;
-   pool->items.used = pool->items.allocated = memb * pool->items.member;
-   pool->items.count = memb;
+   chckPoolBufferFlush(&pool->removed);
    return RETURN_OK;
 }
 
 void* chckPoolToCArray(chckPool *pool, size_t *outMemb)
 {
    assert(pool);
+   return chckPoolBufferToCArray(&pool->items, outMemb);
+}
 
-   if (outMemb)
-      *outMemb = pool->items.count;
+typedef struct _chckIterPool {
+   _chckPoolBuffer items;
+} _chckIterPool;
 
-   return pool->items.buffer;
+chckIterPool* chckIterPoolNew(size_t growStep, size_t capacity, size_t memberSize)
+{
+   chckIterPool *pool = NULL;
+   assert(memberSize > 0);
+
+   if (!memberSize)
+      goto fail;
+
+   if (!(pool = calloc(1, sizeof(chckIterPool))))
+      goto fail;
+
+   chckPoolBufferInit(&pool->items, growStep, capacity, memberSize);
+   return pool;
+
+fail:
+   if (pool)
+      chckIterPoolFree(pool);
+   return NULL;
+}
+
+chckIterPool* chckIterPoolNewFromCArray(void *items, size_t memb, size_t growStep, size_t memberSize)
+{
+   chckIterPool *pool;
+
+   if (!(pool = chckIterPoolNew(growStep, 0, memberSize)))
+      return NULL;
+
+   if (!chckIterPoolSetCArray(pool, items, memb))
+      goto fail;
+
+   return pool;
+
+fail:
+   chckIterPoolFree(pool);
+   return NULL;
+}
+
+void chckIterPoolFree(chckIterPool *pool)
+{
+   assert(pool);
+   chckIterPoolFlush(pool);
+   free(pool);
+}
+
+void chckIterPoolFlush(chckIterPool *pool)
+{
+   assert(pool);
+   chckPoolBufferFlush(&pool->items);
+}
+
+size_t chckIterPoolCount(const chckIterPool *pool)
+{
+   assert(pool);
+   return pool->items.count;
+}
+
+void* chckIterPoolGet(const chckIterPool *pool, chckPoolIndex index)
+{
+   if (index >= pool->items.count)
+      return NULL;
+
+   return pool->items.buffer + index * pool->items.member;
+}
+
+void* chckIterPoolGetLast(const chckIterPool *pool)
+{
+   return chckIterPoolGet(pool, pool->items.count - 1);
+}
+
+void* chckIterPoolAdd(chckIterPool *pool, const void *data, chckPoolIndex *outIndex)
+{
+   assert(pool);
+   return chckPoolBufferAdd(&pool->items, data, pool->items.used, outIndex);
+}
+
+void chckIterPoolRemove(chckIterPool *pool, chckPoolIndex index)
+{
+   assert(pool);
+   chckPoolBufferRemoveMove(&pool->items, index);
+}
+
+void* chckIterPoolIter(const chckIterPool *pool, chckPoolIndex *iter)
+{
+   assert(pool && iter);
+   return chckPoolBufferIter(&pool->items, iter);
+}
+
+int chckIterPoolSetCArray(chckIterPool *pool, void *items, size_t memb)
+{
+   assert(pool);
+
+   if (chckPoolBufferSetCArray(&pool->items, items, memb) != RETURN_OK)
+      return RETURN_FAIL;
+
+   return RETURN_OK;
+}
+
+void* chckIterPoolToCArray(chckIterPool *pool, size_t *outMemb)
+{
+   assert(pool);
+   return chckPoolBufferToCArray(&pool->items, outMemb);
 }
 
 /* vim: set ts=8 sw=3 tw=0 :*/
