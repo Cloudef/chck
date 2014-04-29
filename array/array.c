@@ -162,14 +162,17 @@ void* chckArrayIter(const chckArray *array, size_t *iter)
 
 int chckArraySetCArray(chckArray *array, void *items, size_t memb)
 {
-   void **copy;
+   void **copy = NULL;
    assert(array);
 
-   if (!(copy = calloc(memb, sizeof(void*))))
-      return RETURN_FAIL;
+   if (items && memb > 0) {
+      if (!(copy = calloc(memb, sizeof(void*))))
+         return RETURN_FAIL;
+
+      memcpy(copy, items, memb * sizeof(void*));
+   }
 
    chckArrayFlush(array);
-   memcpy(copy, items, memb * sizeof(void*));
 
    array->buffer = copy;
    array->allocated = memb * sizeof(void*);
