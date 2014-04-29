@@ -165,11 +165,10 @@ int chckArraySetCArray(chckArray *array, void *items, size_t memb)
    void **copy;
    assert(array);
 
-   chckArrayFlush(array);
-
    if (!(copy = calloc(memb, sizeof(void*))))
       return RETURN_FAIL;
 
+   chckArrayFlush(array);
    memcpy(copy, items, memb * sizeof(void*));
 
    array->buffer = copy;
