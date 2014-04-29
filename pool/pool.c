@@ -178,8 +178,12 @@ void* chckPoolAdd(chckPool *pool, const void *data, chckPoolIndex *outIndex)
 void chckPoolRemove(chckPool *pool, chckPoolIndex index)
 {
    assert(pool);
+
+   char last = (index == pool->items.count - 1);
    chckPoolBufferRemove(&pool->items, index);
-   chckPoolBufferAdd(&pool->removed, &index, pool->removed.used, NULL);
+
+   if (!last)
+      chckPoolBufferAdd(&pool->removed, &index, pool->removed.used, NULL);
 }
 
 void* chckPoolIter(const chckPool *pool, chckPoolIndex *iter)
