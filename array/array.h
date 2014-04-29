@@ -5,8 +5,8 @@
 #  include <stddef.h> /* for size_t */
 #endif
 
-typedef struct _chckArray chckArray;
 typedef size_t chckArrayIndex;
+typedef struct _chckArray chckArray;
 
 #define chckArrayIterCall(array, function, ...) \
 { size_t i; void *p; for (i = 0; (p = chckArrayIter(array, &i));) function(p, ##__VA_ARGS__); }
