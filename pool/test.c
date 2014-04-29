@@ -18,59 +18,59 @@ int main(void)
 {
    /* TEST: pool */
    {
-
       chckPool *pool = chckPoolNew(32, 3, sizeof(struct item));
       assert(pool != NULL);
 
-      chckPoolItem a = chckPoolAdd(pool, sizeof(struct item));
-      chckPoolItem b = chckPoolAdd(pool, sizeof(struct item));
-      chckPoolItem c = chckPoolAdd(pool, sizeof(struct item));
+      chckPoolIndex a, b, c;
+      chckPoolAdd(pool, (&(struct item){1, NULL}), &a);
+      chckPoolAdd(pool, NULL, &b);
+      chckPoolAdd(pool, NULL, &c);
 
-      assert(a != 0 && b != 0 && c != 0);
+      assert(a == 0 && b == 1 && c == 2);
       assert(a != b && b != c && a != c);
 
       size_t iter = 0;
       struct item *current;
-      while ((current = chckPoolIter(pool, &iter, NULL)))
+      while ((current = chckPoolIter(pool, &iter)))
          assert(current != NULL);
 
       assert(chckPoolCount(pool) == 3);
-      assert(iter == (sizeof(struct item) + 1) * 3);
+      assert(iter == 3);
       chckPoolRemove(pool, b);
 
       iter = 0;
-      while ((current = chckPoolIter(pool, &iter, NULL)))
+      while ((current = chckPoolIter(pool, &iter)))
          assert(current != NULL);
 
       assert(chckPoolCount(pool) == 2);
-      assert(iter == (sizeof(struct item) + 1) * 3);
+      assert(iter == 2);
 
-      chckPoolAdd(pool, sizeof(struct item));
+      chckPoolAdd(pool, NULL, NULL);
 
       iter = 0;
-      while ((current = chckPoolIter(pool, &iter, NULL)))
+      while ((current = chckPoolIter(pool, &iter)))
          assert(current != NULL);
 
       assert(chckPoolCount(pool) == 3);
-      assert(iter == (sizeof(struct item) + 1) * 3);
+      assert(iter == 3);
 
       chckPoolRemove(pool, c);
 
       iter = 0;
-      while ((current = chckPoolIter(pool, &iter, NULL)))
+      while ((current = chckPoolIter(pool, &iter)))
          assert(current != NULL);
 
       assert(chckPoolCount(pool) == 2);
-      assert(iter == (sizeof(struct item) + 1) * 2);
+      assert(iter == 2);
 
-      chckPoolAdd(pool, sizeof(struct item));
+      chckPoolAdd(pool, NULL, NULL);
 
       iter = 0;
-      while ((current = chckPoolIter(pool, &iter, NULL)))
+      while ((current = chckPoolIter(pool, &iter)))
          assert(current != NULL);
 
       assert(chckPoolCount(pool) == 3);
-      assert(iter == (sizeof(struct item) + 1) * 3);
+      assert(iter == 3);
 
       struct item *itemA = chckPoolGet(pool, a);
       struct item *itemB = chckPoolGet(pool, b);
@@ -79,10 +79,13 @@ int main(void)
       itemB->a = 2;
       itemC->a = 3;
 
-      assert(chckPoolGetAt(pool, 0) == itemA);
-      assert(chckPoolGetAt(pool, 1) == itemB);
-      assert(chckPoolGetAt(pool, 2) == itemC);
+      assert(chckPoolGet(pool, 0) == itemA);
+      assert(chckPoolGet(pool, 1) == itemB);
+      assert(chckPoolGet(pool, 2) == itemC);
       assert(chckPoolGetLast(pool) == itemC);
+      assert(&((struct item*)chckPoolToCArray(pool, NULL))[0] == itemA);
+      assert(&((struct item*)chckPoolToCArray(pool, NULL))[1] == itemB);
+      assert(&((struct item*)chckPoolToCArray(pool, NULL))[2] == itemC);
       chckPoolIterCall(pool, printa);
 
       chckPoolFlush(pool);

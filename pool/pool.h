@@ -6,22 +6,23 @@
 #endif
 
 typedef struct _chckPool chckPool;
-typedef size_t chckPoolItem;
+typedef size_t chckPoolIndex;
 
 #define chckPoolIterCall(pool, function, ...) \
-{ size_t i; void *p; for (i = 0; (p = chckPoolIter(pool, &i, NULL));) function(p, ##__VA_ARGS__); }
+{ size_t i; void *p; for (i = 0; (p = chckPoolIter(pool, &i));) function(p, ##__VA_ARGS__); }
 
 chckPool* chckPoolNew(size_t growStep, size_t initialItems, size_t memberSize);
+chckPool* chckPoolNewFromCArray(void *items, size_t memb, size_t growStep, size_t memberSize);
 void chckPoolFree(chckPool *pool);
 void chckPoolFlush(chckPool *pool);
 size_t chckPoolCount(const chckPool *pool);
-void* chckPoolGet(const chckPool *pool, chckPoolItem item);
-void* chckPoolGetAt(const chckPool *pool, size_t index);
+void* chckPoolGet(const chckPool *pool, chckPoolIndex index);
 void* chckPoolGetLast(const chckPool *pool);
-chckPoolItem chckPoolAdd(chckPool *pool, size_t size);
-void* chckPoolAddEx(chckPool *pool, size_t size, chckPoolItem *item);
-void chckPoolRemove(chckPool *pool, chckPoolItem item);
-void* chckPoolIter(const chckPool *pool, size_t *iter, chckPoolItem *item);
+void* chckPoolAdd(chckPool *pool, const void *data, chckPoolIndex *outIndex);
+void chckPoolRemove(chckPool *pool, chckPoolIndex index);
+void* chckPoolIter(const chckPool *pool, chckPoolIndex *iter);
+int chckPoolSetCArray(chckPool *pool, void *items, size_t memb); /* Item *cArray; */
+void* chckPoolToCArray(chckPool *pool, size_t *memb); /* Item *cArray; */
 
 #endif /* __chck_pool__ */
 
