@@ -177,12 +177,12 @@ int chckArraySetCArray(chckArray *array, void *items, size_t memb)
    return RETURN_OK;
 }
 
-void* chckArrayToCArray(chckArray *array, size_t *memb)
+void* chckArrayToCArray(chckArray *array, size_t *outMemb)
 {
    assert(array);
 
-   if (memb)
-      *memb = array->items;
+   if (outMemb)
+      *outMemb = array->items;
 
    return array->buffer;
 }
