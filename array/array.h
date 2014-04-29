@@ -22,9 +22,9 @@ void* chckArrayAdd(chckArray *array, const void *item);
 void* chckArrayAddAt(chckArray *array, const void *item, chckArrayIndex index);
 void chckArrayRemove(chckArray *array, const void *item);
 void chckArrayRemoveAt(chckArray *array, chckArrayIndex index);
-void* chckArrayIter(const chckArray *array, size_t *iter);
-int chckArraySetCArray(chckArray *array, void *item, size_t memb);
-void* chckArrayToCArray(chckArray *array, size_t *memb);
+void* chckArrayIter(const chckArray *array, chckArrayIndex *iter);
+int chckArraySetCArray(chckArray *array, void *items, size_t memb); /* Item **cArray; */
+void* chckArrayToCArray(chckArray *array, size_t *outMemb); /* Item **cArray; */
 
 #endif /* __chck_array__ */
 
