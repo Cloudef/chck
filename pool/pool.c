@@ -113,7 +113,7 @@ static void* chckPoolBufferIter(const _chckPoolBuffer *pb, size_t *iter)
    return pb->buffer + (*iter)++ * pb->member;
 }
 
-static int chckPoolBufferSetCArray(_chckPoolBuffer *pb, void *items, size_t memb)
+static int chckPoolBufferSetCArray(_chckPoolBuffer *pb, const void *items, size_t memb)
 {
    void *copy = NULL;
 
@@ -177,7 +177,7 @@ fail:
    return NULL;
 }
 
-chckPool* chckPoolNewFromCArray(void *items, size_t memb, size_t growStep, size_t memberSize)
+chckPool* chckPoolNewFromCArray(const void *items, size_t memb, size_t growStep, size_t memberSize)
 {
    chckPool *pool;
 
@@ -269,7 +269,7 @@ void* chckPoolIter(const chckPool *pool, chckPoolIndex *iter)
    return current;
 }
 
-int chckPoolSetCArray(chckPool *pool, void *items, size_t memb)
+int chckPoolSetCArray(chckPool *pool, const void *items, size_t memb)
 {
    assert(pool);
 
@@ -310,7 +310,7 @@ fail:
    return NULL;
 }
 
-chckIterPool* chckIterPoolNewFromCArray(void *items, size_t memb, size_t growStep, size_t memberSize)
+chckIterPool* chckIterPoolNewFromCArray(const void *items, size_t memb, size_t growStep, size_t memberSize)
 {
    chckIterPool *pool;
 
@@ -377,7 +377,7 @@ void* chckIterPoolIter(const chckIterPool *pool, chckPoolIndex *iter)
    return chckPoolBufferIter(&pool->items, iter);
 }
 
-int chckIterPoolSetCArray(chckIterPool *pool, void *items, size_t memb)
+int chckIterPoolSetCArray(chckIterPool *pool, const void *items, size_t memb)
 {
    assert(pool);
 
