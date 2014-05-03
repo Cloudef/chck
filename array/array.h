@@ -9,7 +9,7 @@ typedef size_t chckArrayIndex;
 typedef struct _chckArray chckArray;
 
 #define chckArrayIterCall(array, function, ...) \
-{ size_t i; void *p; for (i = 0; (p = chckArrayIter(array, &i));) function(p, ##__VA_ARGS__); }
+{ chckArrayIndex i; void *p; for (i = 0; (p = chckArrayIter(array, &i));) function(p, ##__VA_ARGS__); }
 
 chckArray* chckArrayNew(size_t growStep, size_t initialItems);
 chckArray* chckArrayNewFromCArray(void *items, size_t memb, size_t growStep);

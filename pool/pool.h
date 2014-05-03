@@ -17,7 +17,7 @@ typedef struct _chckIterPool chckIterPool;
  */
 
 #define chckPoolIterCall(pool, function, ...) \
-{ size_t i; void *p; for (i = 0; (p = chckPoolIter(pool, &i));) function(p, ##__VA_ARGS__); }
+{ chckPoolIndex i; void *p; for (i = 0; (p = chckPoolIter(pool, &i));) function(p, ##__VA_ARGS__); }
 
 chckPool* chckPoolNew(size_t growStep, size_t capacity, size_t memberSize);
 chckPool* chckPoolNewFromCArray(void *items, size_t memb, size_t growStep, size_t memberSize);
@@ -41,7 +41,7 @@ void* chckPoolToCArray(chckPool *pool, size_t *memb); /* Item *cArray; */
  */
 
 #define chckIterPoolIterCall(pool, function, ...) \
-{ size_t i; void *p; for (i = 0; (p = chckIterPoolIter(pool, &i));) function(p, ##__VA_ARGS__); }
+{ chckPoolIndex i; void *p; for (i = 0; (p = chckIterPoolIter(pool, &i));) function(p, ##__VA_ARGS__); }
 
 chckIterPool* chckIterPoolNew(size_t growStep, size_t capacity, size_t memberSize);
 chckIterPool* chckIterPoolNewFromCArray(void *items, size_t memb, size_t growStep, size_t memberSize);
