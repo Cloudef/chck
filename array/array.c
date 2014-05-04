@@ -109,7 +109,7 @@ void* chckArrayAddAt(chckArray *array, const void *item, chckArrayIndex index)
 {
    assert(array && index <= array->items);
 
-   if (array->allocated < index && chckArrayResize(array, array->allocated + array->step) != RETURN_OK)
+   if (array->allocated <= index && chckArrayResize(array, array->allocated + array->step) != RETURN_OK)
       return NULL;
 
    if (index >= array->items)
@@ -128,8 +128,8 @@ void chckArrayRemoveAt(chckArray *array, chckArrayIndex index)
 {
    assert(array && index <= array->items);
 
-   if (index < array->items)
-      memmove(&array->buffer[index], &array->buffer[index + 1], array->items - index);
+   if (index < array->items - 1)
+      memmove(&array->buffer[index], &array->buffer[index + 1], (array->items - index) * sizeof(void*));
 
    array->items--;
 }
