@@ -59,8 +59,11 @@ static void* chckPoolBufferAdd(_chckPoolBuffer *pb, const void *data, size_t pos
    if (pb->allocated < pos + pb->member && chckPoolBufferResize(pb, pb->allocated + pb->member * pb->step) != RETURN_OK)
       return NULL;
 
-   if (data)
+   if (data) {
       memcpy(pb->buffer + pos, data, pb->member);
+   } else {
+      memset(pb->buffer + pos, 0, pb->member);
+   }
 
    if (pos + pb->member > pb->used)
       pb->used = pos + pb->member;
