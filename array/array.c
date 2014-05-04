@@ -29,7 +29,6 @@ static int chckArrayResize(chckArray *array, size_t newItems)
       }
    }
 
-   memset(tmp + array->allocated, 0, newItems * sizeof(void*));
    array->buffer = tmp;
    array->allocated = newItems;
    return RETURN_OK;
