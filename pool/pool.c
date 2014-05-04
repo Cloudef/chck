@@ -29,7 +29,6 @@ static int chckPoolBufferResize(_chckPoolBuffer *pb, size_t size)
       }
    }
 
-   memset(tmp + pb->allocated, 0, size);
    pb->buffer = tmp;
    pb->allocated = size;
    return RETURN_OK;
