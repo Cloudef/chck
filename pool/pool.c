@@ -123,7 +123,7 @@ static int chckPoolBufferSetCArray(_chckPoolBuffer *pb, const void *items, size_
       if (!(copy = calloc(memb, pb->member)))
          return RETURN_FAIL;
 
-      memcpy(copy, items, pb->member);
+      memcpy(copy, items, memb * pb->member);
    }
 
    chckPoolBufferFlush(pb);
