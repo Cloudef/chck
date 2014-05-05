@@ -17,7 +17,7 @@ SET(LIBDEF "") # compile defines
 SET(LIBPUB "") # public headers
 
 # C++ interface
-SET(json_TEST "jsonpp-test.cpp")
+# SET(json_TEST "jsonpp-test.cpp")
 
 # Optional features
 FIND_PACKAGE(ZLIB)
