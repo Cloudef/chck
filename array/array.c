@@ -126,19 +126,20 @@ void* chckArrayAdd(chckArray *array, const void *item)
 
 void chckArrayRemoveAt(chckArray *array, chckArrayIndex index)
 {
-   assert(array && index <= array->items);
+   assert(array && index < array->items);
 
-   if (index < array->items - 1)
-      memmove(&array->buffer[index], &array->buffer[index + 1], (array->items - index) * sizeof(void*));
+   if (index + 1 < array->items)
+      memmove(&array->buffer[index], &array->buffer[index+ 1], (array->items - (index + 1)) * sizeof(void*));
 
-   array->items--;
+   if (--array->items <= 0)
+      chckArrayFlush(array);
 }
 
 void chckArrayRemove(chckArray *array, const void *item)
 {
    assert(array && item);
 
-   size_t iter;
+   chckArrayIndex iter;
    void *current;
    for (iter = 0; (current = chckArrayIter(array, &iter));) {
       if (current != item)
@@ -149,7 +150,7 @@ void chckArrayRemove(chckArray *array, const void *item)
    }
 }
 
-void* chckArrayIter(const chckArray *array, size_t *iter)
+void* chckArrayIter(const chckArray *array, chckArrayIndex *iter)
 {
    assert(array && iter);
 
@@ -174,8 +175,7 @@ int chckArraySetCArray(chckArray *array, void *items, size_t memb)
    chckArrayFlush(array);
 
    array->buffer = copy;
-   array->allocated = memb * sizeof(void*);
-   array->items = memb;
+   array->items = array->allocated = memb;
    return RETURN_OK;
 }
 
