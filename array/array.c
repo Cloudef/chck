@@ -1,5 +1,4 @@
 #include "array.h"
-#include <stdio.h> /* for fprintf */
 #include <stdlib.h> /* for calloc, free, etc.. */
 #include <string.h> /* for memcpy/memset */
 #include <assert.h> /* for assert */
