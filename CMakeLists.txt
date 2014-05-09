@@ -9,7 +9,7 @@ SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY lib)
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY lib)
 
 # Sources
-SET(SOURCE buffer sjis fs json pool array)
+SET(SOURCE buffer sjis fs json pool array lut)
 SET(LIBSRC "") # sources to be compiled
 SET(LIBINC "") # include directories
 SET(LIBLIB "") # libraries to be linked
