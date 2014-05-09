@@ -22,7 +22,7 @@ static unsigned int hashint(unsigned int a)
    return a;
 }
 
-unsigned int hashstr(const char *str)
+static unsigned int hashstr(const char *str)
 {
    int c;
    unsigned int hash = 5381;
@@ -148,6 +148,32 @@ static struct _chckHashItem* chckHashTableCopyItem(chckHashTable *table, const s
    return copy;
 }
 
+static void chckHashTableSetIndex(chckHashTable *table, unsigned int index, struct _chckHashItem *newItem)
+{
+   assert(table);
+
+   struct _chckHashItem *item = chckLutGetIndex(table->lut, index);
+   struct _chckHashItem *first = item, *prev = item;
+   for (; item && item->key != newItem->key; item = item->next) prev = item;
+
+   if (item && item->data) {
+      if (newItem->data) {
+         void *next = item->next;
+         memcpy(item, newItem, sizeof(struct _chckHashItem));
+         item->next = next;
+      } else if (item != first) {
+         free(prev->next);
+         prev->next = NULL;
+      } else {
+         chckLutSetIndex(table->lut, index, NULL);
+      }
+   } else if (newItem->data && (item = prev) && item->data) {
+      item->next = chckHashTableCopyItem(table, newItem);
+   } else if (newItem->data) {
+      chckLutSetIndex(table->lut, index, newItem);
+   }
+}
+
 chckHashTable* chckHashTableNew(size_t size)
 {
    chckHashTable *table = NULL;
@@ -193,32 +219,6 @@ void chckHashTableFlush(chckHashTable *table)
    }
 
    chckLutFlush(table->lut);
-}
-
-void chckHashTableSetIndex(chckHashTable *table, unsigned int index, struct _chckHashItem *newItem)
-{
-   assert(table);
-
-   struct _chckHashItem *item = chckLutGetIndex(table->lut, index);
-   struct _chckHashItem *first = item, *prev = item;
-   for (; item && item->key != newItem->key; item = item->next) prev = item;
-
-   if (item && item->data) {
-      if (newItem->data) {
-         void *next = item->next;
-         memcpy(item, newItem, sizeof(struct _chckHashItem));
-         item->next = next;
-      } else if (item != first) {
-         free(prev->next);
-         prev->next = NULL;
-      } else {
-         chckLutSetIndex(table->lut, index, NULL);
-      }
-   } else if (newItem->data && (item = prev) && item->data) {
-      item->next = chckHashTableCopyItem(table, newItem);
-   } else if (newItem->data) {
-      chckLutSetIndex(table->lut, index, newItem);
-   }
 }
 
 void chckHashTableSet(chckHashTable *table, unsigned int key, const void *data)
