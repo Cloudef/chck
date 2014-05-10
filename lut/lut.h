@@ -26,8 +26,7 @@ void chckLutStrSet(chckLut *lut, const char *str, const void *data);
 void* chckLutIter(chckLut *lut, size_t *iter);
 
 /**
- * HashTables are wrappers around LUTs.
- * Collisions are avoided with the Set/Get functions, however StrSet/StrGet may collide since the key for those is hash.
+ * HashTables are wrappers around LUTs that does not have collisions.
  * Due to simplicity of implementation, you can not iterate HashTable.
  */
 
