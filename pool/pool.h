@@ -60,19 +60,21 @@ void* chckIterPoolToCArray(chckIterPool *pool, size_t *memb); /* Item *cArray; *
 /**
  * RingPools are circular pools.
  * You push items to them and the pool grows as needed.
- * When you pop item, the internal index moves forward or wraps around if hit the last item.
+ * You can push and pop to/from both sides.
  */
 
 #define chckRingPoolIterCall(pool, function, ...) \
 { chckPoolIndex i; void *p; for (i = 0; (p = chckRingPoolIter(pool, &i));) function(p, ##__VA_ARGS__); }
 
 chckRingPool* chckRingPoolNew(size_t growStep, size_t capacity, size_t memberSize);
-chckIterPool* chckRingPoolNewFromCArray(const void *items, size_t memb, size_t growStep, size_t memberSize);
+chckRingPool* chckRingPoolNewFromCArray(const void *items, size_t memb, size_t growStep, size_t memberSize);
 void chckRingPoolFree(chckRingPool *pool);
 void chckRingPoolFlush(chckRingPool *pool);
 size_t chckRingPoolCount(const chckRingPool *pool);
-void* chckRingPoolPush(chckRingPool *pool, const void *data);
-void* chckRingPoolPop(chckRingPool *pool);
+void* chckRingPoolPushFront(chckRingPool *pool, const void *data);
+void* chckRingPoolPushEnd(chckRingPool *pool, const void *data);
+void* chckRingPoolPopFirst(chckRingPool *pool);
+void* chckRingPoolPopLast(chckRingPool *pool);
 void* chckRingPoolIter(const chckRingPool *pool, chckPoolIndex *iter);
 int chckRingPoolSetCArray(chckRingPool *pool, const void *items, size_t memb); /* Item *cArray; */
 void* chckRingPoolToCArray(chckRingPool *pool, size_t *memb); /* Item *cArray; */

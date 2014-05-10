@@ -174,9 +174,9 @@ int main(void)
       assert(pool != NULL);
 
       void *a, *b, *c;
-      a = chckRingPoolPush(pool, (&(struct item){1, NULL}));
-      b = chckRingPoolPush(pool, NULL);
-      c = chckRingPoolPush(pool, NULL);
+      a = chckRingPoolPushEnd(pool, (&(struct item){1, NULL}));
+      b = chckRingPoolPushEnd(pool, (&(struct item){2, NULL}));
+      c = chckRingPoolPushEnd(pool, (&(struct item){3, NULL}));
 
       assert(a != NULL && b != NULL && c != NULL);
       assert(a != b && b != c && a != c);
@@ -189,7 +189,7 @@ int main(void)
       assert(chckRingPoolCount(pool) == 3);
       assert(iter == 3);
 
-      assert(chckRingPoolPop(pool) == a);
+      assert(((struct item*)chckRingPoolPopFirst(pool))->a == 1);
 
       iter = 0;
       while ((current = chckRingPoolIter(pool, &iter)))
@@ -198,7 +198,7 @@ int main(void)
       assert(chckRingPoolCount(pool) == 2);
       assert(iter == 2);
 
-      chckRingPoolPush(pool, NULL);
+      chckRingPoolPushFront(pool, NULL);
 
       iter = 0;
       while ((current = chckRingPoolIter(pool, &iter)))
@@ -207,7 +207,7 @@ int main(void)
       assert(chckRingPoolCount(pool) == 3);
       assert(iter == 3);
 
-      assert(chckRingPoolPop(pool) == b);
+      assert(((struct item*)chckRingPoolPopLast(pool))->a == 3);
 
       iter = 0;
       while ((current = chckRingPoolIter(pool, &iter)))
@@ -216,7 +216,7 @@ int main(void)
       assert(chckRingPoolCount(pool) == 2);
       assert(iter == 2);
 
-      chckRingPoolPush(pool, NULL);
+      chckRingPoolPushEnd(pool, NULL);
 
       iter = 0;
       while ((current = chckRingPoolIter(pool, &iter)))
@@ -225,18 +225,20 @@ int main(void)
       assert(chckRingPoolCount(pool) == 3);
       assert(iter == 3);
 
-      iter = 0;
-      while ((current = chckRingPoolIter(pool, &iter)))
-         current->a = iter;
+      chckRingPoolFlush(pool);
 
-      assert(((struct item*)chckRingPoolToCArray(pool, NULL))[0].a == 1);
-      assert(((struct item*)chckRingPoolToCArray(pool, NULL))[1].a == 2);
-      assert(((struct item*)chckRingPoolToCArray(pool, NULL))[2].a == 3);
+      chckRingPoolPushEnd(pool, (&(struct item){1, NULL}));
+      chckRingPoolPushFront(pool, (&(struct item){3, NULL}));
+      chckRingPoolPushEnd(pool, (&(struct item){2, NULL}));
+
+      assert(((struct item*)chckRingPoolToCArray(pool, NULL))[0].a == 3);
+      assert(((struct item*)chckRingPoolToCArray(pool, NULL))[1].a == 1);
+      assert(((struct item*)chckRingPoolToCArray(pool, NULL))[2].a == 2);
       chckRingPoolIterCall(pool, printa);
 
-      assert(((struct item*)chckRingPoolPop(pool))->a == 3);
-      assert(((struct item*)chckRingPoolPop(pool))->a == 1);
-      assert(((struct item*)chckRingPoolPop(pool))->a == 2);
+      assert(((struct item*)chckRingPoolPopLast(pool))->a == 2);
+      assert(((struct item*)chckRingPoolPopFirst(pool))->a == 3);
+      assert(((struct item*)chckRingPoolPopLast(pool))->a == 1);
 
       chckRingPoolFlush(pool);
       chckRingPoolFree(pool);

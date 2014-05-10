@@ -82,10 +82,10 @@ static void chckPoolBufferRemove(_chckPoolBuffer *pb, chckPoolIndex index)
    if (index * pb->member + pb->member >= pb->used)
       pb->used -= pb->member;
 
+   pb->count--;
+
    if (pb->used + pb->member * pb->step < pb->allocated)
       chckPoolBufferResize(pb, pb->allocated - pb->member * pb->step);
-
-   pb->count--;
 }
 
 static void chckPoolBufferRemoveMove(_chckPoolBuffer *pb, chckPoolIndex index)
@@ -97,11 +97,10 @@ static void chckPoolBufferRemoveMove(_chckPoolBuffer *pb, chckPoolIndex index)
       memmove(pb->buffer + index * pb->member, pb->buffer + (index + 1) * pb->member, pb->used - (index + 1) * pb->member);
 
    pb->used -= pb->member;
+   pb->count--;
 
    if (pb->used + pb->member * pb->step < pb->allocated)
       chckPoolBufferResize(pb, pb->allocated - pb->member * pb->step);
-
-   pb->count--;
 }
 
 static void* chckPoolBufferIter(const _chckPoolBuffer *pb, size_t *iter)
@@ -136,7 +135,7 @@ static int chckPoolBufferSetCArray(_chckPoolBuffer *pb, const void *items, size_
 static void* chckPoolBufferToCArray(_chckPoolBuffer *pb, size_t *outMemb)
 {
    if (outMemb)
-      *outMemb = pb->count;
+      *outMemb = (pb->used / pb->member);
 
    return pb->buffer;
 }
@@ -396,7 +395,7 @@ void* chckIterPoolToCArray(chckIterPool *pool, size_t *outMemb)
 
 typedef struct _chckRingPool {
    _chckPoolBuffer items;
-   chckPoolIndex index;
+   void *popped;
 } _chckRingPool;
 
 chckRingPool* chckRingPoolNew(size_t growStep, size_t capacity, size_t memberSize)
@@ -408,6 +407,9 @@ chckRingPool* chckRingPoolNew(size_t growStep, size_t capacity, size_t memberSiz
       goto fail;
 
    if (!(pool = calloc(1, sizeof(chckRingPool))))
+      goto fail;
+
+   if (!(pool->popped = calloc(1, memberSize)))
       goto fail;
 
    chckPoolBufferInit(&pool->items, growStep, capacity, memberSize);
@@ -440,6 +442,10 @@ void chckRingPoolFree(chckRingPool *pool)
 {
    assert(pool);
    chckRingPoolFlush(pool);
+
+   if (pool->popped)
+      free(pool->popped);
+
    free(pool);
 }
 
@@ -455,24 +461,55 @@ size_t chckRingPoolCount(const chckRingPool *pool)
    return pool->items.count;
 }
 
-void* chckRingPoolPush(chckRingPool *pool, const void *data)
+void* chckRingPoolPushFront(chckRingPool *pool, const void *data)
+{
+   assert(pool);
+
+   void *ptr = chckPoolBufferAdd(&pool->items, NULL, pool->items.used, NULL);
+
+   if (pool->items.used > pool->items.member) {
+      memmove(pool->items.buffer + pool->items.member, pool->items.buffer, pool->items.used - pool->items.member);
+      ptr = pool->items.buffer;
+
+      if (data) {
+         memcpy(ptr, data, pool->items.member);
+      } else {
+         memset(ptr, 0, pool->items.member);
+      }
+   }
+
+   return ptr;
+}
+
+void* chckRingPoolPushEnd(chckRingPool *pool, const void *data)
 {
    assert(pool);
    return chckPoolBufferAdd(&pool->items, data, pool->items.used, NULL);
 }
 
-void* chckRingPoolPop(chckRingPool *pool)
+void* chckRingPoolPopFirst(chckRingPool *pool)
 {
    assert(pool);
 
    if (pool->items.count <= 0)
       return NULL;
 
-   void *ptr = pool->items.buffer + pool->index * pool->items.member;
-   pool->index = (pool->index + 1) % pool->items.count;
-   pool->items.used -= pool->items.member;
-   pool->items.count -= 1;
-   return ptr;
+   memcpy(pool->popped, pool->items.buffer, pool->items.member);
+   chckPoolBufferRemoveMove(&pool->items, 0);
+   return pool->popped;
+}
+
+void* chckRingPoolPopLast(chckRingPool *pool)
+{
+   assert(pool);
+
+   if (pool->items.count <= 0)
+      return NULL;
+
+   void *ptr = pool->items.buffer + pool->items.used - pool->items.member;
+   memcpy(pool->popped, ptr, pool->items.member);
+   chckPoolBufferRemoveMove(&pool->items, pool->items.count - 1);
+   return pool->popped;
 }
 
 void* chckRingPoolIter(const chckRingPool *pool, chckPoolIndex *iter)
