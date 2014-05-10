@@ -67,7 +67,7 @@ void* chckIterPoolToCArray(chckIterPool *pool, size_t *memb); /* Item *cArray; *
 { chckPoolIndex i; void *p; for (i = 0; (p = chckRingPoolIter(pool, &i));) function(p, ##__VA_ARGS__); }
 
 chckRingPool* chckRingPoolNew(size_t growStep, size_t capacity, size_t memberSize);
-chckIterPool* chckRingPoolNewFroMCArray(const void *items, size_t memb, size_t growStep, size_t memberSize);
+chckIterPool* chckRingPoolNewFromCArray(const void *items, size_t memb, size_t growStep, size_t memberSize);
 void chckRingPoolFree(chckRingPool *pool);
 void chckRingPoolFlush(chckRingPool *pool);
 size_t chckRingPoolCount(const chckRingPool *pool);
