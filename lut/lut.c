@@ -30,6 +30,18 @@ static unsigned int hashstr(const char *str)
    return hash;
 }
 
+static char* chckStrdup(const char *str)
+{
+   char *cpy;
+   size_t size = strlen(str);
+
+   if (!(cpy = calloc(1, size + 1)))
+      return NULL;
+
+   memcpy(cpy, str, size);
+   return cpy;
+}
+
 static void* chckLutGetIndex(chckLut *lut, unsigned int index)
 {
    return lut->table + index * lut->member;
@@ -127,8 +139,10 @@ void* chckLutIter(chckLut *lut, size_t *iter)
 }
 
 struct _chckHashItem {
-   const void *data;
-   unsigned int key;
+   void *data;
+   size_t size;
+   char *strKey;
+   unsigned int uintKey;
    struct _chckHashItem *next;
 };
 
@@ -148,30 +162,77 @@ static struct _chckHashItem* chckHashTableCopyItem(chckHashTable *table, const s
    return copy;
 }
 
-static void chckHashTableSetIndex(chckHashTable *table, unsigned int index, struct _chckHashItem *newItem)
+static void chckHashItemFree(struct _chckHashItem *item, int freeSelf)
 {
-   assert(table);
+   if (item->size > 0 && item->data)
+      free(item->data);
+
+   if (item->strKey)
+      free(item->strKey);
+
+   if (freeSelf)
+      free(item);
+}
+
+static int chckHashTableSetIndex(chckHashTable *table, unsigned int index, struct _chckHashItem *newItem)
+{
+   assert(table && newItem);
+
+   if (newItem->size > 0) {
+      void *old = newItem->data;
+
+      if (!(newItem->data = malloc(newItem->size)))
+         goto fail;
+
+      memcpy(newItem->data, old, newItem->size);
+   }
 
    struct _chckHashItem *item = chckLutGetIndex(table->lut, index);
    struct _chckHashItem *first = item, *prev = item;
-   for (; item && item->key != newItem->key; item = item->next) prev = item;
+
+   if (item->strKey) {
+      for (; item && (!item->strKey || strcmp(item->strKey, newItem->strKey)); item = item->next) prev = item;
+   } else {
+      for (; item && (item->strKey || item->uintKey != newItem->uintKey); item = item->next) prev = item;
+   }
 
    if (item && item->data) {
-      if (newItem->data) {
-         void *next = item->next;
-         memcpy(item, newItem, sizeof(struct _chckHashItem));
-         item->next = next;
-      } else if (item != first) {
-         free(prev->next);
-         prev->next = NULL;
+      struct _chckHashItem *next = item->next;
+      chckHashItemFree(item, (item != first));
+
+      if (item != first) {
+         if (newItem->data) {
+            /* replace collision in list */
+            if (!(prev->next = chckHashTableCopyItem(table, newItem)))
+               goto fail;
+         } else {
+            /* remove collision from list */
+            prev->next = next;
+         }
       } else {
-         chckLutSetIndex(table->lut, index, NULL);
+         if (newItem->data) {
+            /* memcpy pure item (not a collision) */
+            memcpy(item, newItem, sizeof(struct _chckHashItem));
+            item->next = next;
+         } else {
+            /* remove item */
+            chckLutSetIndex(table->lut, index, NULL);
+         }
       }
    } else if (newItem->data && (item = prev) && item->data) {
-      item->next = chckHashTableCopyItem(table, newItem);
+      /* add collision to list */
+      if (!(item->next = chckHashTableCopyItem(table, newItem)))
+         goto fail;
    } else if (newItem->data) {
+      /* add pure item to list (not a collision) */
       chckLutSetIndex(table->lut, index, newItem);
    }
+
+   return RETURN_OK;
+
+fail:
+   chckHashItemFree(newItem, 0);
+   return RETURN_FAIL;
 }
 
 chckHashTable* chckHashTableNew(size_t size)
@@ -211,58 +272,67 @@ void chckHashTableFlush(chckHashTable *table)
    assert(table);
 
    while ((item = chckLutIter(table->lut, &iter))) {
-      struct _chckHashItem *next;
-      for (item = item->next; item; item = next) {
+      struct _chckHashItem *next = item->next;
+      chckHashItemFree(item, 0);
+      for (item = next; item; item = next) {
          next = item->next;
-         free(item);
+         chckHashItemFree(item, 1);
       }
    }
 
    chckLutFlush(table->lut);
 }
 
-void chckHashTableSet(chckHashTable *table, unsigned int key, const void *data)
+int chckHashTableSet(chckHashTable *table, unsigned int key, const void *data, size_t member)
 {
    assert(table);
 
    struct _chckHashItem newItem = {
-      .data = data,
-      .key = key,
+      .data = (void*)data,
+      .size = member,
+      .strKey = NULL,
+      .uintKey = key,
       .next = NULL
    };
 
-   chckHashTableSetIndex(table, hashint(key) & (table->lut->size - 1), &newItem);
+   return chckHashTableSetIndex(table, hashint(key) & (table->lut->size - 1), &newItem);
 }
 
-void chckHashTableStrSet(chckHashTable *table, const char *str, const void *data)
+int chckHashTableStrSet(chckHashTable *table, const char *str, const void *data, size_t member)
 {
-   assert(table);
+   assert(table && str);
+
+   char *copy;
+
+   if (!(copy = chckStrdup(str)))
+      return RETURN_FAIL;
 
    unsigned int key = hashstr(str);
 
    struct _chckHashItem newItem = {
-      .data = data,
-      .key = key,
+      .data = (void*)data,
+      .size = member,
+      .strKey = copy,
+      .uintKey = -1,
       .next = NULL
    };
 
-   chckHashTableSetIndex(table, key & (table->lut->size - 1), &newItem);
+   return chckHashTableSetIndex(table, key & (table->lut->size - 1), &newItem);
 }
 
 void* chckHashTableGet(chckHashTable *table, unsigned int key)
 {
    assert(table);
    struct _chckHashItem *item = chckLutGet(table->lut, key);
-   for (; item && item->key != key; item = item->next);
+   for (; item && (item->strKey || item->uintKey != key); item = item->next);
    return (item ? (void*)item->data : NULL);
 }
 
 void* chckHashTableStrGet(chckHashTable *table, const char *str)
 {
-   assert(table);
-   unsigned int key = hashstr(str);
-   struct _chckHashItem *item = chckLutGetIndex(table->lut, key & (table->lut->size - 1));
-   for (; item && item->key != key; item = item->next);
+   assert(table && str);
+   struct _chckHashItem *item = chckLutStrGet(table->lut, str);
+   for (; item && (!item->strKey || strcmp(item->strKey, str)); item = item->next);
    return (item ? (void*)item->data : NULL);
 }
 

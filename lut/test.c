@@ -57,9 +57,9 @@ int main(void)
       const char *s1 = "(1) penguin";
       const char *s2 = "(2) ismo";
 
-      chckHashTableSet(table, 0, s0);
-      chckHashTableSet(table, 1, s1);
-      chckHashTableSet(table, 2, s2);
+      chckHashTableSet(table, 0, s0, 0);
+      chckHashTableSet(table, 1, s1, 0);
+      chckHashTableSet(table, 2, s2, 0);
 
       assert(chckHashTableGet(table, 0) == s0);
       assert(chckHashTableGet(table, 1) == s1);
@@ -67,21 +67,21 @@ int main(void)
 
       unsigned int i;
       for (i = 0; i < 10000 * 10; ++i)
-         chckHashTableSet(table, i, ((i % 3) == 0 ? s0 : ((i % 2) == 0 ? s1 : s2)));
+         chckHashTableSet(table, i, &i, sizeof(unsigned int));
       for (i = 0; i < 10000 * 10; ++i)
-         assert(chckHashTableGet(table, i) == ((i % 3) == 0 ? s0 : ((i % 2) == 0 ? s1 : s2)));
+         assert(*(unsigned int*)chckHashTableGet(table, i) == i);
 
       chckHashTableFlush(table);
 
-      chckHashTableStrSet(table, "s0", s0);
-      chckHashTableStrSet(table, "s1", s1);
-      chckHashTableStrSet(table, "s2", s2);
+      chckHashTableStrSet(table, "s0", s0, 0);
+      chckHashTableStrSet(table, "s1", s1, 0);
+      chckHashTableStrSet(table, "s2", s2, 0);
 
       assert(chckHashTableStrGet(table, "s0") == s0);
       assert(chckHashTableStrGet(table, "s1") == s1);
       assert(chckHashTableStrGet(table, "s2") == s2);
 
-      chckHashTableStrSet(table, "s0", s1);
+      chckHashTableStrSet(table, "s0", s1, 0);
       assert(chckHashTableStrGet(table, "s0") == s1);
 
       chckHashTableFree(table);

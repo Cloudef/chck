@@ -27,7 +27,6 @@ void* chckLutIter(chckLut *lut, size_t *iter);
 
 /**
  * HashTables are wrappers around LUTs.
- * HashTables stores data using const pointers (and internally in linked list struct inside LUT), thus references are not copied.
  * Collisions are avoided with the Set/Get functions, however StrSet/StrGet may collide since the key for those is hash.
  * Due to simplicity of implementation, you can not iterate HashTable.
  */
@@ -35,8 +34,8 @@ void* chckLutIter(chckLut *lut, size_t *iter);
 chckHashTable* chckHashTableNew(size_t size);
 void chckHashTableFree(chckHashTable *table);
 void chckHashTableFlush(chckHashTable *table);
-void chckHashTableSet(chckHashTable *table, unsigned int key, const void *data);
-void chckHashTableStrSet(chckHashTable *table, const char *str, const void *data);
+int chckHashTableSet(chckHashTable *table, unsigned int key, const void *data, size_t member);
+int chckHashTableStrSet(chckHashTable *table, const char *str, const void *data, size_t member);
 void* chckHashTableGet(chckHashTable *table, unsigned int key);
 void* chckHashTableStrGet(chckHashTable *table, const char *str);
 
