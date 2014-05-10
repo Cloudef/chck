@@ -33,7 +33,18 @@ namespace json
          }
       };
 
-      static Value object(std::unordered_map<std::string, Value> properties = {})
+      /**
+       * static Value object(std::unordered_map<std::string, Value> properties = {})
+       * ^ Broken in GCC 4.9
+       * Most likely a regression, workaround by method overloading
+       */
+
+      static Value object()
+      {
+         return Value(chckJsonNew(CHCK_JSON_TYPE_OBJECT));
+      }
+
+      static Value object(std::unordered_map<std::string, Value> properties)
       {
          Value v(chckJsonNew(CHCK_JSON_TYPE_OBJECT));
          for(std::pair<std::string const, Value> const& prop : properties)
