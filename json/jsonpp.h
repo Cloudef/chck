@@ -2,6 +2,7 @@
 #define JSONPP_H
 
 #include "json.h"
+#include <cstdlib>
 #include <string>
 #include <vector>
 #include <stdexcept>
