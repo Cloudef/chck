@@ -150,10 +150,39 @@ typedef struct _chckHashTable {
    struct _chckLut *lut;
 } _chckHashTable;
 
-static struct _chckHashItem* chckHashTableCopyItem(chckHashTable *table, const struct _chckHashItem *item)
+static int chckHashItemInit(struct _chckHashItem *item, const char *strKey, unsigned int uintKey, const void *data, size_t member)
+{
+   void *dataCopy = NULL, *strCopy = NULL;
+
+   if (data && member > 0) {
+      if (!(dataCopy = malloc(member)))
+         goto fail;
+
+      memcpy(dataCopy, data, member);
+   }
+
+   if (strKey && !(strCopy = chckStrdup(strKey)))
+      goto fail;
+
+   memset(item, 0, sizeof(struct _chckHashItem));
+   item->data = (member > 0 ? dataCopy : (void*)data);
+   item->size = member;
+   item->uintKey = uintKey;
+   item->strKey = strCopy;
+   return RETURN_OK;
+
+fail:
+   if (dataCopy)
+      free(dataCopy);
+   if (strCopy)
+      free(strCopy);
+   return RETURN_FAIL;
+}
+
+static struct _chckHashItem* chckHashItemCopy(const struct _chckHashItem *item)
 {
    struct _chckHashItem *copy;
-   assert(table);
+   assert(item);
 
    if (!(copy = calloc(1, sizeof(struct _chckHashItem))))
       return NULL;
@@ -178,15 +207,6 @@ static int chckHashTableSetIndex(chckHashTable *table, unsigned int index, struc
 {
    assert(table && newItem);
 
-   if (newItem->size > 0) {
-      void *old = newItem->data;
-
-      if (!(newItem->data = malloc(newItem->size)))
-         goto fail;
-
-      memcpy(newItem->data, old, newItem->size);
-   }
-
    struct _chckHashItem *item = chckLutGetIndex(table->lut, index);
    struct _chckHashItem *first = item, *prev = item;
 
@@ -203,11 +223,12 @@ static int chckHashTableSetIndex(chckHashTable *table, unsigned int index, struc
       if (item != first) {
          if (newItem->data) {
             /* replace collision in list */
-            if (!(prev->next = chckHashTableCopyItem(table, newItem)))
-               goto fail;
+            if (!(prev->next = chckHashItemCopy(newItem)))
+               return RETURN_FAIL;
          } else {
             /* remove collision from list */
             prev->next = next;
+            chckHashItemFree(newItem, 0);
          }
       } else {
          if (newItem->data) {
@@ -217,22 +238,21 @@ static int chckHashTableSetIndex(chckHashTable *table, unsigned int index, struc
          } else {
             /* remove item */
             chckLutSetIndex(table->lut, index, NULL);
+            chckHashItemFree(newItem, 0);
          }
       }
    } else if (newItem->data && (item = prev) && item->data) {
       /* add collision to list */
-      if (!(item->next = chckHashTableCopyItem(table, newItem)))
-         goto fail;
+      if (!(item->next = chckHashItemCopy(newItem)))
+         return RETURN_FAIL;
    } else if (newItem->data) {
-      /* add pure item to list (not a collision) */
+      /* add pure item to table (not a collision) */
       chckLutSetIndex(table->lut, index, newItem);
+   } else {
+      chckHashItemFree(newItem, 0);
    }
 
    return RETURN_OK;
-
-fail:
-   chckHashItemFree(newItem, 0);
-   return RETURN_FAIL;
 }
 
 chckHashTable* chckHashTableNew(size_t size)
@@ -287,37 +307,22 @@ int chckHashTableSet(chckHashTable *table, unsigned int key, const void *data, s
 {
    assert(table);
 
-   struct _chckHashItem newItem = {
-      .data = (void*)data,
-      .size = member,
-      .strKey = NULL,
-      .uintKey = key,
-      .next = NULL
-   };
+   struct _chckHashItem item;
+   if (chckHashItemInit(&item, NULL, key, data, member) != RETURN_OK)
+      return RETURN_FAIL;
 
-   return chckHashTableSetIndex(table, hashint(key) & (table->lut->size - 1), &newItem);
+   return chckHashTableSetIndex(table, hashint(key) & (table->lut->size - 1), &item);
 }
 
 int chckHashTableStrSet(chckHashTable *table, const char *str, const void *data, size_t member)
 {
    assert(table && str);
 
-   char *copy;
-
-   if (!(copy = chckStrdup(str)))
+   struct _chckHashItem item;
+   if (chckHashItemInit(&item, str, -1, data, member) != RETURN_OK)
       return RETURN_FAIL;
 
-   unsigned int key = hashstr(str);
-
-   struct _chckHashItem newItem = {
-      .data = (void*)data,
-      .size = member,
-      .strKey = copy,
-      .uintKey = -1,
-      .next = NULL
-   };
-
-   return chckHashTableSetIndex(table, key & (table->lut->size - 1), &newItem);
+   return chckHashTableSetIndex(table, hashstr(str) & (table->lut->size - 1), &item);
 }
 
 void* chckHashTableGet(chckHashTable *table, unsigned int key)
