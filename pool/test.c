@@ -168,6 +168,80 @@ int main(void)
       chckIterPoolFree(pool);
    }
 
+   /* TEST: ring pool */
+   {
+      chckRingPool *pool = chckRingPoolNew(32, 3, sizeof(struct item));
+      assert(pool != NULL);
+
+      void *a, *b, *c;
+      a = chckRingPoolPush(pool, (&(struct item){1, NULL}));
+      b = chckRingPoolPush(pool, NULL);
+      c = chckRingPoolPush(pool, NULL);
+
+      assert(a != NULL && b != NULL && c != NULL);
+      assert(a != b && b != c && a != c);
+
+      size_t iter = 0;
+      struct item *current;
+      while ((current = chckRingPoolIter(pool, &iter)))
+         assert(current != NULL);
+
+      assert(chckRingPoolCount(pool) == 3);
+      assert(iter == 3);
+
+      assert(chckRingPoolPop(pool) == a);
+
+      iter = 0;
+      while ((current = chckRingPoolIter(pool, &iter)))
+         assert(current != NULL);
+
+      assert(chckRingPoolCount(pool) == 2);
+      assert(iter == 2);
+
+      chckRingPoolPush(pool, NULL);
+
+      iter = 0;
+      while ((current = chckRingPoolIter(pool, &iter)))
+         assert(current != NULL);
+
+      assert(chckRingPoolCount(pool) == 3);
+      assert(iter == 3);
+
+      assert(chckRingPoolPop(pool) == b);
+
+      iter = 0;
+      while ((current = chckRingPoolIter(pool, &iter)))
+         assert(current != NULL);
+
+      assert(chckRingPoolCount(pool) == 2);
+      assert(iter == 2);
+
+      chckRingPoolPush(pool, NULL);
+
+      iter = 0;
+      while ((current = chckRingPoolIter(pool, &iter)))
+         assert(current != NULL);
+
+      assert(chckRingPoolCount(pool) == 3);
+      assert(iter == 3);
+
+      iter = 0;
+      while ((current = chckRingPoolIter(pool, &iter)))
+         current->a = iter;
+
+      assert(((struct item*)chckRingPoolToCArray(pool, NULL))[0].a == 1);
+      assert(((struct item*)chckRingPoolToCArray(pool, NULL))[1].a == 2);
+      assert(((struct item*)chckRingPoolToCArray(pool, NULL))[2].a == 3);
+      chckRingPoolIterCall(pool, printa);
+
+      assert(((struct item*)chckRingPoolPop(pool))->a == 3);
+      assert(((struct item*)chckRingPoolPop(pool))->a == 1);
+      assert(((struct item*)chckRingPoolPop(pool))->a == 2);
+
+      chckRingPoolFlush(pool);
+      chckRingPoolFree(pool);
+   }
+
    return EXIT_SUCCESS;
 }
 

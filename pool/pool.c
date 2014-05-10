@@ -394,4 +394,107 @@ void* chckIterPoolToCArray(chckIterPool *pool, size_t *outMemb)
    return chckPoolBufferToCArray(&pool->items, outMemb);
 }
 
+typedef struct _chckRingPool {
+   _chckPoolBuffer items;
+   chckPoolIndex index;
+} _chckRingPool;
+
+chckRingPool* chckRingPoolNew(size_t growStep, size_t capacity, size_t memberSize)
+{
+   chckRingPool *pool = NULL;
+   assert(memberSize > 0);
+
+   if (!memberSize)
+      goto fail;
+
+   if (!(pool = calloc(1, sizeof(chckRingPool))))
+      goto fail;
+
+   chckPoolBufferInit(&pool->items, growStep, capacity, memberSize);
+   return pool;
+
+fail:
+   if (pool)
+      chckRingPoolFree(pool);
+   return NULL;
+}
+
+chckRingPool* chckRingPoolNewFromCArray(const void *items, size_t memb, size_t growStep, size_t memberSize)
+{
+   chckRingPool *pool;
+
+   if (!(pool = chckRingPoolNew(growStep, 0, memberSize)))
+      return NULL;
+
+   if (!chckRingPoolSetCArray(pool, items, memb))
+      goto fail;
+
+   return pool;
+
+fail:
+   chckRingPoolFree(pool);
+   return NULL;
+}
+
+void chckRingPoolFree(chckRingPool *pool)
+{
+   assert(pool);
+   chckRingPoolFlush(pool);
+   free(pool);
+}
+
+void chckRingPoolFlush(chckRingPool *pool)
+{
+   assert(pool);
+   chckPoolBufferFlush(&pool->items);
+}
+
+size_t chckRingPoolCount(const chckRingPool *pool)
+{
+   assert(pool);
+   return pool->items.count;
+}
+
+void* chckRingPoolPush(chckRingPool *pool, const void *data)
+{
+   assert(pool);
+   return chckPoolBufferAdd(&pool->items, data, pool->items.used, NULL);
+}
+
+void* chckRingPoolPop(chckRingPool *pool)
+{
+   assert(pool);
+
+   if (pool->items.count <= 0)
+      return NULL;
+
+   void *ptr = pool->items.buffer + pool->index * pool->items.member;
+   pool->index = (pool->index + 1) % pool->items.count;
+   pool->items.used -= pool->items.member;
+   pool->items.count -= 1;
+   return ptr;
+}
+
+void* chckRingPoolIter(const chckRingPool *pool, chckPoolIndex *iter)
+{
+   assert(pool && iter);
+   return chckPoolBufferIter(&pool->items, iter);
+}
+
+int chckRingPoolSetCArray(chckRingPool *pool, const void *items, size_t memb)
+{
+   assert(pool);
+
+   if (chckPoolBufferSetCArray(&pool->items, items, memb) != RETURN_OK)
+      return RETURN_FAIL;
+
+   return RETURN_OK;
+}
+
+void* chckRingPoolToCArray(chckRingPool *pool, size_t *outMemb)
+{
+   assert(pool);
+   return chckPoolBufferToCArray(&pool->items, outMemb);
+}
+
 /* vim: set ts=8 sw=3 tw=0 :*/
