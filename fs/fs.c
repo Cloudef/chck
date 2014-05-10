@@ -19,7 +19,7 @@ enum { RETURN_OK = 1, RETURN_FAIL = 0 };
 
 #if defined(_WIN32) || defined(_WIN64)
 /* \brief portable strdup */
-static char *chckStrdup(char *str)
+static char* chckStrdup(const char *str)
 {
    char *cpy;
    size_t size = strlen(str);
