@@ -9,6 +9,11 @@ static void printstr(const char **str)
    printf("%s\n", *str);
 }
 
+static void printstr2(const char *str)
+{
+   printf("%s\n", str);
+}
+
 int main(void)
 {
    /* TEST: lut */
@@ -76,6 +81,8 @@ int main(void)
       chckHashTableStrSet(table, "s0", s0, 0);
       chckHashTableStrSet(table, "s1", s1, 0);
       chckHashTableStrSet(table, "s2", s2, 0);
+
+      chckHashTableIterCall(table, printstr2);
 
       assert(chckHashTableStrGet(table, "s0") == s0);
       assert(chckHashTableStrGet(table, "s1") == s1);

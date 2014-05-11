@@ -341,4 +341,23 @@ void* chckHashTableStrGet(chckHashTable *table, const char *str)
    return (item ? (void*)item->data : NULL);
 }
 
+void* chckHashTableIter(chckHashTable *table, chckHashTableIterator *iterator)
+{
+   assert(table);
+
+   if (iterator->iter >= table->lut->size)
+      return NULL;
+
+   struct _chckHashItem *item = iterator->ptr;
+
+   if (item) {
+      iterator->ptr = item->next;
+   } else {
+      item = chckLutIter(table->lut, &iterator->iter);
+      iterator->ptr = (item ? item->next : NULL);
+   }
+
+   return (item ? item->data : NULL);
+}
+
 /* vim: set ts=8 sw=3 tw=0 :*/
