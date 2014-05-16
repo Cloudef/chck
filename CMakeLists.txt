@@ -9,7 +9,7 @@ SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY lib)
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY lib)
 
 # Sources
-SET(SOURCE buffer sjis fs json pool array lut)
+SET(SOURCE buffer sjis fs json pool array lut cdl)
 SET(LIBSRC "") # sources to be compiled
 SET(LIBINC "") # include directories
 SET(LIBLIB "") # libraries to be linked
@@ -26,6 +26,10 @@ IF (ZLIB_FOUND)
    LIST(APPEND buffer_DEF -DHAS_ZLIB=1)
    LIST(APPEND buffer_LIB ${ZLIB_LIBRARIES})
 ENDIF (ZLIB_FOUND)
+
+IF (UNIX)
+   LIST(APPEND cdl_LIB dl)
+ENDIF (UNIX)
 
 # Warnings
 IF (MSVC)
@@ -76,8 +80,8 @@ ENDFOREACH (src)
 # Compile static lib
 INCLUDE_DIRECTORIES(${LIBINC})
 ADD_DEFINITIONS(${LIBDEF})
-ADD_LIBRARY(chck ${LIBSRC} ${LIBLIB})
-TARGET_LINK_LIBRARIES(chck)
+ADD_LIBRARY(chck ${LIBSRC})
+TARGET_LINK_LIBRARIES(chck ${LIBLIB})
 
 # Documentation
 ADD_SUBDIRECTORY(doxygen)
