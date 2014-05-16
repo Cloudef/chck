@@ -9,7 +9,12 @@ int main(void)
       void *handle = NULL;
       const char *error = NULL;
 
-#if __unix__
+#if defined(__APPLE__)
+      assert((handle = chckDlLoad("/usr/lib/libdl.dylib", &error)) != NULL);
+      assert(error == NULL);
+      assert(chckDlLoadSymbol(handle, "dlsym", &error) != NULL);
+      assert(error == NULL);
+#elif __unix__
       assert((handle = chckDlLoad("/usr/lib/libdl.so", &error)) != NULL);
       assert(error == NULL);
       assert(chckDlLoadSymbol(handle, "dlsym", &error) != NULL);
@@ -19,6 +24,10 @@ int main(void)
       assert(error == NULL);
       assert(chckDlLoadSymbol(handle, "GetNativeSystemInfo", &error) != NULL);
       assert(error == NULL);
+#else
+      assert((handle = chckDlLoad("/usr/lib/libdl.so", &error)) == NULL);
+      assert(error != NULL);
+      return EXIT_SUCCESS;
 #endif
 
       assert(chckDlLoadSymbol(handle, "iWantSomeFrenchFriesWithHotChickenPlease", &error) == NULL);
