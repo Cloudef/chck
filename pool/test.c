@@ -21,10 +21,16 @@ int main(void)
       chckPool *pool = chckPoolNew(32, 3, sizeof(struct item));
       assert(pool != NULL);
 
+      chckPoolAdd(pool, (&(struct item){1, NULL}), NULL);
+      chckPoolAdd(pool, (&(struct item){2, NULL}), NULL);
+      chckPoolRemove(pool, 0);
+      assert(((struct item*)chckPoolGet(pool, 1))->a == 2);
+      chckPoolFlush(pool);
+
       chckPoolIndex a, b, c;
       chckPoolAdd(pool, (&(struct item){1, NULL}), &a);
-      chckPoolAdd(pool, NULL, &b);
-      chckPoolAdd(pool, NULL, &c);
+      chckPoolAdd(pool, (&(struct item){2, NULL}), &b);
+      chckPoolAdd(pool, (&(struct item){3, NULL}), &c);
 
       assert(a == 0 && b == 1 && c == 2);
       assert(a != b && b != c && a != c);
@@ -96,6 +102,12 @@ int main(void)
    {
       chckIterPool *pool = chckIterPoolNew(32, 3, sizeof(struct item));
       assert(pool != NULL);
+
+      chckIterPoolAdd(pool, (&(struct item){1, NULL}), NULL);
+      chckIterPoolAdd(pool, (&(struct item){2, NULL}), NULL);
+      chckIterPoolRemove(pool, 0);
+      assert(((struct item*)chckIterPoolGet(pool, 0))->a == 2);
+      chckIterPoolFlush(pool);
 
       chckPoolIndex a, b, c;
       chckIterPoolAdd(pool, (&(struct item){1, NULL}), &a);

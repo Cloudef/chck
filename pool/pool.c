@@ -216,7 +216,7 @@ size_t chckPoolCount(const chckPool *pool)
 
 void* chckPoolGet(const chckPool *pool, chckPoolIndex index)
 {
-   if (index >= pool->items.count)
+   if (index * pool->items.member >= pool->items.used)
       return NULL;
 
    return pool->items.buffer + index * pool->items.member;
@@ -348,7 +348,7 @@ size_t chckIterPoolCount(const chckIterPool *pool)
 
 void* chckIterPoolGet(const chckIterPool *pool, chckPoolIndex index)
 {
-   if (index >= pool->items.count)
+   if (index * pool->items.member >= pool->items.used)
       return NULL;
 
    return pool->items.buffer + index * pool->items.member;
