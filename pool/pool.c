@@ -68,7 +68,7 @@ static void* chckPoolBufferAdd(_chckPoolBuffer *pb, const void *data, size_t pos
       pb->used = pos + pb->member;
 
    if (outIndex)
-      *outIndex = pb->count;
+      *outIndex = pos / pb->member;
 
    pb->count++;
    return pb->buffer + pos;
@@ -76,7 +76,7 @@ static void* chckPoolBufferAdd(_chckPoolBuffer *pb, const void *data, size_t pos
 
 static void chckPoolBufferRemove(_chckPoolBuffer *pb, chckPoolIndex index)
 {
-   if (index >= pb->count)
+   if (index * pb->member >= pb->used)
       return;
 
    if (index * pb->member + pb->member >= pb->used)
@@ -90,7 +90,7 @@ static void chckPoolBufferRemove(_chckPoolBuffer *pb, chckPoolIndex index)
 
 static void chckPoolBufferRemoveMove(_chckPoolBuffer *pb, chckPoolIndex index)
 {
-   if (index >= pb->count)
+   if (index * pb->member >= pb->used)
       return;
 
    if (index * pb->member + pb->member < pb->used)
@@ -107,7 +107,7 @@ static void* chckPoolBufferIter(const _chckPoolBuffer *pb, size_t *iter)
 {
    assert(iter);
 
-   if (*iter >= pb->count)
+   if (*iter * pb->member >= pb->used)
       return NULL;
 
    return pb->buffer + (*iter)++ * pb->member;
