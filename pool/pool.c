@@ -249,8 +249,7 @@ void* chckPoolIter(const chckPool *pool, chckPoolIndex *iter)
 {
    assert(pool && iter);
 
-   void *current = NULL;
-   current = chckPoolBufferIter(&pool->items, iter);
+   void *current = chckPoolBufferIter(&pool->items, iter);
 
    size_t i;
    for (i = 0; i < pool->removed.count; ++i) {
