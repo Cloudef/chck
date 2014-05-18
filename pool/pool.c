@@ -250,20 +250,13 @@ void* chckPoolIter(const chckPool *pool, chckPoolIndex *iter)
    assert(pool && iter);
 
    void *current = NULL;
-   unsigned char removed = (*iter < pool->items.count);
+   current = chckPoolBufferIter(&pool->items, iter);
 
-   while (removed) {
-      current = chckPoolBufferIter(&pool->items, iter);
-
-      size_t i;
-      for (removed = 0, i = 0; i < pool->removed.count; ++i) {
-         chckPoolIndex index = *(chckPoolIndex*)pool->removed.buffer + i * pool->removed.member;
-         if (index == *iter - 1)
-            continue;
-
-         removed = 1;
-         break;
-      }
+   size_t i;
+   for (i = 0; i < pool->removed.count; ++i) {
+      chckPoolIndex index = *(chckPoolIndex*)pool->removed.buffer + i * pool->removed.member;
+      if (index == *iter - 1)
+         return NULL;
    }
 
    return current;
