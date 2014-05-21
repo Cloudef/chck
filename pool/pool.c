@@ -82,10 +82,10 @@ static void chckPoolBufferRemove(_chckPoolBuffer *pb, chckPoolIndex index)
    if (index * pb->member + pb->member >= pb->used)
       pb->used -= pb->member;
 
-   pb->count--;
-
    if (pb->used + pb->member * pb->step < pb->allocated)
       chckPoolBufferResize(pb, pb->allocated - pb->member * pb->step);
+
+   pb->count--;
 }
 
 static void chckPoolBufferRemoveMove(_chckPoolBuffer *pb, chckPoolIndex index)
