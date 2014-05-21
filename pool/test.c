@@ -35,7 +35,7 @@ int main(void)
       assert(a == 0 && b == 1 && c == 2);
       assert(a != b && b != c && a != c);
 
-      size_t iter = 0;
+      chckPoolIndex iter = 0;
       struct item *current;
       while ((current = chckPoolIter(pool, &iter)))
          assert(current != NULL);
@@ -95,6 +95,31 @@ int main(void)
       chckPoolIterCall(pool, printa);
 
       chckPoolFlush(pool);
+
+      chckPoolAdd(pool, (&(struct item){1, NULL}), &a);
+      chckPoolAdd(pool, (&(struct item){2, NULL}), &b);
+      chckPoolAdd(pool, (&(struct item){3, NULL}), &c);
+      chckPoolAdd(pool, (&(struct item){4, NULL}), &a);
+      chckPoolAdd(pool, (&(struct item){5, NULL}), &b);
+      chckPoolAdd(pool, (&(struct item){6, NULL}), &c);
+      chckPoolRemove(pool, a);
+      chckPoolRemove(pool, b);
+      chckPoolAdd(pool, (&(struct item){7, NULL}), &c);
+      chckPoolAdd(pool, (&(struct item){8, NULL}), &a);
+      chckPoolAdd(pool, (&(struct item){9, NULL}), &b);
+
+      iter = 0;
+      chckPoolIndex aa = 0;
+      while ((current = chckPoolIter(pool, &iter))) {
+         ++aa;
+         assert(((struct item*)current)->a != 4);
+         assert(((struct item*)current)->a != 5);
+         assert(current != NULL);
+      }
+
+      printf("%zu, %zu\n", aa, chckPoolCount(pool));
+      assert(chckPoolCount(pool) == aa);
+
       chckPoolFree(pool);
    }
 

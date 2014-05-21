@@ -148,7 +148,7 @@ typedef struct _chckPool {
 static size_t chckPoolGetFreeSlot(chckPool *pool)
 {
    if (pool->removed.count > 0) {
-      chckPoolIndex last = *(chckPoolIndex*)pool->removed.buffer + pool->removed.used - pool->removed.member;
+      chckPoolIndex last = *(chckPoolIndex*)(pool->removed.buffer + pool->removed.used - pool->removed.member);
       chckPoolBufferRemove(&pool->removed, pool->removed.count - 1);
       return last * pool->items.member;
    }
@@ -267,7 +267,7 @@ void* chckPoolIter(const chckPool *pool, chckPoolIndex *iter)
 
       size_t i;
       for (i = 0; i < pool->removed.count; ++i) {
-         chckPoolIndex index = *(chckPoolIndex*)pool->removed.buffer + i * pool->removed.member;
+         chckPoolIndex index = *(chckPoolIndex*)(pool->removed.buffer + i * pool->removed.member);
          if (index == *iter - 1) {
             current = NULL;
             break;
