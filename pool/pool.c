@@ -249,13 +249,23 @@ void* chckPoolIter(const chckPool *pool, chckPoolIndex *iter)
 {
    assert(pool && iter);
 
-   void *current = chckPoolBufferIter(&pool->items, iter);
+   void *current = NULL;
 
-   size_t i;
-   for (i = 0; i < pool->removed.count; ++i) {
-      chckPoolIndex index = *(chckPoolIndex*)pool->removed.buffer + i * pool->removed.member;
-      if (index == *iter - 1)
-         return NULL;
+   while (!current && *iter * pool->items.member < pool->items.used) {
+      current = chckPoolBufferIter(&pool->items, iter);
+
+      /**
+       * We don't want to return pointer to removed indexes.
+       */
+
+      size_t i;
+      for (i = 0; i < pool->removed.count; ++i) {
+         chckPoolIndex index = *(chckPoolIndex*)pool->removed.buffer + i * pool->removed.member;
+         if (index == *iter - 1) {
+            current = NULL;
+            break;
+         }
+      }
    }
 
    return current;

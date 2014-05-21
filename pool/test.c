@@ -49,7 +49,7 @@ int main(void)
          assert(current != NULL);
 
       assert(chckPoolCount(pool) == 2);
-      assert(iter == 2);
+      assert(iter == 3);
 
       chckPoolAdd(pool, NULL, NULL);
 
