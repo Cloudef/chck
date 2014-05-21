@@ -238,7 +238,14 @@ void chckPoolRemove(chckPool *pool, chckPoolIndex index)
 {
    assert(pool);
 
-   unsigned char last = (index == pool->items.count - 1);
+   size_t i;
+   for (i = 0; i < pool->removed.count; ++i) {
+      chckPoolIndex rindex = *(chckPoolIndex*)(pool->removed.buffer + i * pool->removed.member);
+      if (rindex == index)
+         return;
+   }
+
+   unsigned char last = (index * pool->items.member == pool->items.used);
    chckPoolBufferRemove(&pool->items, index);
 
    if (!last)
