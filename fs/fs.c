@@ -21,14 +21,9 @@ enum { RETURN_OK = 1, RETURN_FAIL = 0 };
 /* \brief portable strdup */
 static char* chckStrdup(const char *str)
 {
-   char *cpy;
    size_t size = strlen(str);
-
-   if (!(cpy = calloc(1, size + 1)))
-      return NULL;
-
-   memcpy(cpy, str, size);
-   return cpy;
+   char *cpy = calloc(1, size + 1);
+   return (cpy ? memcpy(cpy, str, size) : NULL);
 }
 #endif
 
