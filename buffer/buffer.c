@@ -304,7 +304,17 @@ int chckBufferReadUInt32(chckBuffer *buf, unsigned int *i)
 int chckBufferReadInt32(chckBuffer *buf, int *i) { return chckBufferReadUInt32(buf, (unsigned int*)i); }
 
 /* \brief read string from buffer */
-int chckBufferReadString(chckBuffer *buf, size_t bytes, char **str)
+int chckBufferReadString(chckBuffer *buf, char **str)
+{
+   uint8_t type;
+   if (chckBufferReadUInt8(buf, &type) != RETURN_OK)
+      return RETURN_FAIL;
+
+   return chckBufferReadStringOfType(buf, type, str);
+}
+
+/* \brief read string of type */
+int chckBufferReadStringOfType(chckBuffer *buf, chckBufferStringType type, char **str)
 {
    union {
       uint8_t l8;
@@ -312,21 +322,27 @@ int chckBufferReadString(chckBuffer *buf, size_t bytes, char **str)
       uint32_t l32;
    } u;
    size_t len;
-   assert(buf && str && bytes > 0 && bytes <= sizeof(uint32_t));
+   assert(buf && str);
    *str = NULL;
 
-   if (bytes == sizeof(uint32_t)) {
-      if (chckBufferReadUInt32(buf, &u.l32) != RETURN_OK)
+   switch (type) {
+      case CHCK_BUFFER_STRING_UINT8:
+         if (chckBufferReadUInt8(buf, &u.l8) != RETURN_OK)
+            return RETURN_FAIL;
+         len = u.l8;
+         break;
+      case CHCK_BUFFER_STRING_UINT16:
+         if (chckBufferReadUInt16(buf, &u.l16) != RETURN_OK)
+            return RETURN_FAIL;
+         len = u.l16;
+         break;
+      case CHCK_BUFFER_STRING_UINT32:
+         if (chckBufferReadUInt32(buf, &u.l32) != RETURN_OK)
+            return RETURN_FAIL;
+         len = u.l32;
+         break;
+      default:
          return RETURN_FAIL;
-      len = u.l32;
-   } else if (bytes == sizeof(uint16_t)) {
-      if (chckBufferReadUInt16(buf, &u.l16) != RETURN_OK)
-         return RETURN_FAIL;
-      len = u.l16;
-   } else {
-      if (chckBufferReadUInt8(buf, &u.l8) != RETURN_OK)
-         return RETURN_FAIL;
-      len = u.l8;
    }
 
    if (len) {
@@ -334,6 +350,7 @@ int chckBufferReadString(chckBuffer *buf, size_t bytes, char **str)
          return RETURN_FAIL;
       chckBufferRead(*str, 1, len, buf);
    }
+
    return RETURN_OK;
 }
 
@@ -401,15 +418,39 @@ int chckBufferWriteString(chckBuffer *buf, size_t len, const char *str)
 {
    assert(buf);
 
-   if (len > 0xffff) {
-      if (chckBufferWriteUInt32(buf, len) != RETURN_OK)
-         return RETURN_FAIL;
-   } else if (len > 0xff) {
-      if (chckBufferWriteUInt16(buf, len) != RETURN_OK)
-         return RETURN_FAIL;
-   } else {
-      if (chckBufferWriteUInt8(buf, len) != RETURN_OK)
-         return RETURN_FAIL;
+   chckBufferStringType type = (len > 0xffff ? CHCK_BUFFER_STRING_UINT32 :
+                                len > 0xff ? CHCK_BUFFER_STRING_UINT16 : CHCK_BUFFER_STRING_UINT8);
+
+   if (chckBufferWriteUInt8(buf, type) != RETURN_OK)
+      return RETURN_FAIL;
+
+   return chckBufferWriteStringOfType(buf, type, len, str);
+}
+
+/* \brief write string of type to buffer */
+int chckBufferWriteStringOfType(chckBuffer *buf, chckBufferStringType type, size_t len, const char *str)
+{
+   assert(buf);
+
+   switch (type) {
+      case CHCK_BUFFER_STRING_UINT8:
+         if (len > UINT8_MAX)
+            return RETURN_FAIL;
+         if (chckBufferWriteUInt8(buf, len) != RETURN_OK)
+            return RETURN_FAIL;
+         break;
+      case CHCK_BUFFER_STRING_UINT16:
+         if (len > UINT16_MAX)
+            return RETURN_FAIL;
+         if (chckBufferWriteUInt16(buf, len) != RETURN_OK)
+            return RETURN_FAIL;
+         break;
+      case CHCK_BUFFER_STRING_UINT32:
+         if (len > UINT32_MAX)
+            return RETURN_FAIL;
+         if (chckBufferWriteUInt32(buf, len) != RETURN_OK)
+            return RETURN_FAIL;
+         break;
    }
 
    if (len) chckBufferWrite(str, 1, len, buf);

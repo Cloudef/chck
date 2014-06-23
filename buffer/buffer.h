@@ -15,6 +15,12 @@ typedef enum chckBufferEndianType {
    CHCK_BUFFER_ENDIAN_NATIVE = 2,
 } chckBufferEndianType;
 
+typedef enum chckBufferStringType {
+   CHCK_BUFFER_STRING_UINT8,
+   CHCK_BUFFER_STRING_UINT16,
+   CHCK_BUFFER_STRING_UINT32
+} chckBufferStringType;
+
 typedef struct _chckBuffer chckBuffer;
 
 int chckBufferIsBigEndian(void);
@@ -45,7 +51,8 @@ int chckBufferReadUInt16(chckBuffer *buf, unsigned short *i);
 int chckBufferReadInt16(chckBuffer *buf, short *i);
 int chckBufferReadUInt32(chckBuffer *buf, unsigned int *i);
 int chckBufferReadInt32(chckBuffer *buf, int *i);
-int chckBufferReadString(chckBuffer *buf, size_t bytes, char **str);
+int chckBufferReadString(chckBuffer *buf, char **str);
+int chckBufferReadStringOfType(chckBuffer *buf, chckBufferStringType type, char **str);
 
 size_t chckBufferWrite(const void *src, size_t size, size_t nmemb, chckBuffer *buf);
 size_t chckBufferWriteFromFile(FILE *src, size_t size, size_t nmemb, chckBuffer *buf);
@@ -56,6 +63,7 @@ int chckBufferWriteInt16(chckBuffer *buf, short i);
 int chckBufferWriteUInt32(chckBuffer *buf, unsigned int i);
 int chckBufferWriteInt32(chckBuffer *buf, int i);
 int chckBufferWriteString(chckBuffer *buf, size_t len, const char *str);
+int chckBufferWriteStringOfType(chckBuffer *buf, chckBufferStringType type, size_t len, const char *str);
 
 /* -DHAS_ZLIB=1 -lz */
 int chckBufferCompressZlib(chckBuffer *buf);

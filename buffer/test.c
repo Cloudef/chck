@@ -25,9 +25,11 @@ int main(void)
 
    /* TEST: little endian buffer */
    {
-      static const char test[] = "\x12this integer is 5:\x5\x0\x0\0\1\0\1";
+      static const char test[] = "\x0\x12this integer is 5:\x12this integer is 5:\x5\x0\x0\0\1\0\1";
       chckBuffer *buf = chckBufferNewFromPointer(test, sizeof(test)-1, CHCK_BUFFER_ENDIAN_LITTLE);
-      assert(chckBufferReadString(buf, 1, &str) == 1);
+      assert(chckBufferReadString(buf, &str) == 1);
+      assert(strcmp(str, "this integer is 5:") == 0); free(str);
+      assert(chckBufferReadStringOfType(buf, CHCK_BUFFER_STRING_UINT8, &str) == 1);
       assert(strcmp(str, "this integer is 5:") == 0); free(str);
       assert(chckBufferReadInt32(buf, &i) == 1);
       assert(i == 5);
@@ -41,9 +43,11 @@ int main(void)
 
    /* TEST: big endian buffer */
    {
-      static const char test[] = "\x12this integer is 5:\x0\x0\0\x5\0\1\1";
+      static const char test[] = "\x0\x12this integer is 5:\x12this integer is 5:\x0\x0\0\x5\0\1\1";
       chckBuffer *buf = chckBufferNewFromPointer(test, sizeof(test)-1, CHCK_BUFFER_ENDIAN_BIG);
-      assert(chckBufferReadString(buf, 1, &str) == 1);
+      assert(chckBufferReadString(buf, &str) == 1);
+      assert(strcmp(str, "this integer is 5:") == 0); free(str);
+      assert(chckBufferReadStringOfType(buf, CHCK_BUFFER_STRING_UINT8, &str) == 1);
       assert(strcmp(str, "this integer is 5:") == 0); free(str);
       assert(chckBufferReadInt32(buf, &i) == 1);
       assert(i == 5);
@@ -58,13 +62,14 @@ int main(void)
    /* TEST: native buffer write && read && resize */
    {
       i = 8; s = 6;
-      chckBuffer *buf = chckBufferNew(5, CHCK_BUFFER_ENDIAN_NATIVE);
+      chckBuffer *buf = chckBufferNew(5+6, CHCK_BUFFER_ENDIAN_NATIVE);
       assert(chckBufferIsNativeEndian(buf) == 1);
 
       assert(chckBufferWriteString(buf, 4, "test") == 1);
-      assert(chckBufferResize(buf, 5+sizeof(int32_t)+sizeof(int16_t)) == 1);
-      assert(chckBufferGetSize(buf) == 5+sizeof(int32_t)+sizeof(int16_t));
-      assert(chckBufferGetOffset(buf) == 5);
+      assert(chckBufferWriteStringOfType(buf, CHCK_BUFFER_STRING_UINT8, 4, "test") == 1);
+      assert(chckBufferResize(buf, 5+6+sizeof(int32_t)+sizeof(int16_t)) == 1);
+      assert(chckBufferGetSize(buf) == 5+6+sizeof(int32_t)+sizeof(int16_t));
+      assert(chckBufferGetOffset(buf) == 6+5);
       assert(chckBufferGetOffsetPointer(buf) != chckBufferGetPointer(buf));
 
       assert(chckBufferWriteUInt32(buf, i) == 1);
@@ -74,7 +79,9 @@ int main(void)
       assert(chckBufferSeek(buf, 0, SEEK_SET) == chckBufferGetOffset(buf));
       assert(chckBufferGetOffset(buf) == 0);
 
-      assert(chckBufferReadString(buf, 1, &str) == 1);
+      assert(chckBufferReadString(buf, &str) == 1);
+      assert(strcmp(str, "test") == 0); free(str);
+      assert(chckBufferReadStringOfType(buf, CHCK_BUFFER_STRING_UINT8, &str) == 1);
       assert(strcmp(str, "test") == 0); free(str);
       assert(chckBufferReadInt32(buf, &i) == 1);
       assert(i == 8);
@@ -87,13 +94,14 @@ int main(void)
    /* TEST: non-native buffer write && read && resize */
    {
       i = 8; s = 6;
-      chckBuffer *buf = chckBufferNew(5, notnative);
+      chckBuffer *buf = chckBufferNew(5+6, notnative);
       assert(chckBufferIsNativeEndian(buf) == 0);
 
       assert(chckBufferWriteString(buf, 4, "test") == 1);
-      assert(chckBufferResize(buf, 5+sizeof(int32_t)+sizeof(int16_t)) == 1);
-      assert(chckBufferGetSize(buf) == 5+sizeof(int32_t)+sizeof(int16_t));
-      assert(chckBufferGetOffset(buf) == 5);
+      assert(chckBufferWriteStringOfType(buf, CHCK_BUFFER_STRING_UINT8, 4, "test") == 1);
+      assert(chckBufferResize(buf, 5+6+sizeof(int32_t)+sizeof(int16_t)) == 1);
+      assert(chckBufferGetSize(buf) == 5+6+sizeof(int32_t)+sizeof(int16_t));
+      assert(chckBufferGetOffset(buf) == 5+6);
       assert(chckBufferGetOffsetPointer(buf) != chckBufferGetPointer(buf));
 
       assert(chckBufferWriteUInt32(buf, i) == 1);
@@ -103,7 +111,9 @@ int main(void)
       assert(chckBufferSeek(buf, 0, SEEK_SET) == chckBufferGetOffset(buf));
       assert(chckBufferGetOffset(buf) == 0);
 
-      assert(chckBufferReadString(buf, 1, &str) == 1);
+      assert(chckBufferReadString(buf, &str) == 1);
+      assert(strcmp(str, "test") == 0); free(str);
+      assert(chckBufferReadStringOfType(buf, CHCK_BUFFER_STRING_UINT8, &str) == 1);
       assert(strcmp(str, "test") == 0); free(str);
       assert(chckBufferReadInt32(buf, &i) == 1);
       assert(i == 8);
