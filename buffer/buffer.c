@@ -356,7 +356,6 @@ size_t chckBufferWriteFromFile(FILE *src, size_t size, size_t memb, chckBuffer *
 /* \brief write 8 bit unsigned integer to buffer */
 int chckBufferWriteUInt8(chckBuffer *buf, unsigned char i)
 {
-   assert(i);
    if (chckBufferWrite(&i, 1, 1, buf) != 1)
       return RETURN_FAIL;
    return RETURN_OK;
@@ -369,7 +368,6 @@ int chckBufferWriteInt8(chckBuffer *buf, char i) { return chckBufferWriteUInt8(b
 int chckBufferWriteUInt16(chckBuffer *buf, unsigned short i)
 {
    uint16_t r = i;
-   assert(i);
 
    if (!chckBufferIsNativeEndian(buf)) chckBufferSwap(&r, sizeof(r), 1);
 
@@ -386,7 +384,6 @@ int chckBufferWriteInt16(chckBuffer *buf, short i) { return chckBufferWriteUInt1
 int chckBufferWriteUInt32(chckBuffer *buf, unsigned int i)
 {
    uint32_t r = i;
-   assert(i);
 
    if (!chckBufferIsNativeEndian(buf)) chckBufferSwap(&r, sizeof(r), 1);
 
