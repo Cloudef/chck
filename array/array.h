@@ -1,9 +1,7 @@
 #ifndef __chck_array__
 #define __chck_array__
 
-#ifndef size_t
-#  include <stddef.h> /* for size_t */
-#endif
+#include <stddef.h> /* for size_t */
 
 typedef size_t chckArrayIndex;
 typedef struct _chckArray chckArray;

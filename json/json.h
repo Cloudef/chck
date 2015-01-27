@@ -5,9 +5,7 @@
 extern "C" {
 #endif
 
-#ifndef size_t
-#  include <stddef.h> /* for size_t */
-#endif
+#include <stddef.h> /* for size_t */
 
 typedef enum chckJsonError {
    CHCK_JSON_ERROR_UNEXPECTED = 1,

@@ -1,12 +1,9 @@
 #ifndef __chck_buffer__
 #define __chck_buffer__
 
-#ifndef size_t
-#  include <stddef.h> /* for size_t */
-#endif
+#include <stddef.h> /* for size_t */
+#include <stdio.h> /* for FILE */
 
-#ifndef FILE
-#  include <stdio.h> /* for FILE */
 #endif
 
 typedef enum chckBufferEndianType {
