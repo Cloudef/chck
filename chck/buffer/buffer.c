@@ -23,6 +23,9 @@ chck_buffer_release(struct chck_buffer *buf)
 
    if (buf->copied)
       free(buf->buffer);
+
+   buf->copied = false;
+   buf->curpos = buf->buffer = NULL;
 }
 
 bool
@@ -79,19 +82,17 @@ chck_buffer_set_pointer(struct chck_buffer *buf, void *ptr, size_t size, enum ch
 bool
 chck_buffer_resize(struct chck_buffer *buf, size_t size)
 {
-   void *tmp = NULL;
+   assert(buf);
 
    if (size == buf->size)
       return true;
 
    if (size == 0) {
-      if (buf->copied)
-         free(buf->buffer);
-      buf->buffer = NULL;
-      buf->size = 0;
+      chck_buffer_release(buf);
       return true;
    }
 
+   void *tmp = NULL;
    if (!(tmp = realloc((buf->copied ? buf->buffer : NULL), size)))
       return false;
 
