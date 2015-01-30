@@ -47,7 +47,7 @@ chck_buffer(struct chck_buffer *buf, size_t size, enum chck_endianess endianess)
    if (!(data = malloc(size)))
       return false;
 
-   if (!chck_buffer_from_pointer(buf, data, size, endianess))
+   if (unlikely(!chck_buffer_from_pointer(buf, data, size, endianess)))
       goto fail;
 
    buf->copied = true;
@@ -84,10 +84,10 @@ chck_buffer_resize(struct chck_buffer *buf, size_t size)
 {
    assert(buf);
 
-   if (size == buf->size)
+   if (unlikely(size == buf->size))
       return true;
 
-   if (size == 0) {
+   if (unlikely(size == 0)) {
       chck_buffer_release(buf);
       return true;
    }
@@ -185,7 +185,7 @@ chck_buffer_read(void *dst, size_t size, size_t memb, struct chck_buffer *buf)
 {
    assert(dst && buf);
 
-   if (size * memb > buf->size - (buf->curpos - buf->buffer))
+   if (unlikely(size * memb > buf->size - (buf->curpos - buf->buffer))) {
       assert(size != 0); // should never happen
       // read as much as we can
       memb = (buf->size - (buf->curpos - buf->buffer)) / size;
@@ -204,7 +204,7 @@ chck_buffer_read_int(void *i, enum chck_bits bits, struct chck_buffer *buf)
    if (!valid_bits(bits))
       return false;
 
-   if (chck_buffer_read(i, bits, 1, buf) != 1)
+   if (unlikely(chck_buffer_read(i, bits, 1, buf) != 1))
       return false;
 
    if (!chck_buffer_native_endianess(buf))
@@ -223,7 +223,7 @@ chck_buffer_read_string_of_type(char **str, size_t *out_len, enum chck_bits bits
       *out_len = 0;
 
    size_t len = 0;
-   if (chck_buffer_read_int(&len, bits, buf) != true)
+   if (unlikely(!chck_buffer_read_int(&len, bits, buf)))
       return false;
 
    if (out_len)
@@ -235,7 +235,7 @@ chck_buffer_read_string_of_type(char **str, size_t *out_len, enum chck_bits bits
    if (!(*str = calloc(1, len + 1)))
       return false;
 
-   if (chck_buffer_read(*str, 1, len, buf) != len) {
+   if (unlikely(chck_buffer_read(*str, 1, len, buf) != len)) {
       free(*str);
       return false;
    }
@@ -253,10 +253,10 @@ chck_buffer_read_string(char **str, size_t *len, struct chck_buffer *buf)
       *len = 0;
 
    uint8_t bits;
-   if (chck_buffer_read_int(&bits, sizeof(uint8_t), buf) != true)
+   if (unlikely(!chck_buffer_read_int(&bits, sizeof(uint8_t), buf)))
       return false;
 
-   return chck_buffer_read_string_of_type(str, len, bits, buf);
+   return likely(chck_buffer_read_string_of_type(str, len, bits, buf));
 }
 
 size_t
@@ -286,6 +286,8 @@ chck_buffer_write_from_fd(int fd, size_t size, size_t memb, struct chck_buffer *
 bool
 chck_buffer_write_int(const void *i, enum chck_bits bits, struct chck_buffer *buf)
 {
+   assert(buf);
+
    if (!valid_bits(bits))
       return false;
 
@@ -306,13 +308,13 @@ chck_buffer_write_string_of_type(const char *str, size_t len, enum chck_bits bit
 {
    assert(buf);
 
-   if (chck_buffer_write_int(&len, bits, buf) != true)
+   if (unlikely(!chck_buffer_write_int(&len, bits, buf)))
       return false;
 
    if (len <= 0)
       return true;
 
-   return (chck_buffer_write(str, 1, len, buf) == len);
+   return likely(chck_buffer_write(str, 1, len, buf) == len);
 }
 
 bool
@@ -321,10 +323,10 @@ chck_buffer_write_string(const char *str, size_t len, struct chck_buffer *buf)
    assert(buf);
    const enum chck_bits bits = (len > 0xffff ? sizeof(uint32_t) : (len > 0xff ? sizeof(uint16_t) : sizeof(uint8_t)));
 
-   if (chck_buffer_write_int(&bits, sizeof(uint8_t), buf) != true)
+   if (unlikely(!chck_buffer_write_int(&bits, sizeof(uint8_t), buf)))
       return false;
 
-   return chck_buffer_write_string_of_type(str, len, bits, buf);
+   return likely(chck_buffer_write_string_of_type(str, len, bits, buf));
 }
 
 bool
@@ -348,7 +350,7 @@ chck_buffer_compress_zlib(struct chck_buffer *buf)
       dsize = (bsize *= 2);
    }
 
-   if (ret != Z_OK)
+   if (unlikely(ret != Z_OK))
       goto fail;
 
    chck_buffer_set_pointer(buf, compressed, bsize, buf->endianess);
@@ -390,7 +392,7 @@ chck_buffer_decompress_zlib(struct chck_buffer *buf)
       dsize = (bsize *= 2);
    }
 
-   if (ret != Z_OK)
+   if (unlikely(ret != Z_OK))
       goto fail;
 
    chck_buffer_set_pointer(buf, decompressed, bsize, buf->endianess);

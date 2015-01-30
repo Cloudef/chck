@@ -138,5 +138,34 @@ int main(void)
       chck_buffer_release(&buf);
    }
 
+   /* TEST: benchmark read/write (small writes, native && non-native) */
+   {
+      static const uint32_t iters = 0xFFFFF;
+      enum chck_endianess tests[] = { CHCK_ENDIANESS_NATIVE, !chck_endianess() };
+      for (int i = 0; i < 2; ++i) {
+         struct chck_buffer buf;
+         assert(chck_buffer(&buf, iters * sizeof(uint64_t) * sizeof(uint32_t) * sizeof(uint16_t) * sizeof(uint8_t), tests[i]));
+         for (uint64_t a = 0; a < iters; ++a) assert(chck_buffer_write_int(&a, sizeof(a), &buf));
+         for (uint32_t a = 0; a < iters; ++a) assert(chck_buffer_write_int(&a, sizeof(a), &buf));
+         for (uint16_t a = 0; a < 0xFFFF; ++a) assert(chck_buffer_write_int(&a, sizeof(a), &buf));
+         for (uint8_t a = 0; a < 0xFF; ++a) assert(chck_buffer_write_int(&a, sizeof(a), &buf));
+         for (uint32_t a = 0; a < iters; ++a) assert(chck_buffer_write_string("yolo", 4, &buf));
+         chck_buffer_seek(&buf, 0, SEEK_SET);
+         for (uint64_t t, a = 0; a < iters; ++a) { assert(chck_buffer_read_int(&t, sizeof(t), &buf)); assert(a == t); }
+         for (uint32_t t, a = 0; a < iters; ++a) { assert(chck_buffer_read_int(&t, sizeof(t), &buf)); assert(a == t); }
+         for (uint16_t t, a = 0; a < 0xFFFF; ++a) { assert(chck_buffer_read_int(&t, sizeof(t), &buf)); assert(a == t); }
+         for (uint8_t t, a = 0; a < 0xFF; ++a) { assert(chck_buffer_read_int(&t, sizeof(t), &buf)); assert(a == t); }
+         for (uint32_t a = 0; a < iters; ++a) {
+            char *t;
+            size_t len;
+            assert(chck_buffer_read_string(&t, &len, &buf));
+            assert(!strcmp(t, "yolo"));
+            assert(len == 4);
+            free(t);
+         }
+         chck_buffer_release(&buf);
+      }
+   }
+
    return EXIT_SUCCESS;
 }

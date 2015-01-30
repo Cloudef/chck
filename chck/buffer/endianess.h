@@ -5,6 +5,14 @@
 #include <assert.h>
 #include <string.h>
 
+#if __GNUC__
+#define likely(x) __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect(!!(x), 0)
+#else
+#define likely(x) !!(x)
+#define unlikely(x) !!(x)
+#endif
+
 enum chck_endianess {
    CHCK_ENDIANESS_LITTLE = 0,
    CHCK_ENDIANESS_BIG    = 1,
@@ -66,7 +74,7 @@ static inline enum chck_endianess chck_endianess(void)
 static inline void
 chck_bswap(void *v, size_t size, size_t memb)
 {
-   if (!v || size < 1)
+   if (unlikely(!v || size < 1))
       return;
 
    for (void *p = v; p < v + (memb * size); p += size) {
