@@ -16,6 +16,22 @@ int main(void)
       free(buf.buffer); // should not SIGSEGV
    }
 
+   /* TEST: over-read */
+   {
+      struct chck_buffer buf;
+      static char data[] = "yolo I have only this many bytes";
+      assert(chck_buffer_from_pointer(&buf, data, sizeof(data), CHCK_ENDIANESS_NATIVE));
+      char bb[sizeof(data)];
+      assert(chck_buffer_read(bb, 1, sizeof(data), &buf) == sizeof(data));
+      chck_buffer_seek(&buf, 0, SEEK_SET);
+      assert(chck_buffer_read(bb, 1, sizeof(data) * 4, &buf) == sizeof(data));
+      chck_buffer_seek(&buf, 0, SEEK_SET);
+      assert(chck_buffer_read(bb, 8, sizeof(data), &buf) == 4);
+      assert(chck_buffer_read(bb, 12, sizeof(data), &buf) == 0);
+      assert(chck_buffer_read(bb, 1, sizeof(data), &buf) == 1);
+      chck_buffer_release(&buf);
+   }
+
    /* TEST: little endian buffer */
    {
       static const struct {

@@ -186,7 +186,10 @@ chck_buffer_read(void *dst, size_t size, size_t memb, struct chck_buffer *buf)
    assert(dst && buf);
 
    if (size * memb > buf->size - (buf->curpos - buf->buffer))
-      return 0;
+      assert(size != 0); // should never happen
+      // read as much as we can
+      memb = (buf->size - (buf->curpos - buf->buffer)) / size;
+   }
 
    memcpy(dst, buf->curpos, size * memb);
    buf->curpos += size * memb;
