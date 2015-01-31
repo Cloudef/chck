@@ -60,12 +60,12 @@ chck_sjis_to_utf8(const unsigned char *sjis, size_t size, size_t *outSize, bool 
 
       /* single byte half-width katakana */
       if (sjis[i] >= 0xa1 && sjis[i] <= 0xdf) {
-         char halfWidthKatakana[4] = { 0xef, 0xbd, sjis[i], 0x00 };
+         char hw_katakana[4] = { 0xef, 0xbd, sjis[i], 0x00 };
          if (sjis[i] >= 0xc0) {
-            halfWidthKatakana[2] = 0xbe;
-            halfWidthKatakana[3] = 0x80 + sjis[i] - 0xc0;
+            hw_katakana[2] = 0xbe;
+            hw_katakana[3] = 0x80 + sjis[i] - 0xc0;
          }
-         put(&dec, &d, &dsize, halfWidthKatakana);
+         put(&dec, &d, &dsize, hw_katakana);
       }
 
       /* multibyte */
@@ -134,9 +134,9 @@ chck_utf8_to_sjis(const char *input, size_t size, size_t *outSize, bool terminat
 
       /* half-width katakana */
       if (utf8[i + 1] >= 0xbd && utf8[i + 1] <= 0xbe) {
-         char halfWidthKatakana[2] = { utf8[i + 2], 0x00 };
-         if (utf8[i + 1] >= 0xbe) halfWidthKatakana[0] = 0xc0 + utf8[i + 2] - 0x80;
-         put(&dec, &d, &dsize, halfWidthKatakana);
+         char hw_katakana[2] = { utf8[i + 2], 0x00 };
+         if (utf8[i + 1] >= 0xbe) hw_katakana[0] = 0xc0 + utf8[i + 2] - 0x80;
+         put(&dec, &d, &dsize, hw_katakana);
       }
 
       /* multibyte */
