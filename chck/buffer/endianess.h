@@ -43,15 +43,17 @@ enum chck_endianess {
 #  define HAS_BYTESWAP 0
 #endif
 
-#if defined(__BYTE_ORDER) && __BYTE_ORDER == __BIG_ENDIAN || \
+#if (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__) || \
+    (defined(__BYTE_ORDER) && __BYTE_ORDER == __BIG_ENDIAN) || \
     defined(__BIG_ENDIAN__) || \
     defined(__ARMEB__) || \
     defined(__THUMBEB__) || \
     defined(__AARCH64EB__) || \
     defined(_MIBSEB) || defined(__MIBSEB) || defined(__MIBSEB__)
 // compiletime big endian
-#  define chck_big_endian() CHCK_ENDIANESS_BIG
-#elif defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
+#  define chck_endianess() CHCK_ENDIANESS_BIG
+#elif (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || \
+    (defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN) || \
     defined(__LITTLE_ENDIAN__) || \
     defined(__ARMEL__) || \
     defined(__THUMBEL__) || \
