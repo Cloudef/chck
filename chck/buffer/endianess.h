@@ -81,9 +81,9 @@ chck_bswap(void *v, size_t size, size_t memb)
 
    for (void *p = v; p < v + (memb * size); p += size) {
 #if HAS_BYTESWAP
-      if (size == sizeof(uint64_t)) *((uint64_t*)p) = bswap64(*((uint64_t*)p));
       if (size == sizeof(uint32_t)) *((uint32_t*)p) = bswap32(*((uint32_t*)p));
-      if (size == sizeof(uint16_t)) *((uint16_t*)p) = bswap16(*((uint16_t*)p));
+      else if (size == sizeof(uint16_t)) *((uint16_t*)p) = bswap16(*((uint16_t*)p));
+      else if (size == sizeof(uint64_t)) *((uint64_t*)p) = bswap64(*((uint64_t*)p));
 #else
       size_t s;
       uint8_t b[size];
@@ -91,6 +91,14 @@ chck_bswap(void *v, size_t size, size_t memb)
       for (s = 0; s < size; ++s) memset(p + s, b[size - s - 1], 1);
 #endif
    }
+}
+
+static inline void
+chck_bswap1(void *p, size_t size)
+{
+   if (size == sizeof(uint32_t)) *((uint32_t*)p) = bswap32(*((uint32_t*)p));
+   else if (size == sizeof(uint16_t)) *((uint16_t*)p) = bswap16(*((uint16_t*)p));
+   else if (size == sizeof(uint64_t)) *((uint64_t*)p) = bswap64(*((uint64_t*)p));
 }
 
 #endif /* __chck_endianess__ */
