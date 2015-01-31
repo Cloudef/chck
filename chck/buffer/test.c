@@ -12,8 +12,8 @@ int main(void)
       struct chck_buffer buf;
       assert(chck_buffer(&buf, 1, CHCK_ENDIANESS_NATIVE));
       buf.copied = false;
-      chck_buffer_release(&buf);
-      free(buf.buffer); // should not SIGSEGV
+      free(buf.buffer);
+      chck_buffer_release(&buf); // should not SIGSEGV
    }
 
    /* TEST: over-read */
