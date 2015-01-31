@@ -6,7 +6,7 @@
 #  include <zlib.h>
 #endif
 
-static bool
+static inline bool
 valid_bits(enum chck_bits bits)
 {
    return (bits == CHCK_BUFFER_B8  ||
