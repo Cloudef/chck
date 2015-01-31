@@ -197,7 +197,7 @@ chck_pool(struct chck_pool *pool, size_t grow, size_t capacity, size_t member_si
 }
 
 bool
-chck_poolNewFromCArray(struct chck_pool *pool, const void *items, size_t memb, size_t grow, size_t member_size)
+chck_pool_from_c_array(struct chck_pool *pool, const void *items, size_t memb, size_t grow, size_t member_size)
 {
    return (chck_pool(pool, grow, 0, member_size) && chck_pool_set_c_array(pool, items, memb));
 }
