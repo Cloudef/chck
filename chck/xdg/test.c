@@ -26,7 +26,7 @@ main(void)
       const char *path;
       struct xdg_paths state;
       memset(&state, 0, sizeof(state));
-      while ((path = xdg_get_paths("XDG_DATA_DIRS", "/usr/share:/foo/bar:asd:/the/relative/got/skipped:asd", &state)))
+      while ((path = xdg_get_paths("XDG_DATA_DIRS", "/usr/share:/foo/bar:asd:/the/relative/got/skipped:asd", &state, -1)))
          printf("=> %s\n", path);
    }
 
@@ -60,13 +60,13 @@ main(void)
    {
       int i = 0;
       const char *paths[3] = { "/test", "/test2", "/relative/skipped" };
-      setenv("XDG_DATA_DIRS", "/test:/test2:relative:/relative/skipped", 1);
+      setenv("XDG_DATA_DIRS", "/test:/test2:relative:/relative/skipped:/ignored/by/max/iter/arg", 1);
 
       const char *path;
       struct xdg_paths state;
       memset(&state, 0, sizeof(state));
-      while ((path = xdg_get_paths("XDG_DATA_DIRS", "/does:/not:/trigger", &state)))
-         assert(!strcmp(path, paths[i++]));
+      while ((path = xdg_get_paths("XDG_DATA_DIRS", "/does:/not:/trigger", &state, 3)))
+         assert(i < 3 && !strcmp(path, paths[i++]));
    }
 
    // TEST: default paths
@@ -78,8 +78,8 @@ main(void)
       const char *path;
       struct xdg_paths state;
       memset(&state, 0, sizeof(state));
-      while ((path = xdg_get_paths("XDG_DATA_DIRS", "/default:relative:skip/path", &state)))
-         assert(!strcmp(path, paths[i++]));
+      while ((path = xdg_get_paths("XDG_DATA_DIRS", "/default:relative:skip/path", &state, 1)))
+         assert(i < 1 && !strcmp(path, paths[i++]));
    }
 
    return EXIT_SUCCESS;

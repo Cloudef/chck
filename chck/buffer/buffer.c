@@ -150,6 +150,9 @@ chck_buffer_fill(const void *src, size_t size, size_t memb, struct chck_buffer *
    if (size * memb > sz && !chck_buffer_resize(buf, buf->size + size * memb + buf->step))
       return 0;
 
+   if (!buf->curpos)
+      return 0;
+
    memcpy(buf->curpos, src, size * memb);
    return memb;
 }
@@ -163,8 +166,10 @@ chck_buffer_fill_from_file(FILE *src, size_t size, size_t memb, struct chck_buff
    if (size * memb > sz && !chck_buffer_resize(buf, buf->size + size * memb + buf->step))
       return 0;
 
-   fread(buf->curpos, size, memb, src);
-   return memb;
+   if (!buf->curpos)
+      return 0;
+
+   return fread(buf->curpos, size, memb, src);
 }
 
 size_t
@@ -176,8 +181,14 @@ chck_buffer_fill_from_fd(int fd, size_t size, size_t memb, struct chck_buffer *b
    if (size * memb > sz && !chck_buffer_resize(buf, buf->size + size * memb + buf->step))
       return 0;
 
-   read(fd, buf->curpos, size * memb);
-   return memb;
+   if (!buf->curpos)
+      return 0;
+
+   ssize_t ret = read(fd, buf->curpos, size * memb);
+   if (unlikely(ret == -1 || ret == 0))
+      return 0;
+
+   return (size_t)ret / size;
 }
 
 size_t

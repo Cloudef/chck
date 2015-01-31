@@ -44,16 +44,21 @@ bool pool_buffer_resize(struct chck_pool_buffer *pb, size_t size)
    return true;
 }
 
-static void
+static bool
 pool_buffer(struct chck_pool_buffer *pb, size_t grow, size_t capacity, size_t member_size)
 {
    assert(pb && member_size > 0);
+
+   if (unlikely(!member_size))
+      return false;
 
    pb->member = member_size;
    pb->step = (grow ? grow : 32);
 
    if (capacity > 0)
       pool_buffer_resize(pb, capacity * member_size);
+
+   return true;
 }
 
 static void*
@@ -62,6 +67,9 @@ pool_buffer_add(struct chck_pool_buffer *pb, const void *data, size_t pos, size_
    assert(pb);
 
    if (pb->allocated < pos + pb->member && unlikely(!pool_buffer_resize(pb, pb->allocated + pb->member * pb->step)))
+      return NULL;
+
+   if (!pb->buffer)
       return NULL;
 
    if (data) {
@@ -182,9 +190,9 @@ chck_pool(struct chck_pool *pool, size_t grow, size_t capacity, size_t member_si
       return false;
 
    memset(pool, 0, sizeof(struct chck_pool));
-   pool_buffer(&pool->items, grow, capacity, member_size);
-   pool_buffer(&pool->map, grow, capacity, sizeof(bool));
-   pool_buffer(&pool->removed, grow, 0, sizeof(size_t));
+   assert(pool_buffer(&pool->items, grow, capacity, member_size));
+   assert(pool_buffer(&pool->map, grow, capacity, sizeof(bool)));
+   assert(pool_buffer(&pool->removed, grow, 0, sizeof(size_t)));
    return true;
 }
 
@@ -305,7 +313,7 @@ chck_iter_pool(struct chck_iter_pool *pool, size_t grow, size_t capacity, size_t
    if (unlikely(!member_size))
       return false;
 
-   pool_buffer(&pool->items, grow, capacity, member_size);
+   assert(pool_buffer(&pool->items, grow, capacity, member_size));
    return true;
 }
 
@@ -346,7 +354,9 @@ chck_iter_pool_push_front(struct chck_iter_pool *pool, const void *data)
 {
    assert(pool);
 
-   void *ptr = pool_buffer_add(&pool->items, NULL, pool->items.used, NULL);
+   void *ptr;
+   if (!(ptr = pool_buffer_add(&pool->items, NULL, pool->items.used, NULL)))
+      return NULL;
 
    if (pool->items.used > pool->items.member) {
       memmove(pool->items.buffer + pool->items.member, pool->items.buffer, pool->items.used - pool->items.member);
@@ -405,7 +415,7 @@ chck_ring_pool(struct chck_ring_pool *pool, size_t grow, size_t capacity, size_t
    if (unlikely(!member_size))
       return false;
 
-   pool_buffer(&pool->items, grow, capacity, member_size);
+   assert(pool_buffer(&pool->items, grow, capacity, member_size));
    return true;
 }
 
@@ -431,7 +441,9 @@ chck_ring_pool_push_front(struct chck_ring_pool *pool, const void *data)
 {
    assert(pool);
 
-   void *ptr = pool_buffer_add(&pool->items, NULL, pool->items.used, NULL);
+   void *ptr;
+   if (!(ptr = pool_buffer_add(&pool->items, NULL, pool->items.used, NULL)))
+      return NULL;
 
    if (pool->items.used > pool->items.member) {
       memmove(pool->items.buffer + pool->items.member, pool->items.buffer, pool->items.used - pool->items.member);

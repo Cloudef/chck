@@ -66,12 +66,14 @@ xdg_get_path(const char *xdg_env, const char *default_path)
 }
 
 const char*
-xdg_get_paths(const char *xdg_env, const char *default_paths, struct xdg_paths *state)
+xdg_get_paths(const char *xdg_env, const char *default_paths, struct xdg_paths *state, uint32_t max_iter)
 {
-   if (state->path && !*state->path) {
+   if ((state->path && !*state->path) || state->iter == max_iter) {
       free((char*)state->paths);
       return NULL;
    }
+
+   ++state->iter;
 
    if (!state->paths) {
       const char *paths;
