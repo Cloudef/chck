@@ -9,6 +9,8 @@
 static inline bool
 resize(unsigned char **buf, size_t *size, size_t nsize)
 {
+   assert(buf && size);
+
    if (nsize == *size)
       return true;
 
@@ -24,6 +26,8 @@ resize(unsigned char **buf, size_t *size, size_t nsize)
 static inline bool
 put(unsigned char **buf, size_t *o, size_t *size, const char *bytes)
 {
+   assert(buf && o && size && bytes);
+
    size_t len = strlen(bytes);
    if (len >= *size - *o && resize(buf, size, *size * 2) != true)
       return false;

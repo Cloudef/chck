@@ -43,6 +43,7 @@ node_fits(struct chck_atlas_node *node, uint32_t width, uint32_t height, uint32_
 static bool
 node_merge(struct chck_atlas_node *n1, struct chck_atlas_node *n2)
 {
+   assert(n1 && n2);
    bool ret = false;
 
    /* if we share the top edge then.. */
@@ -74,6 +75,8 @@ node_merge(struct chck_atlas_node *n1, struct chck_atlas_node *n2)
 static bool
 atlas_node_add(struct chck_atlas *atlas, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 {
+   assert(atlas);
+
    struct chck_atlas_node *node;
    if (!(node = calloc(1, sizeof(struct chck_atlas_node))))
       return false;
@@ -90,6 +93,8 @@ atlas_node_add(struct chck_atlas *atlas, uint32_t x, uint32_t y, uint32_t width,
 static bool
 merge_nodes(struct chck_atlas *atlas)
 {
+   assert(atlas);
+
    struct chck_atlas_node *f = atlas->free_list;
    while (f) {
       struct chck_atlas_node *c = atlas->free_list, *prev = NULL;
@@ -107,6 +112,7 @@ merge_nodes(struct chck_atlas *atlas)
       }
       f = f->next;
    }
+
    return false;
 }
 

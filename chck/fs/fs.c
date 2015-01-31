@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
+#include <assert.h>
 
 #if defined(_WIN32) || defined(_WIN64)
 #  include <windows.h>
@@ -20,6 +21,7 @@
 static inline char*
 ccopy(const char *str)
 {
+   assert(str);
    size_t size = strlen(str);
    char *cpy = calloc(1, size + 1);
    return (cpy ? memcpy(cpy, str, size) : NULL);
@@ -29,6 +31,8 @@ ccopy(const char *str)
 static inline bool
 resize(char **buf, size_t *size, size_t nsize)
 {
+   assert(buf && size);
+
    if (nsize == *size)
       return true;
 

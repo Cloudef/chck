@@ -9,6 +9,7 @@
 static char*
 ccopy(const char *str)
 {
+   assert(str);
    size_t size = strlen(str);
    char *cpy = calloc(1, size + 1);
    return (cpy ? memcpy(cpy, str, size) : NULL);
@@ -17,6 +18,7 @@ ccopy(const char *str)
 static char*
 strip_slash(char *str)
 {
+   assert(str);
    size_t size;
    if ((size = strlen(str)) > 0) {
       for (char *s = str + size - 1; *s == '/'; --s)
@@ -42,7 +44,10 @@ get_home(void)
 char*
 xdg_get_path(const char *xdg_env, const char *default_path)
 {
-   assert(default_path[0] != '/');
+   assert(xdg_env && default_path && default_path[0] != '/');
+
+   if (!xdg_env || !default_path || default_path[0] == '/')
+      return NULL;
 
    const char *xdg_dir;
    if ((xdg_dir = getenv(xdg_env)) && xdg_dir[0] == '/')
@@ -68,6 +73,8 @@ xdg_get_path(const char *xdg_env, const char *default_path)
 const char*
 xdg_get_paths(const char *xdg_env, const char *default_paths, struct xdg_paths *state, uint32_t max_iter)
 {
+   assert(xdg_env && default_paths && state);
+
    if ((state->path && !*state->path) || state->iter == max_iter) {
       free((char*)state->paths);
       return NULL;
@@ -76,6 +83,9 @@ xdg_get_paths(const char *xdg_env, const char *default_paths, struct xdg_paths *
    ++state->iter;
 
    if (!state->paths) {
+      if (!xdg_env || !default_paths)
+         return NULL;
+
       const char *paths;
       if (!(paths = getenv(xdg_env)) || !paths[0])
          paths = default_paths;
