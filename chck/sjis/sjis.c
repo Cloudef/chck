@@ -25,7 +25,7 @@ static inline bool
 put(unsigned char **buf, size_t *o, size_t *size, const char *bytes)
 {
    size_t len = strlen(bytes);
-   if (len > *size - *o && resize(buf, size, *size * 2) != true)
+   if (len >= *size - *o && resize(buf, size, *size * 2) != true)
       return false;
 
    memcpy(*buf + *o, bytes, len);
