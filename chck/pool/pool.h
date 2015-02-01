@@ -45,10 +45,10 @@ struct chck_ring_pool {
  */
 
 #define chck_pool_for_each_call(pool, function, ...) \
-{ void *p; for (size_t i = 0; (p = chck_pool_iter(pool, &i));) function(p, ##__VA_ARGS__); }
+{ void *_P; for (size_t _I = 0; (_P = chck_pool_iter(pool, &_I));) function(_P, ##__VA_ARGS__); }
 
 #define chck_pool_for_each(pool, pos) \
-   for (size_t i = 0; (pos = chck_pool_iter(pool, &i));)
+   for (size_t _I = 0; (pos = chck_pool_iter(pool, &_I));)
 
 bool chck_pool(struct chck_pool *pool, size_t grow, size_t capacity, size_t member_size);
 bool chck_pool_from_c_array(struct chck_pool *pool, const void *items, size_t memb, size_t grow, size_t member_size);
@@ -70,10 +70,10 @@ void* chck_pool_to_c_array(struct chck_pool *pool, size_t *memb); /* Item *cArra
  */
 
 #define chck_iter_pool_for_each_call(pool, function, ...) \
-{ void *p; for (size_t i = 0; (p = chck_iter_pool_iter(pool, &i));) function(p, ##__VA_ARGS__); }
+{ void *_P; for (size_t _I = 0; (_P = chck_iter_pool_iter(pool, &_I));) function(_P, ##__VA_ARGS__); }
 
 #define chck_iter_pool_for_each(pool, pos) \
-   for (size_t i = 0; (pos = chck_iter_pool_iter(pool, &i));)
+   for (size_t _I = 0; (pos = chck_iter_pool_iter(pool, &_I));)
 
 bool chck_iter_pool(struct chck_iter_pool *pool, size_t grow, size_t capacity, size_t member_size);
 bool chck_iter_pool_from_c_array(struct chck_iter_pool *pool, const void *items, size_t memb, size_t grow_step, size_t member_size);
@@ -94,10 +94,10 @@ void* chck_iter_pool_to_c_array(struct chck_iter_pool *pool, size_t *memb); /* I
  */
 
 #define chck_ring_pool_for_each_call(pool, function, ...) \
-{ void *p; for (size_t i = 0; (p = chck_ring_pool_iter(pool, &i));) function(p, ##__VA_ARGS__); }
+{ void *_P; for (size_t _I = 0; (_P = chck_ring_pool_iter(pool, &_I));) function(_P, ##__VA_ARGS__); }
 
 #define chck_ring_pool_for_each(pool, pos) \
-   for (size_t i = 0; (pos = chck_ring_pool_iter(pool, &i));)
+   for (size_t _I = 0; (pos = chck_ring_pool_iter(pool, &_I));)
 
 bool chck_ring_pool(struct chck_ring_pool *pool, size_t grow, size_t capacity, size_t member_size);
 bool chck_ring_pool_from_c_array(struct chck_ring_pool *pool, const void *items, size_t memb, size_t growStep, size_t memberSize);
