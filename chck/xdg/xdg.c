@@ -6,7 +6,7 @@
 #include <pwd.h>
 #include "xdg.h"
 
-static char*
+static inline char*
 ccopy(const char *str)
 {
    assert(str);
@@ -15,7 +15,7 @@ ccopy(const char *str)
    return (cpy ? memcpy(cpy, str, size) : NULL);
 }
 
-static char*
+static inline char*
 strip_slash(char *str)
 {
    assert(str);
@@ -27,7 +27,7 @@ strip_slash(char *str)
    return str;
 }
 
-static char*
+static inline char*
 get_home(void)
 {
    const char *env;
