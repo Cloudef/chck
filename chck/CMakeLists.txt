@@ -1,4 +1,4 @@
-set(modules buffer pool lut atlas math bams dl fs sjis xdg)
+set(modules buffer pool lut atlas math bams dl fs sjis xdg string)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 foreach (module ${modules})
