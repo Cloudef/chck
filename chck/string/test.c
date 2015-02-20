@@ -15,7 +15,9 @@ int main(void)
       assert(chck_string_set_cstr(&str, NULL, false));
       assert(!str.data && str.size == 0 && !chck_string_eq_cstr(&str, "foobar"));
 
-      // is_heap is false, so nothing is copied
+      // is_heap is false, so nothing is copied.
+      // since chck_strings do not copy when is_heap is false, printf for .data would print whole "foobar" in this case.
+      // if is_heap is set to true, the string is copied and terminated correctly.
       assert(chck_string_set_cstr_with_length(&str, "foobar", 3, false));
       assert(str.data && str.size == strlen("foo") && chck_string_eq_cstr(&str, "foo") && !chck_string_eq_cstr(&str, "foobar"));
 
