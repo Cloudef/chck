@@ -29,6 +29,9 @@ int main(void)
       assert(chck_string_set_cstr(&str2, "foobar2", false));
       assert(str.data != str2.data && str2.size == strlen("foobar2") && !chck_string_eq(&str, &str2));
 
+      assert(chck_string_set_format(&str, "%s-%s", "test", str2.data));
+      assert(str.data && str.size == strlen("test-foobar2") && str.is_heap && chck_string_eq_cstr(&str, "test-foobar2"));
+
       chck_string_release(&str);
       chck_string_release(&str2);
       assert(!str.data && !str2.data && str.size + str2.size == 0);

@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdarg.h>
 #include <string.h>
 
 struct chck_string {
@@ -40,5 +41,11 @@ void chck_string_release(struct chck_string *string);
 bool chck_string_set_cstr(struct chck_string *string, const char *data, bool is_heap);
 bool chck_string_set_cstr_with_length(struct chck_string *string, const char *data, size_t len, bool is_heap);
 bool chck_string_set(struct chck_string *string, const struct chck_string *other, bool is_heap);
+
+#if __GNUC__
+__attribute__((format(printf, 2, 3)))
+#endif
+bool chck_string_set_format(struct chck_string *string, const char *fmt, ...);
+bool chck_string_set_varg(struct chck_string *string, const char *fmt, va_list args);
 
 #endif /* __chck_string_h__ */
