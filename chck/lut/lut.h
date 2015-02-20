@@ -107,7 +107,7 @@ void chck_hash_table_release(struct chck_hash_table *table);
 uint32_t chck_hash_table_collisions(struct chck_hash_table *table);
 bool chck_hash_table_set(struct chck_hash_table *table, uint32_t key, const void *data);
 void* chck_hash_table_get(struct chck_hash_table *table, uint32_t key);
-bool chck_hash_table_str_set(struct chck_hash_table *table, const char *str, size_t len,  const void *data);
+bool chck_hash_table_str_set(struct chck_hash_table *table, const char *str, size_t len, const void *data);
 void* chck_hash_table_str_get(struct chck_hash_table *table, const char *str, size_t len);
 void* chck_hash_table_iter(struct chck_hash_table_iterator *iter);
 
