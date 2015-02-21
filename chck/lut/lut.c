@@ -354,9 +354,14 @@ chck_hash_table_get(struct chck_hash_table *table, uint32_t key)
       data = chck_lut_get(&t->lut, key);
       h = chck_lut_get(&t->meta, key);
       t = t->next;
+
+      if (h && !h->str_key && h->uint_key == key)
+         return data;
+
       // check if this item is a intersection, if so cycle from another set of luts
-   } while (t && (!h || (h->str_key || h->uint_key != key)));
-   return data;
+   } while (t);
+
+   return NULL;
 }
 
 bool
@@ -378,9 +383,14 @@ chck_hash_table_str_get(struct chck_hash_table *table, const char *str, size_t l
       data = chck_lut_str_get(&t->lut, str, len);
       h = chck_lut_str_get(&t->meta, str, len);
       t = t->next;
+
+      if (h && h->str_key && !strcmp(h->str_key, str))
+         return data;
+
       // check if this item is a intersection, if so cycle from another set of luts
-   } while (t && (!h || (!h->str_key || strcmp(h->str_key, str))));
-   return data;
+   } while (t);
+
+   return NULL;
 }
 
 void*
