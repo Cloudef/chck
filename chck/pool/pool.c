@@ -313,6 +313,7 @@ chck_iter_pool(struct chck_iter_pool *pool, size_t grow, size_t capacity, size_t
    if (unlikely(!member_size))
       return false;
 
+   memset(pool, 0, sizeof(struct chck_iter_pool));
    assert(pool_buffer(&pool->items, grow, capacity, member_size));
    return true;
 }
@@ -415,6 +416,7 @@ chck_ring_pool(struct chck_ring_pool *pool, size_t grow, size_t capacity, size_t
    if (unlikely(!member_size))
       return false;
 
+   memset(pool, 0, sizeof(struct chck_ring_pool));
    assert(pool_buffer(&pool->items, grow, capacity, member_size));
    return true;
 }
