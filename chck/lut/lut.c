@@ -17,7 +17,7 @@ lut_create_table(struct chck_lut *lut)
 {
    assert(lut);
 
-   if (!(lut->table = calloc(lut->count, lut->member)))
+   if (!(lut->table = malloc(lut->count * lut->member)))
       return false;
 
    memset(lut->table, lut->set, lut->count * lut->member);
