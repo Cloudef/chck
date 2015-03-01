@@ -43,6 +43,8 @@ int main(void)
             assert(current != NULL);
 
          assert(pool.items.count == 3);
+         assert(pool.items.used == 3 * sizeof(struct item));
+         assert(pool.items.allocated == 32 * sizeof(struct item));
          assert(iter == 3);
       }
 
@@ -55,6 +57,8 @@ int main(void)
             assert(current != NULL);
 
          assert(pool.items.count == 2);
+         assert(pool.items.used == 3 * sizeof(struct item));
+         assert(pool.items.allocated == 32 * sizeof(struct item));
          assert(iter == 3);
       }
 
@@ -67,6 +71,8 @@ int main(void)
             assert(current != NULL);
 
          assert(pool.items.count == 3);
+         assert(pool.items.used == 3 * sizeof(struct item));
+         assert(pool.items.allocated == 32 * sizeof(struct item));
          assert(iter == 3);
       }
 
@@ -79,6 +85,8 @@ int main(void)
             assert(current != NULL);
 
          assert(pool.items.count == 2);
+         assert(pool.items.used == 2 * sizeof(struct item));
+         assert(pool.items.allocated == 32 * sizeof(struct item));
          assert(iter == 2);
       }
 
@@ -91,6 +99,8 @@ int main(void)
             assert(current != NULL);
 
          assert(pool.items.count == 3);
+         assert(pool.items.used == 3 * sizeof(struct item));
+         assert(pool.items.allocated == 32 * sizeof(struct item));
          assert(iter == 3);
       }
 
@@ -124,6 +134,9 @@ int main(void)
       chck_pool_add(&pool, (&(struct item){8, NULL}), &a);
       chck_pool_add(&pool, (&(struct item){9, NULL}), &b);
 
+      assert(pool.items.used == 7 * sizeof(struct item));
+      assert(pool.items.allocated == 32 * sizeof(struct item));
+
       {
          size_t aa = 0;
          struct item *current;
@@ -134,11 +147,26 @@ int main(void)
             assert(current != NULL);
          }
 
-         printf("%zu, %zu\n", aa, pool.items.count);
          assert(pool.items.count == aa);
       }
 
+      {
+         for (uint32_t i = 0; i < 32; ++i)
+            chck_pool_add(&pool, NULL, NULL);
+
+         assert(pool.items.used == 39 * sizeof(struct item));
+         assert(pool.items.allocated == 64 * sizeof(struct item));
+
+         for (uint32_t i = 0; i < 32; ++i)
+            chck_pool_remove(&pool, 7 + i);
+
+         assert(pool.items.used == 7 * sizeof(struct item));
+         assert(pool.items.allocated == 32 * sizeof(struct item));
+      }
+
       chck_pool_release(&pool);
+      assert(pool.items.allocated == 0);
+      assert(pool.items.used == 0);
    }
 
    /* TEST: iter pool */
@@ -163,6 +191,8 @@ int main(void)
             assert(current != NULL);
 
          assert(pool.items.count == 3);
+         assert(pool.items.used == 3 * sizeof(struct item));
+         assert(pool.items.allocated == 32 * sizeof(struct item));
          assert(iter == 3);
       }
 
@@ -175,6 +205,8 @@ int main(void)
             assert(current != NULL);
 
          assert(pool.items.count == 2);
+         assert(pool.items.used == 2 * sizeof(struct item));
+         assert(pool.items.allocated == 32 * sizeof(struct item));
          assert(iter == 2);
       }
 
@@ -189,6 +221,8 @@ int main(void)
             assert(current != NULL);
 
          assert(pool.items.count == 3);
+         assert(pool.items.used == 3 * sizeof(struct item));
+         assert(pool.items.allocated == 32 * sizeof(struct item));
          assert(iter == 3);
       }
 
@@ -201,6 +235,8 @@ int main(void)
             assert(current != NULL);
 
          assert(pool.items.count == 2);
+         assert(pool.items.used == 2 * sizeof(struct item));
+         assert(pool.items.allocated == 32 * sizeof(struct item));
          assert(iter == 2);
       }
 
@@ -213,6 +249,8 @@ int main(void)
             assert(current != NULL);
 
          assert(pool.items.count == 3);
+         assert(pool.items.used == 3 * sizeof(struct item));
+         assert(pool.items.allocated == 32 * sizeof(struct item));
          assert(iter == 3);
       }
 
@@ -232,13 +270,29 @@ int main(void)
       assert(&((struct item*)chck_iter_pool_to_c_array(&pool, NULL))[2] == itemC);
       chck_iter_pool_for_each_call(&pool, printa);
 
+      {
+         for (uint32_t i = 0; i < 32; ++i)
+            chck_iter_pool_push_back(&pool, NULL);
+
+         assert(pool.items.used == 35 * sizeof(struct item));
+         assert(pool.items.allocated == 64 * sizeof(struct item));
+
+         for (uint32_t i = 0; i < 32; ++i)
+            chck_iter_pool_remove(&pool, pool.items.count - 1);
+
+         assert(pool.items.used == 3 * sizeof(struct item));
+         assert(pool.items.allocated == 32 * sizeof(struct item));
+      }
+
       chck_iter_pool_release(&pool);
+      assert(pool.items.allocated == 0);
+      assert(pool.items.used == 0);
    }
 
    /* TEST: ring pool */
    {
       struct chck_ring_pool pool;
-      assert(chck_ring_pool(&pool, 32, 3, sizeof(struct item)));
+      assert(chck_ring_pool(&pool, 32, 0, sizeof(struct item)));
 
       void *a, *b, *c;
       a = chck_ring_pool_push_back(&pool, (&(struct item){1, NULL}));
@@ -255,6 +309,8 @@ int main(void)
             assert(current != NULL);
 
          assert(pool.items.count == 3);
+         assert(pool.items.used == 3 * sizeof(struct item));
+         assert(pool.items.allocated == 32 * sizeof(struct item));
          assert(iter == 3);
       }
 
@@ -267,6 +323,8 @@ int main(void)
             assert(current != NULL);
 
          assert(pool.items.count == 2);
+         assert(pool.items.used == 2 * sizeof(struct item));
+         assert(pool.items.allocated == 32 * sizeof(struct item));
          assert(iter == 2);
       }
 
@@ -279,6 +337,8 @@ int main(void)
             assert(current != NULL);
 
          assert(pool.items.count == 3);
+         assert(pool.items.used == 3 * sizeof(struct item));
+         assert(pool.items.allocated == 32 * sizeof(struct item));
          assert(iter == 3);
       }
 
@@ -291,6 +351,8 @@ int main(void)
             assert(current != NULL);
 
          assert(pool.items.count == 2);
+         assert(pool.items.used == 2 * sizeof(struct item));
+         assert(pool.items.allocated == 32 * sizeof(struct item));
          assert(iter == 2);
       }
 
@@ -303,6 +365,8 @@ int main(void)
             assert(current != NULL);
 
          assert(pool.items.count == 3);
+         assert(pool.items.used == 3 * sizeof(struct item));
+         assert(pool.items.allocated == 32 * sizeof(struct item));
          assert(iter == 3);
       }
 
@@ -320,8 +384,25 @@ int main(void)
       assert(((struct item*)chck_ring_pool_pop_last(&pool))->a == 2);
       assert(((struct item*)chck_ring_pool_pop_first(&pool))->a == 3);
       assert(((struct item*)chck_ring_pool_pop_last(&pool))->a == 1);
+      assert(pool.items.used == 0);
+
+      {
+         for (uint32_t i = 0; i < 33; ++i)
+            chck_ring_pool_push_back(&pool, NULL);
+
+         assert(pool.items.used == 33 * sizeof(struct item));
+         assert(pool.items.allocated == 64 * sizeof(struct item));
+
+         for (uint32_t i = 0; i < 32; ++i)
+            chck_ring_pool_pop_last(&pool);
+
+         assert(pool.items.used == 1 * sizeof(struct item));
+         assert(pool.items.allocated == 32 * sizeof(struct item));
+      }
 
       chck_ring_pool_release(&pool);
+      assert(pool.items.allocated == 0);
+      assert(pool.items.used == 0);
    }
 
    /* TEST: benchmark (many insertions, and removal expanding from center) */
@@ -332,6 +413,7 @@ int main(void)
       for (uint32_t i = 0; i < iters; ++i)
          assert(chck_pool_add(&pool, (&(struct item){i, NULL}), NULL));
       assert(pool.items.count == iters);
+      assert(pool.items.used == iters * sizeof(struct item));
       for (uint32_t i = iters / 2, d = iters / 2; i < iters; ++i, --d) {
          assert(((struct item*)chck_pool_get(&pool, i))->a == i);
          assert(((struct item*)chck_pool_get(&pool, d))->a == d);
@@ -339,7 +421,9 @@ int main(void)
          chck_pool_remove(&pool, d);
       }
       assert(pool.items.count == 0);
+      assert(pool.items.used == 0);
       chck_pool_release(&pool);
+      assert(pool.items.allocated == 0);
    }
 
    return EXIT_SUCCESS;

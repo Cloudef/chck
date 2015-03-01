@@ -22,8 +22,8 @@ pool_buffer_release(struct chck_pool_buffer *pb)
    pb->count = pb->allocated = pb->used = 0;
 }
 
-static
-bool pool_buffer_resize(struct chck_pool_buffer *pb, size_t size)
+static bool
+pool_buffer_resize(struct chck_pool_buffer *pb, size_t size)
 {
    assert(pb);
 
@@ -89,15 +89,15 @@ pool_buffer_add(struct chck_pool_buffer *pb, const void *data, size_t pos, size_
 }
 
 static void
-pool_buffer_remove(struct chck_pool_buffer *pb, size_t index)
+pool_buffer_remove(struct chck_pool_buffer *pb, size_t index, size_t (*get_used)(), void *userdata)
 {
-   assert(pb);
+   assert(pb && get_used);
 
    if (unlikely(index * pb->member >= pb->used))
       return;
 
    if (index * pb->member + pb->member >= pb->used)
-      pb->used -= pb->member;
+      pb->used = (index > 0 ? get_used(pb, index, userdata) : 0);
 
    if (pb->used + pb->member * pb->step < pb->allocated)
       pool_buffer_resize(pb, pb->allocated - pb->member * pb->step);
@@ -174,7 +174,7 @@ pool_get_free_slot(struct chck_pool *pool)
 
    if (pool->removed.count > 0) {
       const size_t last = *(size_t*)(pool->removed.buffer + pool->removed.used - pool->removed.member);
-      pool_buffer_remove(&pool->removed, pool->removed.count - 1);
+      pool_buffer_remove_move(&pool->removed, pool->removed.count - 1);
       return last;
    }
 
@@ -230,6 +230,19 @@ chck_pool_get_last(const struct chck_pool *pool)
    return chck_pool_get(pool, pool->items.count - 1);
 }
 
+static size_t
+pool_get_used(struct chck_pool_buffer *pb, size_t removed, struct chck_pool *pool)
+{
+   assert(pb && pool);
+
+   // for chck_pool's, chck_pool_buffer can not know alone the used size,
+   // so we need to help a bit with this function.
+
+   size_t largest;
+   for (largest = (removed > 0 ? removed - 1 : 0); largest > 0 && !*(bool*)(pool->map.buffer + largest * pool->map.member); --largest);
+   return largest * pb->member + pb->member;
+}
+
 void*
 chck_pool_add(struct chck_pool *pool, const void *data, size_t *out_index)
 {
@@ -241,7 +254,7 @@ chck_pool_add(struct chck_pool *pool, const void *data, size_t *out_index)
 
    void *p;
    if (!(p = pool_buffer_add(&pool->items, data, slot * pool->items.member, out_index))) {
-      pool_buffer_remove(&pool->map, slot * pool->map.member);
+      pool_buffer_remove(&pool->map, slot * pool->map.member, pool_get_used, pool);
       return NULL;
    }
 
@@ -257,10 +270,10 @@ chck_pool_remove(struct chck_pool *pool, size_t index)
       return;
 
    const bool last = (index * pool->items.member == pool->items.used);
-   pool_buffer_remove(&pool->items, index);
+   pool_buffer_remove(&pool->items, index, pool_get_used, pool);
 
    *(bool*)(pool->map.buffer + index * pool->map.member) = false;
-   pool_buffer_remove(&pool->map, index);
+   pool_buffer_resize(&pool->map, (pool->items.allocated / pool->items.member) * pool->map.member);
 
    if (!last) {
       // Some heuristics to avoid large amount of heap allocations
