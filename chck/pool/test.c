@@ -180,9 +180,12 @@ int main(void)
       assert(((struct item*)chck_iter_pool_get(&pool, 0))->a == 2);
       chck_iter_pool_release(&pool);
 
-      assert(chck_iter_pool_push_back(&pool, (&(struct item){1, NULL})));
-      assert(chck_iter_pool_push_back(&pool, NULL));
-      assert(chck_iter_pool_push_back(&pool, NULL));
+      assert(chck_iter_pool_push_front(&pool, (&(struct item){1, NULL})));
+      assert(chck_iter_pool_insert(&pool, 55, (&(struct item){2, NULL}))); // same as push_back when index > count
+      assert(chck_iter_pool_insert(&pool, 1, (&(struct item){3, NULL})));
+      assert(((struct item*)chck_iter_pool_get(&pool, 0))->a == 1);
+      assert(((struct item*)chck_iter_pool_get(&pool, 1))->a == 3);
+      assert(((struct item*)chck_iter_pool_get(&pool, 2))->a == 2);
 
       {
          size_t iter = 0;

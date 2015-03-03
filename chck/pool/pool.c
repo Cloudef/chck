@@ -88,6 +88,34 @@ pool_buffer_add(struct chck_pool_buffer *pb, const void *data, size_t pos, size_
    return pb->buffer + pos;
 }
 
+static void*
+pool_buffer_add_move(struct chck_pool_buffer *pb, const void *data, size_t pos, size_t *out_index)
+{
+   if (pos > pb->used)
+      pos = pb->used;
+
+   void *ptr;
+   if (!(ptr = pool_buffer_add(pb, data, pb->used, out_index)))
+      return NULL;
+
+   assert(pb->used >= pb->member);
+   assert(pb->used > pos);
+
+   if (pb->used > pb->member) {
+      size_t shift = pb->used - pos;
+      memmove(pb->buffer + pos + pb->member, pb->buffer + (pb->used - shift), shift);
+      ptr = pb->buffer + pos;
+   }
+
+   if (data) {
+      memcpy(ptr, data, pb->member);
+   } else {
+      memset(ptr, 0, pb->member);
+   }
+
+   return ptr;
+}
+
 static void
 pool_buffer_remove(struct chck_pool_buffer *pb, size_t index, size_t (*get_used)(), void *userdata)
 {
@@ -364,26 +392,17 @@ chck_iter_pool_get_last(const struct chck_iter_pool *pool)
 }
 
 void*
+chck_iter_pool_insert(struct chck_iter_pool *pool, size_t index, const void *data)
+{
+   assert(pool);
+   return pool_buffer_add_move(&pool->items, data, index * pool->items.member, NULL);
+}
+
+void*
 chck_iter_pool_push_front(struct chck_iter_pool *pool, const void *data)
 {
    assert(pool);
-
-   void *ptr;
-   if (!(ptr = pool_buffer_add(&pool->items, NULL, pool->items.used, NULL)))
-      return NULL;
-
-   if (pool->items.used > pool->items.member) {
-      memmove(pool->items.buffer + pool->items.member, pool->items.buffer, pool->items.used - pool->items.member);
-      ptr = pool->items.buffer;
-
-      if (data) {
-         memcpy(ptr, data, pool->items.member);
-      } else {
-         memset(ptr, 0, pool->items.member);
-      }
-   }
-
-   return ptr;
+   return pool_buffer_add_move(&pool->items, data, 0, NULL);
 }
 
 void*
@@ -455,23 +474,7 @@ void*
 chck_ring_pool_push_front(struct chck_ring_pool *pool, const void *data)
 {
    assert(pool);
-
-   void *ptr;
-   if (!(ptr = pool_buffer_add(&pool->items, NULL, pool->items.used, NULL)))
-      return NULL;
-
-   if (pool->items.used > pool->items.member) {
-      memmove(pool->items.buffer + pool->items.member, pool->items.buffer, pool->items.used - pool->items.member);
-      ptr = pool->items.buffer;
-
-      if (data) {
-         memcpy(ptr, data, pool->items.member);
-      } else {
-         memset(ptr, 0, pool->items.member);
-      }
-   }
-
-   return ptr;
+   return pool_buffer_add_move(&pool->items, data, 0, NULL);
 }
 
 void*

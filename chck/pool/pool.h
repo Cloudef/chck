@@ -82,6 +82,7 @@ void* chck_iter_pool_get(const struct chck_iter_pool *pool, size_t index);
 void* chck_iter_pool_get_last(const struct chck_iter_pool *pool);
 void* chck_iter_pool_push_front(struct chck_iter_pool *pool, const void *data);
 void* chck_iter_pool_push_back(struct chck_iter_pool *pool, const void *data);
+void* chck_iter_pool_insert(struct chck_iter_pool *pool, size_t index, const void *data);
 void chck_iter_pool_remove(struct chck_iter_pool *pool, size_t index);
 void* chck_iter_pool_iter(const struct chck_iter_pool *pool, size_t *iter);
 bool chck_iter_pool_set_c_array(struct chck_iter_pool *pool, const void *items, size_t memb); /* Item *cArray; */
