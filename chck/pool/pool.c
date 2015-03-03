@@ -153,14 +153,14 @@ pool_buffer_remove_move(struct chck_pool_buffer *pb, size_t index)
 }
 
 static void*
-pool_buffer_iter(const struct chck_pool_buffer *pb, size_t *iter)
+pool_buffer_iter(const struct chck_pool_buffer *pb, size_t *iter, bool reverse)
 {
    assert(iter);
 
    if (*iter * pb->member >= pb->used)
       return NULL;
 
-   return pb->buffer + (*iter)++ * pb->member;
+   return pb->buffer + (reverse ? (*iter)-- : (*iter)++) * pb->member;
 }
 
 static bool
@@ -311,16 +311,16 @@ chck_pool_remove(struct chck_pool *pool, size_t index)
 }
 
 void*
-chck_pool_iter(const struct chck_pool *pool, size_t *iter)
+chck_pool_iter(const struct chck_pool *pool, size_t *iter, bool reverse)
 {
    assert(pool && iter);
 
    void *current = NULL;
    while (!current && *iter * pool->items.member < pool->items.used) {
-      current = pool_buffer_iter(&pool->items, iter);
+      current = pool_buffer_iter(&pool->items, iter, reverse);
 
       // We don't want to return pointer to removed indexes.
-      if (!*(bool*)(pool->map.buffer + (*iter - 1) * pool->map.member))
+      if (!*(bool*)(pool->map.buffer + (*iter - (reverse ? -1 : 1)) * pool->map.member))
          current = NULL;
    }
 
@@ -420,10 +420,10 @@ chck_iter_pool_remove(struct chck_iter_pool *pool, size_t index)
 }
 
 void*
-chck_iter_pool_iter(const struct chck_iter_pool *pool, size_t *iter)
+chck_iter_pool_iter(const struct chck_iter_pool *pool, size_t *iter, bool reverse)
 {
    assert(pool && iter);
-   return pool_buffer_iter(&pool->items, iter);
+   return pool_buffer_iter(&pool->items, iter, reverse);
 }
 
 bool
@@ -518,10 +518,10 @@ chck_ring_pool_pop_last(struct chck_ring_pool *pool)
 }
 
 void*
-chck_ring_pool_iter(const struct chck_ring_pool *pool, size_t *iter)
+chck_ring_pool_iter(const struct chck_ring_pool *pool, size_t *iter, bool reverse)
 {
    assert(pool && iter);
-   return pool_buffer_iter(&pool->items, iter);
+   return pool_buffer_iter(&pool->items, iter, reverse);
 }
 
 bool

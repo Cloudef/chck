@@ -39,7 +39,7 @@ int main(void)
       {
          size_t iter = 0;
          struct item *current;
-         while ((current = chck_pool_iter(&pool, &iter)))
+         while ((current = chck_pool_iter(&pool, &iter, false)))
             assert(current != NULL);
 
          assert(pool.items.count == 3);
@@ -53,7 +53,7 @@ int main(void)
       {
          size_t iter = 0;
          struct item *current;
-         while ((current = chck_pool_iter(&pool, &iter)))
+         while ((current = chck_pool_iter(&pool, &iter, false)))
             assert(current != NULL);
 
          assert(pool.items.count == 2);
@@ -67,7 +67,7 @@ int main(void)
       {
          size_t iter = 0;
          struct item *current;
-         while ((current = chck_pool_iter(&pool, &iter)))
+         while ((current = chck_pool_iter(&pool, &iter, false)))
             assert(current != NULL);
 
          assert(pool.items.count == 3);
@@ -81,13 +81,13 @@ int main(void)
       {
          size_t iter = 0;
          struct item *current;
-         while ((current = chck_pool_iter(&pool, &iter)))
+         while ((current = chck_pool_iter(&pool, &iter, true)))
             assert(current != NULL);
 
          assert(pool.items.count == 2);
          assert(pool.items.used == 2 * sizeof(struct item));
          assert(pool.items.allocated == 32 * sizeof(struct item));
-         assert(iter == 2);
+         assert(iter == (size_t)-1);
       }
 
       chck_pool_add(&pool, NULL, NULL);
@@ -95,7 +95,7 @@ int main(void)
       {
          size_t iter = 0;
          struct item *current;
-         while ((current = chck_pool_iter(&pool, &iter)))
+         while ((current = chck_pool_iter(&pool, &iter, false)))
             assert(current != NULL);
 
          assert(pool.items.count == 3);
@@ -190,7 +190,7 @@ int main(void)
       {
          size_t iter = 0;
          struct item *current;
-         while ((current = chck_iter_pool_iter(&pool, &iter)))
+         while ((current = chck_iter_pool_iter(&pool, &iter, false)))
             assert(current != NULL);
 
          assert(pool.items.count == 3);
@@ -204,13 +204,13 @@ int main(void)
       {
          size_t iter = 0;
          struct item *current;
-         while ((current = chck_iter_pool_iter(&pool, &iter)))
+         while ((current = chck_iter_pool_iter(&pool, &iter, true)))
             assert(current != NULL);
 
          assert(pool.items.count == 2);
          assert(pool.items.used == 2 * sizeof(struct item));
          assert(pool.items.allocated == 32 * sizeof(struct item));
-         assert(iter == 2);
+         assert(iter == (size_t)-1);
       }
 
       void *f;
@@ -220,7 +220,7 @@ int main(void)
       {
          size_t iter = 0;
          struct item *current;
-         while ((current = chck_iter_pool_iter(&pool, &iter)))
+         while ((current = chck_iter_pool_iter(&pool, &iter, false)))
             assert(current != NULL);
 
          assert(pool.items.count == 3);
@@ -234,7 +234,7 @@ int main(void)
       {
          size_t iter = 0;
          struct item *current;
-         while ((current = chck_iter_pool_iter(&pool, &iter)))
+         while ((current = chck_iter_pool_iter(&pool, &iter, false)))
             assert(current != NULL);
 
          assert(pool.items.count == 2);
@@ -248,7 +248,7 @@ int main(void)
       {
          size_t iter = 0;
          struct item *current;
-         while ((current = chck_iter_pool_iter(&pool, &iter)))
+         while ((current = chck_iter_pool_iter(&pool, &iter, false)))
             assert(current != NULL);
 
          assert(pool.items.count == 3);
@@ -308,7 +308,7 @@ int main(void)
       {
          size_t iter = 0;
          struct item *current;
-         while ((current = chck_ring_pool_iter(&pool, &iter)))
+         while ((current = chck_ring_pool_iter(&pool, &iter, false)))
             assert(current != NULL);
 
          assert(pool.items.count == 3);
@@ -322,13 +322,13 @@ int main(void)
       {
          size_t iter = 0;
          struct item *current;
-         while ((current = chck_ring_pool_iter(&pool, &iter)))
+         while ((current = chck_ring_pool_iter(&pool, &iter, true)))
             assert(current != NULL);
 
          assert(pool.items.count == 2);
          assert(pool.items.used == 2 * sizeof(struct item));
          assert(pool.items.allocated == 32 * sizeof(struct item));
-         assert(iter == 2);
+         assert(iter == (size_t)-1);
       }
 
       assert(chck_ring_pool_push_front(&pool, NULL));
@@ -336,7 +336,7 @@ int main(void)
       {
          size_t iter = 0;
          struct item *current;
-         while ((current = chck_ring_pool_iter(&pool, &iter)))
+         while ((current = chck_ring_pool_iter(&pool, &iter, false)))
             assert(current != NULL);
 
          assert(pool.items.count == 3);
@@ -350,7 +350,7 @@ int main(void)
       {
          size_t iter = 0;
          struct item *current;
-         while ((current = chck_ring_pool_iter(&pool, &iter)))
+         while ((current = chck_ring_pool_iter(&pool, &iter, false)))
             assert(current != NULL);
 
          assert(pool.items.count == 2);
@@ -364,7 +364,7 @@ int main(void)
       {
          size_t iter = 0;
          struct item *current;
-         while ((current = chck_ring_pool_iter(&pool, &iter)))
+         while ((current = chck_ring_pool_iter(&pool, &iter, false)))
             assert(current != NULL);
 
          assert(pool.items.count == 3);
