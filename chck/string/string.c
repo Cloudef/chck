@@ -7,7 +7,7 @@
 static inline char*
 ccopy(const char *str, size_t len)
 {
-   char *cpy = calloc(1, len);
+   char *cpy = calloc(1, len + 1);
    return (cpy ? memcpy(cpy, str, len) : NULL);
 }
 
