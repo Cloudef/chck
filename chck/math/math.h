@@ -79,6 +79,7 @@
    decl_generics(T, n) \
    static inline T chck_modn##n(T x, T m) { return x - m * round((FT)x / (FT)m); } // modulus rounding to nearest int (-m/2, +m/2 range)
 
+decl_u_generics(size_t, sz)
 decl_u_generics(uint64_t, u64)
 decl_s_generics(int64_t, double, 64)
 decl_u_generics(uint32_t, u32)
