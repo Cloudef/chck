@@ -1,6 +1,7 @@
 #include "buffer.h"
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdarg.h>
 
 #if HAS_ZLIB
 #  include <zlib.h>
@@ -339,6 +340,33 @@ chck_buffer_write_string(const char *str, size_t len, struct chck_buffer *buf)
       return false;
 
    return likely(chck_buffer_write_string_of_type(str, len, bits, buf));
+}
+
+size_t
+chck_buffer_write_format(struct chck_buffer *buf, const char *fmt, ...)
+{
+   va_list argp;
+   va_start(argp, fmt);
+   const size_t wrote = chck_buffer_write_varg(buf, fmt, argp);
+   va_end(argp);
+   return wrote;
+}
+
+size_t
+chck_buffer_write_varg(struct chck_buffer *buf, const char *fmt, va_list args)
+{
+   va_list cpy;
+   va_copy(cpy, args);
+
+   char *str = NULL;
+   const size_t len = vsnprintf(NULL, 0, fmt, args);
+   if (len > 0 && !(str = malloc(len + 1)))
+      return false;
+
+   vsnprintf(str, len + 1, fmt, cpy);
+   const size_t wrote = chck_buffer_write(str, 1, len, buf);
+   free(str);
+   return wrote;
 }
 
 bool

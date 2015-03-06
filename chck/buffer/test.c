@@ -32,6 +32,18 @@ int main(void)
       chck_buffer_release(&buf);
    }
 
+   /* TEST: writing format */
+   {
+      struct chck_buffer buf;
+      assert(chck_buffer(&buf, 1, CHCK_ENDIANESS_NATIVE));
+      const char *result = "Hello buffer, I'm in your buffer at 10:00 clock!";
+      assert(chck_buffer_write_format(&buf, "Hello %s, I'm in your buffer at %d:%.2d clock!", "buffer", 10, 0) == strlen(result));
+      chck_buffer_seek(&buf, 0, SEEK_SET);
+      assert(!memcmp(buf.buffer, result, strlen(result)));
+      chck_buffer_release(&buf);
+
+   }
+
    /* TEST: little endian buffer */
    {
       static const struct {

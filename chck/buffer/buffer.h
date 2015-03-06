@@ -59,6 +59,12 @@ bool chck_buffer_write_int(const void *i, enum chck_bits bits, struct chck_buffe
 bool chck_buffer_write_string(const char *str, size_t len, struct chck_buffer *buf);
 bool chck_buffer_write_string_of_type(const char *str, size_t len, enum chck_bits bits, struct chck_buffer *buf);
 
+#if __GNUC__
+__attribute__((format(printf, 2, 3)))
+#endif
+size_t chck_buffer_write_format(struct chck_buffer *buf, const char *fmt, ...);
+size_t chck_buffer_write_varg(struct chck_buffer *buf, const char *fmt, va_list args);
+
 ptrdiff_t chck_buffer_seek(struct chck_buffer *buf, long offset, int whence);
 bool chck_buffer_resize(struct chck_buffer *buf, size_t size);
 
