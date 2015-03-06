@@ -2,6 +2,7 @@
 #define __chck_math_h__
 
 #include <math.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <float.h>
