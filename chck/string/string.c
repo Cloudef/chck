@@ -52,9 +52,8 @@ chck_string_set_varg(struct chck_string *string, const char *fmt, va_list args)
    va_list cpy;
    va_copy(cpy, args);
 
-   size_t len = vsnprintf(NULL, 0, fmt, args);
-
    char *str = NULL;
+   const size_t len = vsnprintf(NULL, 0, fmt, args);
    if (len > 0 && !(str = malloc(len + 1)))
       return false;
 
