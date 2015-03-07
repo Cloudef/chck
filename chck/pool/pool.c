@@ -39,6 +39,10 @@ pool_buffer_resize(struct chck_pool_buffer *pb, size_t size)
    if (!(tmp = realloc(pb->buffer, size)))
       return false;
 
+   // make sure our buffer is always initialized, to avoid complexity
+   if (size > pb->allocated)
+      memset(tmp + pb->allocated, 0, size - pb->allocated);
+
    pb->buffer = tmp;
    pb->allocated = size;
    return true;
@@ -66,8 +70,10 @@ pool_buffer_add(struct chck_pool_buffer *pb, const void *data, size_t pos, size_
 {
    assert(pb);
 
-   if (pb->allocated < pos + pb->member && unlikely(!pool_buffer_resize(pb, pb->allocated + pb->member * pb->step)))
-      return NULL;
+   while (pb->allocated < pos + pb->member) {
+      if (unlikely(!pool_buffer_resize(pb, pb->allocated + pb->member * pb->step)))
+         return NULL;
+   }
 
    if (!pb->buffer)
       return NULL;
@@ -261,6 +267,7 @@ static size_t
 pool_get_used(struct chck_pool_buffer *pb, size_t removed, struct chck_pool *pool)
 {
    assert(pb && pool);
+   assert(removed * pool->map.member + pool->map.member <= pool->map.used);
 
    // for chck_pool's, chck_pool_buffer can not know alone the used size,
    // so we need to help a bit with this function.
