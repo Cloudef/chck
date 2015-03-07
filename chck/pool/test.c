@@ -19,6 +19,8 @@ static void printa(struct item *item)
 
 int main(void)
 {
+   struct item dummy = {0};
+
    /* TEST: pool */
    {
       struct chck_pool pool;
@@ -37,6 +39,7 @@ int main(void)
       assert(chck_pool_add(&pool, (&(struct item){1, NULL}), &a));
       assert(chck_pool_add(&pool, (&(struct item){2, NULL}), &b));
       assert(chck_pool_add(&pool, (&(struct item){3, NULL}), &c));
+      assert(memcmp(chck_pool_get(&pool, 0), &dummy, sizeof(dummy)));
 
       assert(a == 0 && b == 1 && c == 2);
       assert(a != b && b != c && a != c);
@@ -68,6 +71,7 @@ int main(void)
       }
 
       assert(chck_pool_add(&pool, NULL, NULL));
+      assert(!memcmp(chck_pool_get(&pool, 1), &dummy, sizeof(dummy)));
 
       {
          size_t iter = 0;
