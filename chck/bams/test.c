@@ -1,6 +1,8 @@
 #include "bams.h"
 #include "math/math.h"
 #include <stdlib.h>
+
+#undef NDEBUG
 #include <assert.h>
 
 int main(void)

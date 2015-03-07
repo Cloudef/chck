@@ -1,5 +1,7 @@
 #include "dl.h"
 #include <stdlib.h>
+
+#undef NDEBUG
 #include <assert.h>
 
 int main(void)

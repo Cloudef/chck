@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#undef NDEBUG
 #include <assert.h>
 
 int
@@ -65,8 +67,10 @@ main(void)
       const char *path;
       struct xdg_paths state;
       memset(&state, 0, sizeof(state));
-      while ((path = xdg_get_paths("XDG_DATA_DIRS", "/does:/not:/trigger", &state, 3)))
-         assert(i < 3 && !strcmp(path, paths[i++]));
+      while ((path = xdg_get_paths("XDG_DATA_DIRS", "/does:/not:/trigger", &state, 3))) {
+         assert(i < 3 && !strcmp(path, paths[i]));
+         ++i;
+      }
    }
 
    // TEST: default paths
@@ -78,8 +82,10 @@ main(void)
       const char *path;
       struct xdg_paths state;
       memset(&state, 0, sizeof(state));
-      while ((path = xdg_get_paths("XDG_DATA_DIRS", "/default:relative:skip/path", &state, 1)))
-         assert(i < 1 && !strcmp(path, paths[i++]));
+      while ((path = xdg_get_paths("XDG_DATA_DIRS", "/default:relative:skip/path", &state, 1))) {
+         assert(i < 1 && !strcmp(path, paths[i]));
+         ++i;
+      }
    }
 
    return EXIT_SUCCESS;

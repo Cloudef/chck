@@ -151,7 +151,7 @@ chck_buffer_fill(const void *src, size_t size, size_t memb, struct chck_buffer *
    if (size * memb > sz && !chck_buffer_resize(buf, buf->size + size * memb + buf->step))
       return 0;
 
-   if (!buf->curpos)
+   if (!buf->curpos || !src)
       return 0;
 
    memcpy(buf->curpos, src, size * memb);

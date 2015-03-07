@@ -2,8 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <stdint.h>
+
+#undef NDEBUG
+#include <assert.h>
 
 struct item {
    uint32_t a;

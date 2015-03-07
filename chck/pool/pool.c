@@ -4,9 +4,9 @@
 #include <assert.h> /* for assert */
 
 #if __GNUC__
-#define unlikely(x) __builtin_expect(!!(x), 0)
+#  define unlikely(x) __builtin_expect(!!(x), 0)
 #else
-#define unlikely(x) !!(x)
+#  define unlikely(x) !!(x)
 #endif
 
 static void
@@ -218,10 +218,9 @@ chck_pool(struct chck_pool *pool, size_t grow, size_t capacity, size_t member_si
       return false;
 
    memset(pool, 0, sizeof(struct chck_pool));
-   assert(pool_buffer(&pool->items, grow, capacity, member_size));
-   assert(pool_buffer(&pool->map, grow, capacity, sizeof(bool)));
-   assert(pool_buffer(&pool->removed, grow, 0, sizeof(size_t)));
-   return true;
+   return (pool_buffer(&pool->items, grow, capacity, member_size) &&
+           pool_buffer(&pool->map, grow, capacity, sizeof(bool)) &&
+           pool_buffer(&pool->removed, grow, 0, sizeof(size_t)));
 }
 
 bool
@@ -355,8 +354,7 @@ chck_iter_pool(struct chck_iter_pool *pool, size_t grow, size_t capacity, size_t
       return false;
 
    memset(pool, 0, sizeof(struct chck_iter_pool));
-   assert(pool_buffer(&pool->items, grow, capacity, member_size));
-   return true;
+   return pool_buffer(&pool->items, grow, capacity, member_size);
 }
 
 bool
@@ -449,8 +447,7 @@ chck_ring_pool(struct chck_ring_pool *pool, size_t grow, size_t capacity, size_t
       return false;
 
    memset(pool, 0, sizeof(struct chck_ring_pool));
-   assert(pool_buffer(&pool->items, grow, capacity, member_size));
-   return true;
+   return pool_buffer(&pool->items, grow, capacity, member_size);
 }
 
 bool

@@ -2,8 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <assert.h>
 #include <string.h>
+
+#undef NDEBUG
+#include <assert.h>
 
 int main(void)
 {

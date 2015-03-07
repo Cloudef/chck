@@ -1,8 +1,10 @@
 #include "fs.h"
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <stdio.h>
+
+#undef NDEBUG
+#include <assert.h>
 
 int main(void)
 {

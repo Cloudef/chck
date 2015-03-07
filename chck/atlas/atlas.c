@@ -325,6 +325,10 @@ chck_atlas_pack(struct chck_atlas *atlas, bool force_pot, bool one_px_border, ui
       /* should always find a fit */
       assert(best_fit);
 
+      /* bail out on NDEBUG */
+      if (!best_fit)
+         goto out;
+
       switch (edge_count) {
          case 0:
             if (t->longest_edge <= best_fit->rect.w) {
@@ -425,6 +429,7 @@ chck_atlas_pack(struct chck_atlas *atlas, bool force_pot, bool one_px_border, ui
       height = next_pow_2(height);
    }
 
+out:
    if (out_w) *out_w = width;
    if (out_h) *out_h = height;
    return (width * height) - atlas->total_area;

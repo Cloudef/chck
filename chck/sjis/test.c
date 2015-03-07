@@ -1,6 +1,8 @@
 #include "sjis.h"
 #include <stdlib.h>
 #include <string.h>
+
+#undef NDEBUG
 #include <assert.h>
 
 int main(void)

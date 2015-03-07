@@ -297,7 +297,8 @@ chck_hash_table_str_algorithm(struct chck_hash_table *table, uint32_t (*hashstr)
 void
 chck_hash_table_release(struct chck_hash_table *table)
 {
-   assert(table);
+   if (!table)
+      return;
 
    struct chck_hash_table *n;
    for (struct chck_hash_table *t = table; t; t = n) {
