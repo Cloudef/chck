@@ -251,7 +251,8 @@ chck_pool_get(const struct chck_pool *pool, size_t index)
 {
    assert(pool);
 
-   if (unlikely(index * pool->items.member >= pool->items.used))
+   if (unlikely(index * pool->items.member >= pool->items.used) ||
+      !unlikely(*(bool*)(pool->map.buffer + index * pool->map.member)))
       return NULL;
 
    return pool->items.buffer + index * pool->items.member;

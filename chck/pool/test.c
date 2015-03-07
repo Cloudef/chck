@@ -24,6 +24,9 @@ int main(void)
       struct chck_pool pool;
       assert(chck_pool(&pool, 32, 3, sizeof(struct item)));
 
+      for (uint32_t i = 0; i < 3; ++i)
+         assert(!chck_pool_get(&pool, i));
+
       assert(chck_pool_add(&pool, (&(struct item){1, NULL}), NULL));
       assert(chck_pool_add(&pool, (&(struct item){2, NULL}), NULL));
       chck_pool_remove(&pool, 0);
