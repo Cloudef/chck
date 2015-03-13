@@ -147,7 +147,8 @@ chck_utf8_to_sjis(const char *input, size_t size, size_t *outSize, bool terminat
       if ((utf8[i + 1] & 0xc0) == 0x80) {
          uint8_t mblen = 0;
          const struct map_sjis_utf8 *data = NULL;
-         while ((utf8[i + mblen + 1] & 0xc0) == 0x80) ++mblen;
+         while (i + mblen + 1 < size && (utf8[i + mblen + 1] & 0xc0) == 0x80)
+            ++mblen;
 
          for (uint16_t mb = 0; mb < map_sjis_utf8_size; ++mb) {
             if (!memcmp(map_sjis_utf8[mb].utf8, utf8 + i, mblen + 1)) {
