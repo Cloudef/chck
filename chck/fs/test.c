@@ -22,5 +22,17 @@ int main(void)
       printf("%s\n", path);
       free(path);
    }
+
+   /* TEST: basename */
+   {
+      assert(!strcmp(chck_basename("foo/bar"), "bar"));
+      assert(!strcmp(chck_basename("foo"), "foo"));
+      assert(!strcmp(chck_basename("foo/"), ""));
+      assert(strcmp(chck_basename("foo/"), "foo"));
+      assert(strcmp(chck_basename("foo/"), "/"));
+      assert(!strcmp(chck_basename(""), ""));
+      assert(strcmp(chck_basename("foo/bar"), "foo"));
+   }
+
    return EXIT_SUCCESS;
 }
