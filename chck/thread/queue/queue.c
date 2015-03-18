@@ -14,15 +14,16 @@
 #endif
 
 static bool
-creator_thread(const struct chck_tqueue *tqueue)
+creator_thread(const struct chck_tqueue *tqueue, const char *function)
 {
    if (tqueue->threads.self != pthread_self()) {
-      fprintf(stderr, "chck: Function '%s' should be only called from same thread where tqueue was created in.\n", __FUNCTION__);
+      fprintf(stderr, "chck: Function '%s' should be only called from same thread where tqueue was created in.\n", function);
       abort();
       return false;
    }
    return true;
 }
+#define creator_thread(x) creator_thread(x, __FUNCTION__)
 
 static void*
 get_data(struct chck_tasks *tasks, size_t index)
@@ -230,7 +231,7 @@ void
 chck_tqueue_release(struct chck_tqueue *tqueue)
 {
    // Allowed only on creator thread.
-   if (!tqueue || !creator_thread(tqueue))
+   if (!tqueue || (tqueue->threads.self && !creator_thread(tqueue)))
       return;
 
    stop(tqueue);
