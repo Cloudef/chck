@@ -348,6 +348,9 @@ chck_hash_table_get(struct chck_hash_table *table, uint32_t key)
 {
    assert(table);
 
+   if (!table->lut.table)
+      return NULL;
+
    void *data;
    struct header *h;
    struct chck_hash_table *t = table;
@@ -376,6 +379,9 @@ void*
 chck_hash_table_str_get(struct chck_hash_table *table, const char *str, size_t len)
 {
    assert(table && str);
+
+   if (!table->lut.table)
+      return NULL;
 
    void *data;
    struct header *h;
