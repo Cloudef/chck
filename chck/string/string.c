@@ -1,13 +1,15 @@
+#include "string.h"
+#include "overflow/overflow.h"
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <assert.h>
-#include "string.h"
 
 static inline char*
 ccopy(const char *str, size_t len)
 {
-   char *cpy = calloc(1, len + 1);
+   assert(str);
+   char *cpy = chck_calloc_add_of(len, 1);
    return (cpy ? memcpy(cpy, str, len) : NULL);
 }
 
@@ -49,12 +51,14 @@ chck_string_set_cstr(struct chck_string *string, const char *data, bool is_heap)
 bool
 chck_string_set_varg(struct chck_string *string, const char *fmt, va_list args)
 {
+   assert(string && fmt);
+
    va_list cpy;
    va_copy(cpy, args);
 
    char *str = NULL;
    const size_t len = vsnprintf(NULL, 0, fmt, args);
-   if (len > 0 && !(str = malloc(len + 1)))
+   if (len > 0 && !(str = chck_malloc_add_of(len, 1)))
       return false;
 
    vsnprintf(str, len + 1, fmt, cpy);
@@ -79,6 +83,8 @@ chck_string_set_format(struct chck_string *string, const char *fmt, ...)
 bool
 chck_string_set(struct chck_string *string, const struct chck_string *other, bool is_heap)
 {
+   assert(string && other);
+
    if (!is_heap && string->data == other->data) {
       string->size = other->size;
       return true;

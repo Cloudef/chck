@@ -31,45 +31,42 @@ struct chck_buffer {
    bool copied;
 };
 
-static inline bool
+CHCK_NONULL static inline bool
 chck_buffer_native_endianess(const struct chck_buffer *buf)
 {
    return (chck_endianess() == buf->endianess);
 }
 
 void chck_buffer_release(struct chck_buffer *buf);
-bool chck_buffer_from_pointer(struct chck_buffer *buf, void *ptr, size_t size, enum chck_endianess endianess);
-bool chck_buffer(struct chck_buffer *buf, size_t size, enum chck_endianess endianess);
-void chck_buffer_set_pointer(struct chck_buffer *buf, void *ptr, size_t size, enum chck_endianess endianess);
+CHCK_NONULLV(1) bool chck_buffer_from_pointer(struct chck_buffer *buf, void *ptr, size_t size, enum chck_endianess endianess);
+CHCK_NONULL bool chck_buffer(struct chck_buffer *buf, size_t size, enum chck_endianess endianess);
+CHCK_NONULLV(1) void chck_buffer_set_pointer(struct chck_buffer *buf, void *ptr, size_t size, enum chck_endianess endianess);
 
-size_t chck_buffer_fill(const void *src, size_t size, size_t memb, struct chck_buffer *buf);
-size_t chck_buffer_fill_from_file(FILE *src, size_t size, size_t memb, struct chck_buffer *buf);
-size_t chck_buffer_fill_from_fd(int fd, size_t size, size_t memb, struct chck_buffer *buf);
+CHCK_NONULL size_t chck_buffer_fill(const void *src, size_t size, size_t memb, struct chck_buffer *buf);
+CHCK_NONULL size_t chck_buffer_fill_from_file(FILE *src, size_t size, size_t memb, struct chck_buffer *buf);
+CHCK_NONULL size_t chck_buffer_fill_from_fd(int fd, size_t size, size_t memb, struct chck_buffer *buf);
 
-size_t chck_buffer_write(const void *src, size_t size, size_t nmemb, struct chck_buffer *buf);
-size_t chck_buffer_write_from_file(FILE *src, size_t size, size_t nmemb, struct chck_buffer *buf);
-size_t chck_buffer_write_from_fd(int fd, size_t size, size_t nmemb, struct chck_buffer *buf);
+CHCK_NONULL size_t chck_buffer_write(const void *src, size_t size, size_t nmemb, struct chck_buffer *buf);
+CHCK_NONULL size_t chck_buffer_write_from_file(FILE *src, size_t size, size_t nmemb, struct chck_buffer *buf);
+CHCK_NONULL size_t chck_buffer_write_from_fd(int fd, size_t size, size_t nmemb, struct chck_buffer *buf);
 
-size_t chck_buffer_read(void *dst, size_t size, size_t memb, struct chck_buffer *buf);
-bool chck_buffer_read_int(void *i, enum chck_bits bits, struct chck_buffer *buf);
-bool chck_buffer_read_string(char **str, size_t *len, struct chck_buffer *buf);
-bool chck_buffer_read_string_of_type(char **str, size_t *len, enum chck_bits bits, struct chck_buffer *buf);
+CHCK_NONULL size_t chck_buffer_read(void *dst, size_t size, size_t memb, struct chck_buffer *buf);
+CHCK_NONULL bool chck_buffer_read_int(void *i, enum chck_bits bits, struct chck_buffer *buf);
+CHCK_NONULLV(1, 3) bool chck_buffer_read_string(char **str, size_t *len, struct chck_buffer *buf);
+CHCK_NONULLV(1, 4) bool chck_buffer_read_string_of_type(char **str, size_t *len, enum chck_bits bits, struct chck_buffer *buf);
 
-bool chck_buffer_write_int(const void *i, enum chck_bits bits, struct chck_buffer *buf);
-bool chck_buffer_write_string(const char *str, size_t len, struct chck_buffer *buf);
-bool chck_buffer_write_string_of_type(const char *str, size_t len, enum chck_bits bits, struct chck_buffer *buf);
+CHCK_NONULL bool chck_buffer_write_int(const void *i, enum chck_bits bits, struct chck_buffer *buf);
+CHCK_NONULL bool chck_buffer_write_string(const char *str, size_t len, struct chck_buffer *buf);
+CHCK_NONULL bool chck_buffer_write_string_of_type(const char *str, size_t len, enum chck_bits bits, struct chck_buffer *buf);
 
-#if __GNUC__
-__attribute__((format(printf, 2, 3)))
-#endif
-size_t chck_buffer_write_format(struct chck_buffer *buf, const char *fmt, ...);
-size_t chck_buffer_write_varg(struct chck_buffer *buf, const char *fmt, va_list args);
+CHCK_NONULL CHCK_FORMAT(printf, 2, 3) size_t chck_buffer_write_format(struct chck_buffer *buf, const char *fmt, ...);
+CHCK_NONULL size_t chck_buffer_write_varg(struct chck_buffer *buf, const char *fmt, va_list args);
 
-ptrdiff_t chck_buffer_seek(struct chck_buffer *buf, long offset, int whence);
-bool chck_buffer_resize(struct chck_buffer *buf, size_t size);
+CHCK_NONULL ptrdiff_t chck_buffer_seek(struct chck_buffer *buf, long offset, int whence);
+CHCK_NONULL bool chck_buffer_resize(struct chck_buffer *buf, size_t size);
 
 /* -DHAS_ZLIB=1 -lz */
-bool chck_buffer_compress_zlib(struct chck_buffer *buf);
-bool chck_buffer_decompress_zlib(struct chck_buffer *buf);
+CHCK_NONULL bool chck_buffer_compress_zlib(struct chck_buffer *buf);
+CHCK_NONULL bool chck_buffer_decompress_zlib(struct chck_buffer *buf);
 
 #endif /* __chck_buffer__ */

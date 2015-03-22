@@ -1,4 +1,5 @@
 #include "lut.h"
+#include "overflow/overflow.h"
 #include <stdlib.h> /* for calloc, free, etc.. */
 #include <string.h> /* for memcpy/memset */
 #include <assert.h> /* for assert */
@@ -8,7 +9,7 @@ ccopy(const char *str)
 {
    assert(str);
    size_t size = strlen(str);
-   char *cpy = calloc(1, size + 1);
+   char *cpy = chck_calloc_add_of(size, 1);
    return (cpy ? memcpy(cpy, str, size) : NULL);
 }
 
@@ -17,7 +18,7 @@ lut_create_table(struct chck_lut *lut)
 {
    assert(lut);
 
-   if (!(lut->table = malloc(lut->count * lut->member)))
+   if (!(lut->table = chck_malloc_mul_of(lut->count, lut->member)))
       return false;
 
    memset(lut->table, lut->set, lut->count * lut->member);
@@ -27,9 +28,12 @@ lut_create_table(struct chck_lut *lut)
 static inline void*
 lut_get_index(struct chck_lut *lut, uint32_t index)
 {
-   assert(lut);
+   assert(lut && index < lut->count);
 
    if (!lut->table && !lut_create_table(lut))
+      return NULL;
+
+   if (index >= lut->count)
       return NULL;
 
    return lut->table + index * lut->member;
@@ -42,6 +46,9 @@ lut_set_index(struct chck_lut *lut, uint32_t index, const void *data)
 
    if (!lut->table && !lut_create_table(lut))
       return false;
+
+   if (index >= lut->count)
+      return NULL;
 
    if (data) {
       memcpy(lut->table + index * lut->member, data, lut->member);

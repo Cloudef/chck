@@ -1,6 +1,7 @@
 #ifndef __chck_bams_h__
 #define __chck_bams_h__
 
+#include "macros.h"
 #include <stdint.h>
 
 typedef int64_t bams64;
@@ -9,8 +10,8 @@ typedef int16_t bams16;
 typedef int8_t bams8;
 
 #define decl_bams_func(B, R, T) \
-   static inline R B##_from_##T(T x, T range) { return (x / range) * (B##_most + B##_erro); } \
-   static inline T T##_from_##B(R x, T range) { return (x / (T)(B##_most + B##_erro)) * range; }
+   CHCK_CONST static inline R B##_from_##T(T x, T range) { return (x / range) * (B##_most + B##_erro); } \
+   CHCK_CONST static inline T T##_from_##B(R x, T range) { return (x / (T)(B##_most + B##_erro)) * range; }
 
 #define decl_bams(B, R) \
    static const R B##_erro = (sizeof(B) < sizeof(uint32_t)); \

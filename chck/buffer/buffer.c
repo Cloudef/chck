@@ -1,4 +1,5 @@
 #include "buffer.h"
+#include "overflow/overflow.h"
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdarg.h>
@@ -142,16 +143,32 @@ chck_buffer_seek(struct chck_buffer *buf, long offset, int whence)
    return buf->curpos - buf->buffer;
 }
 
+static bool
+bounds_check(struct chck_buffer *buf, size_t size, size_t memb)
+{
+   size_t nsz;
+   if (unlikely(chck_mul_ofsz(size, memb, &nsz)))
+      return false;
+
+   size_t sz = buf->size - (buf->curpos - buf->buffer);
+   if (nsz > sz) {
+      /* buf->size + size * memb + buf->step */
+      if (unlikely(chck_add_ofsz(buf->size, nsz, &nsz)) || unlikely(chck_add_ofsz(buf->step, nsz, &nsz)))
+         return false;
+
+      if (!chck_buffer_resize(buf, nsz))
+         return false;
+   }
+
+   return true;
+}
+
 size_t
 chck_buffer_fill(const void *src, size_t size, size_t memb, struct chck_buffer *buf)
 {
    assert(src && buf);
 
-   size_t sz = buf->size - (buf->curpos - buf->buffer);
-   if (size * memb > sz && !chck_buffer_resize(buf, buf->size + size * memb + buf->step))
-      return 0;
-
-   if (!buf->curpos || !src)
+   if (!bounds_check(buf, size, memb) || !buf->curpos || !src)
       return 0;
 
    memcpy(buf->curpos, src, size * memb);
@@ -163,11 +180,7 @@ chck_buffer_fill_from_file(FILE *src, size_t size, size_t memb, struct chck_buff
 {
    assert(src && buf);
 
-   size_t sz = buf->size - (buf->curpos - buf->buffer);
-   if (size * memb > sz && !chck_buffer_resize(buf, buf->size + size * memb + buf->step))
-      return 0;
-
-   if (!buf->curpos)
+   if (!bounds_check(buf, size, memb) || !buf->curpos || !src)
       return 0;
 
    return fread(buf->curpos, size, memb, src);
@@ -178,11 +191,7 @@ chck_buffer_fill_from_fd(int fd, size_t size, size_t memb, struct chck_buffer *b
 {
    assert(fd && buf);
 
-   size_t sz = buf->size - (buf->curpos - buf->buffer);
-   if (size * memb > sz && !chck_buffer_resize(buf, buf->size + size * memb + buf->step))
-      return 0;
-
-   if (!buf->curpos)
+   if (!bounds_check(buf, size, memb) || !buf->curpos)
       return 0;
 
    ssize_t ret = read(fd, buf->curpos, size * memb);
@@ -197,7 +206,11 @@ chck_buffer_read(void *dst, size_t size, size_t memb, struct chck_buffer *buf)
 {
    assert(dst && buf);
 
-   if (unlikely(size * memb > buf->size - (buf->curpos - buf->buffer))) {
+   size_t nsz;
+   if (unlikely(chck_mul_ofsz(size, memb, &nsz)))
+      return 0;
+
+   if (unlikely(nsz > buf->size - (buf->curpos - buf->buffer))) {
       assert(size != 0); // should never happen
       // read as much as we can
       memb = (buf->size - (buf->curpos - buf->buffer)) / size;
@@ -244,7 +257,7 @@ chck_buffer_read_string_of_type(char **str, size_t *out_len, enum chck_bits bits
    if (len <= 0)
       return true;
 
-   if (!(*str = calloc(1, len + 1)))
+   if (!(*str = chck_calloc_add_of(len, 1)))
       return false;
 
    if (unlikely(chck_buffer_read(*str, 1, len, buf) != len)) {
@@ -360,7 +373,7 @@ chck_buffer_write_varg(struct chck_buffer *buf, const char *fmt, va_list args)
 
    char *str = NULL;
    const size_t len = vsnprintf(NULL, 0, fmt, args);
-   if (len > 0 && !(str = malloc(len + 1)))
+   if (len > 0 && !(str = chck_malloc_add_of(len, 1)))
       return false;
 
    vsnprintf(str, len + 1, fmt, cpy);
@@ -383,7 +396,7 @@ chck_buffer_compress_zlib(struct chck_buffer *buf)
    int ret;
    while ((ret = compress(compressed, &dsize, buf->buffer, buf->size)) == Z_BUF_ERROR) {
       void *tmp;
-      if (!(tmp = realloc(compressed, bsize * 2)))
+      if (!(tmp = chck_realloc_mul_of(compressed, bsize, 2)))
          goto fail;
 
       compressed = tmp;
@@ -416,7 +429,14 @@ chck_buffer_decompress_zlib(struct chck_buffer *buf)
 {
 #if HAS_ZLIB
    size_t dsize, bsize;
-   dsize = bsize = buf->size * 2;
+
+   {
+      size_t sz;
+      if (unlikely(chck_mul_ofsz(buf->size, 2, &sz)))
+         return false;
+
+      dsize = bsize = sz;
+   }
 
    void *decompressed;
    if (!(decompressed = malloc(dsize)))
@@ -425,7 +445,7 @@ chck_buffer_decompress_zlib(struct chck_buffer *buf)
    int ret;
    while ((ret = uncompress(decompressed, &dsize, buf->buffer, buf->size)) == Z_BUF_ERROR) {
       void *tmp;
-      if (!(tmp = realloc(decompressed, bsize * 2)))
+      if (!(tmp = chck_realloc_mul_of(decompressed, bsize, 2)))
          goto fail;
 
       decompressed = tmp;

@@ -1,6 +1,7 @@
 #ifndef __chck_atlas_h__
 #define __chck_atlas_h__
 
+#include "macros.h"
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -41,13 +42,13 @@ struct chck_atlas {
    uint32_t total_area;
 };
 
-bool chck_atlas(struct chck_atlas *atlas);
+CHCK_NONULL bool chck_atlas(struct chck_atlas *atlas);
 void chck_atlas_release(struct chck_atlas *atlas);
-uint32_t chck_atlas_push(struct chck_atlas *atlas, uint32_t width, uint32_t height);
-uint32_t chck_atlas_pop(struct chck_atlas *atlas);
-const struct chck_atlas_texture* chck_atlas_get(const struct chck_atlas *atlas, uint32_t index, struct chck_atlas_rect *out_transformed);
+CHCK_NONULL uint32_t chck_atlas_push(struct chck_atlas *atlas, uint32_t width, uint32_t height);
+CHCK_NONULL uint32_t chck_atlas_pop(struct chck_atlas *atlas);
+CHCK_NONULLV(1) const struct chck_atlas_texture* chck_atlas_get(const struct chck_atlas *atlas, uint32_t index, struct chck_atlas_rect *out_transformed);
 
-// returns total unusued area
-uint32_t chck_atlas_pack(struct chck_atlas *atlas, bool force_pot, bool one_px_border, uint32_t *out_w, uint32_t *out_h);
+// returns total unused area
+CHCK_NONULLV(1) uint32_t chck_atlas_pack(struct chck_atlas *atlas, bool force_pot, bool one_px_border, uint32_t *out_w, uint32_t *out_h);
 
 #endif /* __chck_atlas_h__ */

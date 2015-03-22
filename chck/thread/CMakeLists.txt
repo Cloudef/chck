@@ -1,4 +1,4 @@
-set(CMAKE_THREAD_PREFER_PTHREADS 1)
+set(CMAKE_THREAD_PREFER_PTHREAD 1)
 find_package(Threads)
 if (THREADS_FOUND)
    find_package(Valgrind)
@@ -6,6 +6,12 @@ if (THREADS_FOUND)
       add_definitions(-DHAS_VALGRIND=1)
       include_directories(${VALGRIND_INCLUDE_DIRS})
    endif (VALGRIND_FOUND)
+
+   if ("${CMAKE_THREAD_LIBS_INIT}" STREQUAL "")
+      find_library(THREAD_LIB NAMES pthread)
+   else ()
+      set(THREAD_LIB ${CMAKE_THREAD_LIBS_INIT})
+   endif ()
 
    add_subdirectory(queue)
 endif (THREADS_FOUND)

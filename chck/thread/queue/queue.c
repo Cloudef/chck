@@ -1,4 +1,5 @@
 #include "queue.h"
+#include "overflow/overflow.h"
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -289,8 +290,8 @@ chck_tqueue(struct chck_tqueue *tqueue, size_t nthreads, size_t qsize, size_t ms
    if (!msize || !work)
       return false;
 
-   if (!(tqueue->tasks.buffer = calloc(qsize, msize)) ||
-       !(tqueue->tasks.processed = calloc(qsize, sizeof(bool))))
+   if (!(tqueue->tasks.buffer = chck_calloc_of(qsize, msize)) ||
+       !(tqueue->tasks.processed = chck_calloc_of(qsize, sizeof(bool))))
       return false;
 
    // We allow racy reads on this array.
@@ -302,7 +303,7 @@ chck_tqueue(struct chck_tqueue *tqueue, size_t nthreads, size_t qsize, size_t ms
        pthread_cond_init(&tqueue->tasks.notify, NULL) != 0)
       goto fail;
 
-   if (!(tqueue->threads.t = calloc(nthreads, sizeof(pthread_t))))
+   if (!(tqueue->threads.t = chck_calloc_of(nthreads, sizeof(pthread_t))))
       goto fail;
 
    tqueue->threads.self = pthread_self();

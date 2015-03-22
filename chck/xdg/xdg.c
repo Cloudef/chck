@@ -1,17 +1,18 @@
+#include "xdg.h"
+#include "overflow/overflow.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <assert.h>
 #include <pwd.h>
-#include "xdg.h"
 
 static inline char*
 ccopy(const char *str)
 {
    assert(str);
    size_t size = strlen(str);
-   char *cpy = calloc(1, size + 1);
+   char *cpy = chck_calloc_add_of(size, 1);
    return (cpy ? memcpy(cpy, str, size) : NULL);
 }
 

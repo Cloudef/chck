@@ -1,13 +1,8 @@
 #include "pool.h"
+#include "overflow/overflow.h"
 #include <stdlib.h> /* for calloc, free, etc.. */
 #include <string.h> /* for memcpy/memset */
 #include <assert.h> /* for assert */
-
-#if __GNUC__
-#  define unlikely(x) __builtin_expect(!!(x), 0)
-#else
-#  define unlikely(x) !!(x)
-#endif
 
 static void
 pool_buffer_release(struct chck_pool_buffer *pb)
@@ -59,8 +54,13 @@ pool_buffer(struct chck_pool_buffer *pb, size_t grow, size_t capacity, size_t me
    pb->member = member_size;
    pb->step = (grow ? grow : 32);
 
-   if (capacity > 0)
-      pool_buffer_resize(pb, capacity * member_size);
+   if (capacity > 0) {
+      size_t sz;
+      if (unlikely(chck_mul_ofsz(capacity, member_size, &sz)))
+         return false;
+
+      pool_buffer_resize(pb, sz);
+   }
 
    return true;
 }
@@ -70,7 +70,15 @@ pool_buffer_add(struct chck_pool_buffer *pb, const void *data, size_t pos, size_
 {
    assert(pb);
 
+   size_t tail;
+   if (unlikely(chck_add_ofsz(pos, pb->member, &tail)))
+      return NULL;
+
    while (pb->allocated < pos + pb->member) {
+      size_t sz;
+      if (unlikely(chck_mul_ofsz(pb->member, pb->step, &sz)) || unlikely(chck_add_ofsz(pb->allocated, sz, &sz)))
+         return NULL;
+
       if (unlikely(!pool_buffer_resize(pb, pb->allocated + pb->member * pb->step)))
          return NULL;
    }
@@ -84,8 +92,8 @@ pool_buffer_add(struct chck_pool_buffer *pb, const void *data, size_t pos, size_
       memset(pb->buffer + pos, 0, pb->member);
    }
 
-   if (pos + pb->member > pb->used)
-      pb->used = pos + pb->member;
+   if (tail > pb->used)
+      pb->used = tail;
 
    if (out_index)
       *out_index = pos / pb->member;
@@ -127,10 +135,11 @@ pool_buffer_remove(struct chck_pool_buffer *pb, size_t index, size_t (*get_used)
 {
    assert(pb && get_used);
 
-   if (unlikely(index * pb->member >= pb->used))
+   size_t slot;
+   if (unlikely(chck_mul_ofsz(index, pb->member, &slot)) || unlikely(slot >= pb->used))
       return;
 
-   if (index * pb->member + pb->member >= pb->used)
+   if (slot + pb->member >= pb->used)
       pb->used = (index > 0 ? get_used(pb, index, userdata) : 0);
 
    if (pb->used + pb->member * pb->step < pb->allocated)
@@ -145,11 +154,12 @@ pool_buffer_remove_move(struct chck_pool_buffer *pb, size_t index)
 {
    assert(pb);
 
-   if (unlikely(index * pb->member >= pb->used))
+   size_t slot;
+   if (unlikely(chck_mul_ofsz(index, pb->member, &slot)) || unlikely(slot >= pb->used))
       return;
 
-   if (index * pb->member + pb->member < pb->used)
-      memmove(pb->buffer + index * pb->member, pb->buffer + (index + 1) * pb->member, pb->used - (index + 1) * pb->member);
+   if (slot + pb->member < pb->used)
+      memmove(pb->buffer + slot, pb->buffer + slot + pb->member, pb->used - slot - pb->member);
 
    pb->used -= pb->member;
    pb->count--;
@@ -176,7 +186,7 @@ pool_buffer_set_c_array(struct chck_pool_buffer *pb, const void *items, size_t m
 
    void *copy = NULL;
    if (items && memb > 0) {
-      if (!(copy = malloc(memb * pb->member)))
+      if (!(copy = chck_malloc_mul_of(memb, pb->member)))
          return false;
 
       memcpy(copy, items, memb * pb->member);

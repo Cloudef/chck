@@ -1,5 +1,6 @@
 #include "sjis.h"
 #include "utf8sjis.h"
+#include "overflow/overflow.h"
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
@@ -7,7 +8,7 @@
 #include <stdbool.h>
 
 static inline bool
-resize(unsigned char **buf, size_t *size, size_t nsize)
+resize(uint8_t **buf, size_t *size, size_t nsize)
 {
    assert(buf && size);
 
@@ -24,12 +25,22 @@ resize(unsigned char **buf, size_t *size, size_t nsize)
 }
 
 static inline bool
-put(unsigned char **buf, size_t *o, size_t *size, const char *bytes)
+resize_mul(uint8_t **buf, size_t *size, size_t nsize, size_t mul)
 {
-   assert(buf && o && size && bytes);
+   size_t nsz;
+   if (unlikely(chck_mul_ofsz(nsize, mul, &nsz)))
+      return false;
+
+   return resize(buf, size, nsz);
+}
+
+static inline bool
+put(uint8_t **buf, size_t *o, size_t *size, const char *bytes)
+{
+   assert(buf && o && size && bytes && *size > *o);
 
    size_t len = strlen(bytes);
-   if (len >= *size - *o && resize(buf, size, *size * 2) != true)
+   if (len >= *size - *o && !resize_mul(buf, size, *size, 2))
       return false;
 
    memcpy(*buf + *o, bytes, len);
@@ -38,7 +49,7 @@ put(unsigned char **buf, size_t *o, size_t *size, const char *bytes)
 }
 
 char*
-chck_sjis_to_utf8(const unsigned char *sjis, size_t size, size_t *outSize, bool terminate)
+chck_sjis_to_utf8(const uint8_t *sjis, size_t size, size_t *out_size, bool terminate)
 {
    assert(sjis && size != 0);
 
@@ -104,20 +115,20 @@ chck_sjis_to_utf8(const unsigned char *sjis, size_t size, size_t *outSize, bool 
       dec = NULL;
    }
 
-   if (outSize)
-      *outSize = size;
+   if (out_size)
+      *out_size = size;
 
    return (char*)dec;
 }
 
-unsigned char*
-chck_utf8_to_sjis(const char *input, size_t size, size_t *outSize, bool terminate)
+uint8_t*
+chck_utf8_to_sjis(const char *input, size_t size, size_t *out_size, bool terminate)
 {
-   const unsigned char *utf8 = (const unsigned char*)input;
+   const uint8_t *utf8 = (const uint8_t*)input;
    assert(input && size != 0);
 
    size_t dsize;
-   unsigned char *dec;
+   uint8_t *dec;
    if (!(dec = malloc((dsize = size))))
       return NULL;
 
@@ -179,8 +190,8 @@ chck_utf8_to_sjis(const char *input, size_t size, size_t *outSize, bool terminat
       dec = NULL;
    }
 
-   if (outSize)
-      *outSize = size;
+   if (out_size)
+      *out_size = size;
 
    return dec;
 }

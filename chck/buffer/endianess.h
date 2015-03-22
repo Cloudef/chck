@@ -1,17 +1,10 @@
 #ifndef __chck_endianess__
 #define __chck_endianess__
 
+#include "macros.h"
 #include <stdint.h>
 #include <assert.h>
 #include <string.h>
-
-#if __GNUC__
-#  define likely(x) __builtin_expect(!!(x), 1)
-#  define unlikely(x) __builtin_expect(!!(x), 0)
-#else
-#  define likely(x) !!(x)
-#  define unlikely(x) !!(x)
-#endif
 
 enum chck_endianess {
    CHCK_ENDIANESS_LITTLE = 0,
@@ -63,7 +56,8 @@ enum chck_endianess {
 #  define chck_endianess() CHCK_ENDIANESS_LITTLE
 #else
 // runtime endianess check
-static inline enum chck_endianess chck_endianess(void)
+static inline enum
+chck_endianess chck_endianess(void)
 {
    union {
       uint32_t i;
@@ -73,11 +67,10 @@ static inline enum chck_endianess chck_endianess(void)
 };
 #endif
 
-static inline void
+CHCK_NONULL static inline void
 chck_bswap(void *v, size_t size, size_t memb)
 {
-   if (unlikely(!v || size < 1))
-      return;
+   assert(v);
 
    for (void *p = v; p < v + (memb * size); p += size) {
 #if HAS_BYTESWAP
@@ -93,9 +86,10 @@ chck_bswap(void *v, size_t size, size_t memb)
    }
 }
 
-static inline void
+CHCK_NONULL static inline void
 chck_bswap1(void *p, size_t size)
 {
+   assert(p);
    if (size == sizeof(uint32_t)) *((uint32_t*)p) = bswap32(*((uint32_t*)p));
    else if (size == sizeof(uint16_t)) *((uint16_t*)p) = bswap16(*((uint16_t*)p));
    else if (size == sizeof(uint64_t)) *((uint64_t*)p) = bswap64(*((uint64_t*)p));

@@ -1,5 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-PROJECT(chck)
+PROJECT(chck C)
 set(CHCK_NAME "Chck")
 set(CHCK_DESCRIPTION "Collection of C utilities taken and cleaned up from my other projects")
 

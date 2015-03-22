@@ -1,6 +1,7 @@
 #ifndef __chck_lut__
 #define __chck_lut__
 
+#include "macros.h"
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -34,14 +35,14 @@ struct chck_hash_table_iterator {
 
 // simply return the input, this is good for incrementing numbers
 // or, when you know that the input will be somewhere around range of your hash table's size
-static inline uint32_t
+CHCK_CONST static inline uint32_t
 chck_incremental_uint_hash(uint32_t uint)
 {
    return uint;
 }
 
 // default simple hash from <http://stackoverflow.com/a/12996028>
-static inline uint32_t
+CHCK_CONST static inline uint32_t
 chck_default_uint_hash(uint32_t uint)
 {
    uint = ((uint >> 16) ^ uint) * 0x45d9f3b;
@@ -50,7 +51,7 @@ chck_default_uint_hash(uint32_t uint)
 }
 
 // default simple string hash
-static inline uint32_t
+CHCK_NONULL CHCK_CONST static inline uint32_t
 chck_default_str_hash(const char *str, size_t len)
 {
    (void)len;
@@ -75,15 +76,15 @@ chck_default_str_hash(const char *str, size_t len)
 #define chck_lut_for_each(lut, pos) \
    for (size_t _I = 0; (pos = chck_lut_iter(lut, &_I));)
 
-bool chck_lut(struct chck_lut *lut, int set, size_t count, size_t member);
-void chck_lut_uint_algorithm(struct chck_lut *lut, uint32_t (*hashuint)(uint32_t uint));
-void chck_lut_str_algorithm(struct chck_lut *lut, uint32_t (*hashstr)(const char *str, size_t len));
+CHCK_NONULL bool chck_lut(struct chck_lut *lut, int set, size_t count, size_t member);
+CHCK_NONULL void chck_lut_uint_algorithm(struct chck_lut *lut, uint32_t (*hashuint)(uint32_t uint));
+CHCK_NONULL void chck_lut_str_algorithm(struct chck_lut *lut, uint32_t (*hashstr)(const char *str, size_t len));
 void chck_lut_release(struct chck_lut *lut);
-bool chck_lut_set(struct chck_lut *lut, uint32_t lookup, const void *data);
-void* chck_lut_get(struct chck_lut *lut, uint32_t lookup);
-bool chck_lut_str_set(struct chck_lut *lut, const char *str, size_t len, const void *data);
-void* chck_lut_str_get(struct chck_lut *lut, const char *str, size_t len);
-void* chck_lut_iter(struct chck_lut *lut, size_t *iter);
+CHCK_NONULLV(1) bool chck_lut_set(struct chck_lut *lut, uint32_t lookup, const void *data);
+CHCK_NONULL void* chck_lut_get(struct chck_lut *lut, uint32_t lookup);
+CHCK_NONULLV(1, 2) bool chck_lut_str_set(struct chck_lut *lut, const char *str, size_t len, const void *data);
+CHCK_NONULL void* chck_lut_str_get(struct chck_lut *lut, const char *str, size_t len);
+CHCK_NONULL void* chck_lut_iter(struct chck_lut *lut, size_t *iter);
 
 /**
  * Hash tables are wrappers around LUTs that does not have collisions.
@@ -100,15 +101,15 @@ void* chck_lut_iter(struct chck_lut *lut, size_t *iter);
 #define chck_hash_table_for_each(table, pos) \
    for (struct chck_hash_table_iterator _I = { table, 0 }; (pos = chck_hash_table_iter(&_I));)
 
-bool chck_hash_table(struct chck_hash_table *table, int set, size_t count, size_t member);
-void chck_hash_table_uint_algorithm(struct chck_hash_table *table, uint32_t (*hashuint)(uint32_t uint));
-void chck_hash_table_str_algorithm(struct chck_hash_table *table, uint32_t (*hashstr)(const char *str, size_t len));
+CHCK_NONULL bool chck_hash_table(struct chck_hash_table *table, int set, size_t count, size_t member);
+CHCK_NONULL void chck_hash_table_uint_algorithm(struct chck_hash_table *table, uint32_t (*hashuint)(uint32_t uint));
+CHCK_NONULL void chck_hash_table_str_algorithm(struct chck_hash_table *table, uint32_t (*hashstr)(const char *str, size_t len));
 void chck_hash_table_release(struct chck_hash_table *table);
-uint32_t chck_hash_table_collisions(struct chck_hash_table *table);
-bool chck_hash_table_set(struct chck_hash_table *table, uint32_t key, const void *data);
-void* chck_hash_table_get(struct chck_hash_table *table, uint32_t key);
-bool chck_hash_table_str_set(struct chck_hash_table *table, const char *str, size_t len, const void *data);
-void* chck_hash_table_str_get(struct chck_hash_table *table, const char *str, size_t len);
-void* chck_hash_table_iter(struct chck_hash_table_iterator *iter);
+CHCK_NONULL uint32_t chck_hash_table_collisions(struct chck_hash_table *table);
+CHCK_NONULLV(1) bool chck_hash_table_set(struct chck_hash_table *table, uint32_t key, const void *data);
+CHCK_NONULLV(1) void* chck_hash_table_get(struct chck_hash_table *table, uint32_t key);
+CHCK_NONULLV(1, 2) bool chck_hash_table_str_set(struct chck_hash_table *table, const char *str, size_t len, const void *data);
+CHCK_NONULLV(1, 2) void* chck_hash_table_str_get(struct chck_hash_table *table, const char *str, size_t len);
+CHCK_NONULL void* chck_hash_table_iter(struct chck_hash_table_iterator *iter);
 
 #endif /* __chck_lut__ */
