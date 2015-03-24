@@ -143,7 +143,7 @@ int main(void)
 
    /* TEST: benchmark (default algorithm, number of collisions) */
    {
-      static const uint32_t iters = 24;
+      const uint32_t iters = 24;
       struct chck_hash_table table;
       assert(chck_hash_table(&table, -1, 128, sizeof(uint32_t)));
 
@@ -170,7 +170,7 @@ int main(void)
    /* TEST: benchmark (incremental algorithm with known range)
     *       mainly tests insert/get speed */
    {
-      static const uint32_t iters = 0xFFFFF;
+      const uint32_t iters = 0xFFFFF;
       struct chck_hash_table table;
       assert(chck_hash_table(&table, -1, iters, sizeof(uint32_t)));
       chck_hash_table_uint_algorithm(&table, chck_incremental_uint_hash);

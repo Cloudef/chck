@@ -21,7 +21,7 @@ int main(void)
    /* TEST: over-read */
    {
       struct chck_buffer buf;
-      static char data[] = "yolo I have only this many bytes";
+      char data[] = "yolo I have only this many bytes";
       assert(chck_buffer_from_pointer(&buf, data, sizeof(data), CHCK_ENDIANESS_NATIVE));
       char bb[sizeof(data)];
       assert(chck_buffer_read(bb, 1, sizeof(data), &buf) == sizeof(data));
@@ -48,7 +48,7 @@ int main(void)
 
    /* TEST: little endian buffer */
    {
-      static const struct {
+      const struct {
          char *data;
          size_t size;
          enum chck_endianess endianess;
@@ -133,8 +133,8 @@ int main(void)
 
    /* TEST: zlib compression && decompression */
    {
-      static char uncompressed[] = ".....................";
-      static char compressed[] = { 0x78, 0x9c, 0xd3, 0xd3, 0xc3, 0x2, 0x18, 0x0, 0x2d, 0x5e, 0x3, 0xc7 };
+      char uncompressed[] = ".....................";
+      char compressed[] = { 0x78, 0x9c, 0xd3, 0xd3, 0xc3, 0x2, 0x18, 0x0, 0x2d, 0x5e, 0x3, 0xc7 };
       struct chck_buffer buf;
       chck_buffer_from_pointer(&buf, uncompressed, sizeof(uncompressed), CHCK_ENDIANESS_NATIVE);
 #if HAS_ZLIB
@@ -154,7 +154,7 @@ int main(void)
 
    /* TEST: benchmark read/write (small writes, native && non-native) */
    {
-      static const uint32_t iters = 0xFFFFF;
+      const uint32_t iters = 0xFFFFF;
       enum chck_endianess tests[] = { CHCK_ENDIANESS_NATIVE, !chck_endianess() };
       for (int i = 0; i < 2; ++i) {
          struct chck_buffer buf;

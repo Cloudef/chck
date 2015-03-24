@@ -419,7 +419,7 @@ int main(void)
 
    /* TEST: benchmark (many insertions, and removal expanding from center) */
    {
-      static const uint32_t iters = 0xFFFFF;
+      const uint32_t iters = 0xFFFFF;
       struct chck_pool pool;
       assert(chck_pool(&pool, 32, iters, sizeof(struct item)));
       for (uint32_t i = 0; i < iters; ++i)

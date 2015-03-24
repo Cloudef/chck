@@ -34,7 +34,7 @@ main(void)
 
    // TEST: good set
    {
-      static const char *home = "/home/dir/.configs" ;
+      const char *home = "/home/dir/.configs" ;
       setenv("XDG_CONFIG_HOME", home, 1);
       char *ret = xdg_get_path("XDG_CONFIG_HOME", "default_is_not_used");
       assert(!strcmp(ret, home));
@@ -51,7 +51,7 @@ main(void)
 
    // TEST: non relative
    {
-      static const char *home = "\\o// $24$@£ DID I SET MY CONFIG_HOME RIGHT!?" ;
+      const char *home = "\\o// $24$@£ DID I SET MY CONFIG_HOME RIGHT!?" ;
       setenv("XDG_CONFIG_HOME", home, 1);
       char *ret = xdg_get_path("XDG_CONFIG_HOME", "that_does_not_get_set");
       assert(strcmp(ret, home));
