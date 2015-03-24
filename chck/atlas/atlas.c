@@ -100,8 +100,7 @@ merge_nodes(struct chck_atlas *atlas)
       struct chck_atlas_node *c = atlas->free_list, *prev = NULL;
       while (c) {
          if (f != c) {
-            if (node_merge(f, c)) {
-               assert(prev);
+            if (node_merge(f, c) && prev) {
                prev->next = c->next;
                free(c);
                return true;

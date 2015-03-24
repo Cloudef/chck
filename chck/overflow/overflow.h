@@ -18,16 +18,16 @@
 /** else use these generics, note behaviour of these is not strictly defined. */
 #  define add_of(a, b, r) (*r = ((a) + (b))) < (a)
 #  define sub_of(a, b, r) (*r = ((a) - (b))) > (a)
-#  define mul_of(a, b, r) ((*r = ((a) * (b))) || true) && ((a) != 0 && (b) > *r / (a))
+#  define mul_of(a, b, r) ((*r = ((a) * (b))) || *r == 0) && ((a) != 0 && (b) > *r / (a))
 #endif
 
 /** declare overflow functions */
 
 // T = type name, n = function suffix
 #define decl_generics_for_type(T, n, ac) \
-   CHCK_PURE CHCK_NONULL static inline bool chck_add_of##n(T a, T b, T *r) { assert((!ac || b > 0) && r); return add_of(a, b, r); } \
-   CHCK_PURE CHCK_NONULL static inline bool chck_sub_of##n(T a, T b, T *r) { assert((!ac || b > 0) && r); return sub_of(a, b, r); } \
-   CHCK_PURE CHCK_NONULL static inline bool chck_mul_of##n(T a, T b, T *r) { assert(r); return mul_of(a, b, r); }
+   CHCK_NONULL static inline bool chck_add_of##n(T a, T b, T *r) { assert((!ac || b > 0) && r); return add_of(a, b, r); } \
+   CHCK_NONULL static inline bool chck_sub_of##n(T a, T b, T *r) { assert((!ac || b > 0) && r); return sub_of(a, b, r); } \
+   CHCK_NONULL static inline bool chck_mul_of##n(T a, T b, T *r) { assert(r); return mul_of(a, b, r); }
 
 // UT = unsigned type, un = unsigned function suffix
 // T = signed type, n = signed function suffix
@@ -51,7 +51,7 @@ CHCK_MALLOC static inline void*
 chck_malloc_add_of(size_t size, size_t add)
 {
    size_t r;
-   if (unlikely(chck_add_ofsz(size, add, &r)))
+   if (unlikely(chck_add_ofsz(size, add, &r)) || !r)
       return NULL;
 
    return malloc(r);
@@ -61,7 +61,7 @@ CHCK_MALLOC static inline void*
 chck_malloc_sub_of(size_t size, size_t sub)
 {
    size_t r;
-   if (unlikely(chck_sub_ofsz(size, sub, &r)))
+   if (unlikely(chck_sub_ofsz(size, sub, &r)) || !r)
       return NULL;
 
    return malloc(r);
@@ -71,7 +71,7 @@ CHCK_MALLOC static inline void*
 chck_malloc_mul_of(size_t size, size_t mul)
 {
    size_t r;
-   if (unlikely(chck_mul_ofsz(size, mul, &r)))
+   if (unlikely(chck_mul_ofsz(size, mul, &r)) || !r)
       return NULL;
 
    return malloc(r);
@@ -81,7 +81,7 @@ CHCK_MALLOC static inline void*
 chck_calloc_of(size_t nmemb, size_t size)
 {
    size_t r;
-   if (unlikely(chck_mul_ofsz(nmemb, size, &r)))
+   if (unlikely(chck_mul_ofsz(nmemb, size, &r)) || !r)
       return NULL;
 
    return calloc(nmemb, size);
@@ -91,7 +91,7 @@ CHCK_MALLOC static inline void*
 chck_calloc_add_of(size_t size, size_t add)
 {
    size_t r;
-   if (unlikely(chck_add_ofsz(size, add, &r)))
+   if (unlikely(chck_add_ofsz(size, add, &r)) || !r)
       return NULL;
 
    return calloc(1, r);
@@ -101,7 +101,7 @@ CHCK_MALLOC static inline void*
 chck_calloc_sub_of(size_t size, size_t sub)
 {
    size_t r;
-   if (unlikely(chck_sub_ofsz(size, sub, &r)))
+   if (unlikely(chck_sub_ofsz(size, sub, &r)) || !r)
       return NULL;
 
    return calloc(1, r);
@@ -111,7 +111,7 @@ CHCK_NONULL static inline void*
 chck_realloc_add_of(void *ptr, size_t size, size_t add)
 {
    size_t r;
-   if (unlikely(chck_add_ofsz(size, add, &r)))
+   if (unlikely(chck_add_ofsz(size, add, &r)) || !r)
       return NULL;
 
    return realloc(ptr, r);
@@ -121,7 +121,7 @@ CHCK_NONULL static inline void*
 chck_realloc_sub_of(void *ptr, size_t size, size_t sub)
 {
    size_t r;
-   if (unlikely(chck_sub_ofsz(size, sub, &r)))
+   if (unlikely(chck_sub_ofsz(size, sub, &r)) || !r)
       return NULL;
 
    return realloc(ptr, r);
@@ -131,7 +131,7 @@ CHCK_NONULL static inline void*
 chck_realloc_mul_of(void *ptr, size_t size, size_t mul)
 {
    size_t r;
-   if (unlikely(chck_mul_ofsz(size, mul, &r)))
+   if (unlikely(chck_mul_ofsz(size, mul, &r)) || !r)
       return NULL;
 
    return realloc(ptr, r);

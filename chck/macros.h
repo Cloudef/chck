@@ -10,7 +10,6 @@
 #  define CHCK_NONULL __attribute__((nonnull))
 #  define CHCK_NONULLV(...) __attribute__((nonnull(__VA_ARGS__)))
 #  define CHCK_CONST __attribute__((const))
-#  define CHCK_PURE __attribute__((pure))
 #  define CHCK_MALLOC __attribute__((malloc))
 #else
 #  if !defined(likely) && !defined(unlikely)
