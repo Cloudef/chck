@@ -46,6 +46,16 @@ resize(char **buf, size_t *size, size_t nsize)
    return true;
 }
 
+static inline bool
+resize_mul_of(char **buf, size_t *size, size_t nsize, size_t mul)
+{
+   size_t r;
+   if (chck_mul_ofsz(nsize, mul, &r))
+      return false;
+
+   return resize(buf, size, nsize * mul);
+}
+
 static char*
 get_executable_path_from(const char *path)
 {
@@ -69,13 +79,13 @@ get_executable_path_from(const char *path)
    if (!(buf = malloc(size))) goto fail;
    while ((size_t)(rsize = GetModuleFileName(NULL, buf, size)) > size) {
       if (rsize <= 0) goto fail;
-      if (!resize(&buf, &size, size * 2)) goto fail;
+      if (!resize_mul_of(&buf, &size, size, 2)) goto fail;
    }
 #else
    if (!(buf = malloc(size))) goto fail;
    while ((size_t)(rsize = readlink(path, buf, size)) > size) {
       if (rsize <= 0) goto fail;
-      if (!resize(&buf, &size, size * 2)) goto fail;
+      if (!resize_mul_of(&buf, &size, size, 2)) goto fail;
    }
 #endif
 
