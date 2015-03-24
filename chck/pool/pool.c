@@ -5,16 +5,25 @@
 #include <assert.h> /* for assert */
 
 static void
-pool_buffer_release(struct chck_pool_buffer *pb)
+pool_buffer_flush(struct chck_pool_buffer *pb)
 {
-   if (!pb)
-      return;
+   assert(pb);
 
    if (pb->buffer)
       free(pb->buffer);
 
    pb->buffer = NULL;
    pb->count = pb->allocated = pb->used = 0;
+}
+
+static void
+pool_buffer_release(struct chck_pool_buffer *pb)
+{
+   if (!pb)
+      return;
+
+   pool_buffer_flush(pb);
+   memset(pb, 0, sizeof(struct chck_pool_buffer));
 }
 
 static bool
@@ -26,7 +35,7 @@ pool_buffer_resize(struct chck_pool_buffer *pb, size_t size)
       return true;
 
    if (unlikely(size == 0)) {
-      pool_buffer_release(pb);
+      pool_buffer_flush(pb);
       return true;
    }
 
@@ -256,6 +265,15 @@ chck_pool_release(struct chck_pool *pool)
    pool_buffer_release(&pool->removed);
 }
 
+void
+chck_pool_flush(struct chck_pool *pool)
+{
+   assert(pool);
+   pool_buffer_flush(&pool->items);
+   pool_buffer_flush(&pool->map);
+   pool_buffer_flush(&pool->removed);
+}
+
 void*
 chck_pool_get(const struct chck_pool *pool, size_t index)
 {
@@ -352,7 +370,7 @@ chck_pool_set_c_array(struct chck_pool *pool, const void *items, size_t memb)
    if (unlikely(!pool_buffer_set_c_array(&pool->items, items, memb)))
       return false;
 
-   pool_buffer_release(&pool->removed);
+   pool_buffer_flush(&pool->removed);
    return true;
 }
 
@@ -388,6 +406,13 @@ chck_iter_pool_release(struct chck_iter_pool *pool)
       return;
 
    pool_buffer_release(&pool->items);
+}
+
+void
+chck_iter_pool_flush(struct chck_iter_pool *pool)
+{
+   assert(pool);
+   pool_buffer_flush(&pool->items);
 }
 
 void*
@@ -481,6 +506,15 @@ chck_ring_pool_release(struct chck_ring_pool *pool)
       return;
 
    pool_buffer_release(&pool->items);
+   free(pool->popped);
+   pool->popped = NULL;
+}
+
+void
+chck_ring_pool_flush(struct chck_ring_pool *pool)
+{
+   assert(pool);
+   pool_buffer_flush(&pool->items);
    free(pool->popped);
    pool->popped = NULL;
 }

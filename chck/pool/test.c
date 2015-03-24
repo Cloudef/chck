@@ -33,7 +33,7 @@ int main(void)
       assert(chck_pool_add(&pool, (&(struct item){2, NULL}), NULL));
       chck_pool_remove(&pool, 0);
       assert(((struct item*)chck_pool_get(&pool, 1))->a == 2);
-      chck_pool_release(&pool);
+      chck_pool_flush(&pool);
 
       size_t a, b, c;
       assert(chck_pool_add(&pool, (&(struct item){1, NULL}), &a));
@@ -129,7 +129,7 @@ int main(void)
       assert(&((struct item*)chck_pool_to_c_array(&pool, NULL))[2] == itemC);
       chck_pool_for_each_call(&pool, printa);
 
-      chck_pool_release(&pool);
+      chck_pool_flush(&pool);
 
       chck_pool_add(&pool, (&(struct item){1, NULL}), &a);
       chck_pool_add(&pool, (&(struct item){2, NULL}), &b);
@@ -187,7 +187,7 @@ int main(void)
       assert(chck_iter_pool_push_back(&pool, (&(struct item){2, NULL})));
       chck_iter_pool_remove(&pool, 0);
       assert(((struct item*)chck_iter_pool_get(&pool, 0))->a == 2);
-      chck_iter_pool_release(&pool);
+      chck_iter_pool_flush(&pool);
 
       assert(chck_iter_pool_push_front(&pool, (&(struct item){1, NULL})));
       assert(chck_iter_pool_insert(&pool, 55, (&(struct item){2, NULL}))); // same as push_back when index > count
@@ -382,7 +382,7 @@ int main(void)
          assert(iter == 3);
       }
 
-      chck_ring_pool_release(&pool);
+      chck_ring_pool_flush(&pool);
 
       chck_ring_pool_push_back(&pool, (&(struct item){1, NULL}));
       chck_ring_pool_push_front(&pool, (&(struct item){3, NULL}));

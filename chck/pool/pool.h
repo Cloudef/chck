@@ -60,6 +60,7 @@ struct chck_ring_pool {
 CHCK_NONULL bool chck_pool(struct chck_pool *pool, size_t grow, size_t capacity, size_t member_size);
 CHCK_NONULL bool chck_pool_from_c_array(struct chck_pool *pool, const void *items, size_t memb, size_t grow, size_t member_size);
 void chck_pool_release(struct chck_pool *pool);
+CHCK_NONULL void chck_pool_flush(struct chck_pool *pool);
 CHCK_NONULL void* chck_pool_get(const struct chck_pool *pool, size_t index);
 CHCK_NONULL void* chck_pool_get_last(const struct chck_pool *pool);
 CHCK_NONULLV(1) void* chck_pool_add(struct chck_pool *pool, const void *data, size_t *out_index);
@@ -91,6 +92,7 @@ CHCK_NONULLV(1) void* chck_pool_to_c_array(struct chck_pool *pool, size_t *memb)
 CHCK_NONULL bool chck_iter_pool(struct chck_iter_pool *pool, size_t grow, size_t capacity, size_t member_size);
 CHCK_NONULL bool chck_iter_pool_from_c_array(struct chck_iter_pool *pool, const void *items, size_t memb, size_t grow_step, size_t member_size);
 void chck_iter_pool_release(struct chck_iter_pool *pool);
+CHCK_NONULL void chck_iter_pool_flush(struct chck_iter_pool *pool);
 CHCK_NONULL void* chck_iter_pool_get(const struct chck_iter_pool *pool, size_t index);
 CHCK_NONULL void* chck_iter_pool_get_last(const struct chck_iter_pool *pool);
 CHCK_NONULLV(1) void* chck_iter_pool_push_front(struct chck_iter_pool *pool, const void *data);
@@ -122,6 +124,7 @@ CHCK_NONULLV(1) void* chck_iter_pool_to_c_array(struct chck_iter_pool *pool, siz
 CHCK_NONULL bool chck_ring_pool(struct chck_ring_pool *pool, size_t grow, size_t capacity, size_t member_size);
 CHCK_NONULL bool chck_ring_pool_from_c_array(struct chck_ring_pool *pool, const void *items, size_t memb, size_t growStep, size_t memberSize);
 void chck_ring_pool_release(struct chck_ring_pool *pool);
+CHCK_NONULL void chck_ring_pool_flush(struct chck_ring_pool *pool);
 CHCK_NONULLV(1) void* chck_ring_pool_push_front(struct chck_ring_pool *pool, const void *data);
 CHCK_NONULLV(1) void* chck_ring_pool_push_back(struct chck_ring_pool *pool, const void *data);
 CHCK_NONULL void* chck_ring_pool_pop_first(struct chck_ring_pool *pool);
