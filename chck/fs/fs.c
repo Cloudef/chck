@@ -1,3 +1,4 @@
+#include <chck/overflow/overflow.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -23,7 +24,7 @@ ccopy(const char *str)
 {
    assert(str);
    size_t size = strlen(str);
-   char *cpy = calloc(1, size + 1);
+   char *cpy = chck_calloc_add_of(size, 1);
    return (cpy ? memcpy(cpy, str, size) : NULL);
 }
 #endif
