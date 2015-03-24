@@ -18,16 +18,25 @@ valid_bits(enum chck_bits bits)
 }
 
 void
-chck_buffer_release(struct chck_buffer *buf)
+chck_buffer_flush(struct chck_buffer *buf)
 {
-   if (!buf)
-      return;
+   assert(buf);
 
    if (buf->copied)
       free(buf->buffer);
 
    buf->copied = false;
    buf->curpos = buf->buffer = NULL;
+}
+
+void
+chck_buffer_release(struct chck_buffer *buf)
+{
+   if (!buf)
+      return;
+
+   chck_buffer_flush(buf);
+   memset(buf, 0, sizeof(struct chck_buffer));
 }
 
 bool
@@ -90,7 +99,7 @@ chck_buffer_resize(struct chck_buffer *buf, size_t size)
       return true;
 
    if (unlikely(size == 0)) {
-      chck_buffer_release(buf);
+      chck_buffer_flush(buf);
       return true;
    }
 

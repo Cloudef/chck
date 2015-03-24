@@ -38,6 +38,7 @@ chck_buffer_native_endianess(const struct chck_buffer *buf)
 }
 
 void chck_buffer_release(struct chck_buffer *buf);
+CHCK_NONULL void chck_buffer_flush(struct chck_buffer *buf);
 CHCK_NONULLV(1) bool chck_buffer_from_pointer(struct chck_buffer *buf, void *ptr, size_t size, enum chck_endianess endianess);
 CHCK_NONULL bool chck_buffer(struct chck_buffer *buf, size_t size, enum chck_endianess endianess);
 CHCK_NONULLV(1) void chck_buffer_set_pointer(struct chck_buffer *buf, void *ptr, size_t size, enum chck_endianess endianess);
