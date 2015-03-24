@@ -91,15 +91,24 @@ chck_lut_str_algorithm(struct chck_lut *lut, uint32_t (*hashstr)(const char *str
 }
 
 void
-chck_lut_release(struct chck_lut *lut)
+chck_lut_flush(struct chck_lut *lut)
 {
-   if (!lut)
-      return;
+   assert(lut);
 
    if (lut->table)
       free(lut->table);
 
    lut->table = NULL;
+}
+
+void
+chck_lut_release(struct chck_lut *lut)
+{
+   if (!lut)
+      return;
+
+   chck_lut_flush(lut);
+   memset(lut, 0, sizeof(struct chck_lut));
 }
 
 bool
@@ -302,10 +311,9 @@ chck_hash_table_str_algorithm(struct chck_hash_table *table, uint32_t (*hashstr)
 }
 
 void
-chck_hash_table_release(struct chck_hash_table *table)
+chck_hash_table_flush(struct chck_hash_table *table)
 {
-   if (!table)
-      return;
+   assert(table);
 
    struct chck_hash_table *n;
    for (struct chck_hash_table *t = table; t; t = n) {
@@ -316,14 +324,24 @@ chck_hash_table_release(struct chck_hash_table *table)
       chck_lut_for_each(&t->meta, hdr)
          header_release(hdr);
 
-      chck_lut_release(&t->lut);
-      chck_lut_release(&t->meta);
+      chck_lut_flush(&t->lut);
+      chck_lut_flush(&t->meta);
 
       if (t != table)
          free(t);
    }
 
    table->next = NULL;
+}
+
+void
+chck_hash_table_release(struct chck_hash_table *table)
+{
+   if (!table)
+      return;
+
+   chck_hash_table_flush(table);
+   memset(table, 0, sizeof(struct chck_hash_table));
 }
 
 uint32_t

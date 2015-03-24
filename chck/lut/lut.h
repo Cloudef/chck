@@ -80,6 +80,7 @@ CHCK_NONULL bool chck_lut(struct chck_lut *lut, int set, size_t count, size_t me
 CHCK_NONULL void chck_lut_uint_algorithm(struct chck_lut *lut, uint32_t (*hashuint)(uint32_t uint));
 CHCK_NONULL void chck_lut_str_algorithm(struct chck_lut *lut, uint32_t (*hashstr)(const char *str, size_t len));
 void chck_lut_release(struct chck_lut *lut);
+CHCK_NONULL void chck_lut_flush(struct chck_lut *lut);
 CHCK_NONULLV(1) bool chck_lut_set(struct chck_lut *lut, uint32_t lookup, const void *data);
 CHCK_NONULL void* chck_lut_get(struct chck_lut *lut, uint32_t lookup);
 CHCK_NONULLV(1, 2) bool chck_lut_str_set(struct chck_lut *lut, const char *str, size_t len, const void *data);
@@ -105,6 +106,7 @@ CHCK_NONULL bool chck_hash_table(struct chck_hash_table *table, int set, size_t 
 CHCK_NONULL void chck_hash_table_uint_algorithm(struct chck_hash_table *table, uint32_t (*hashuint)(uint32_t uint));
 CHCK_NONULL void chck_hash_table_str_algorithm(struct chck_hash_table *table, uint32_t (*hashstr)(const char *str, size_t len));
 void chck_hash_table_release(struct chck_hash_table *table);
+CHCK_NONULL void chck_hash_table_flush(struct chck_hash_table *table);
 CHCK_NONULL uint32_t chck_hash_table_collisions(struct chck_hash_table *table);
 CHCK_NONULLV(1) bool chck_hash_table_set(struct chck_hash_table *table, uint32_t key, const void *data);
 CHCK_NONULLV(1) void* chck_hash_table_get(struct chck_hash_table *table, uint32_t key);

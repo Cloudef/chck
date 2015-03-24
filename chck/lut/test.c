@@ -39,7 +39,7 @@ int main(void)
       }
 
       chck_lut_for_each_call(&lut, printstr);
-      chck_lut_release(&lut);
+      chck_lut_flush(&lut);
 
       assert(chck_lut_str_set(&lut, "s0", 2, &s0));
       assert(chck_lut_str_set(&lut, "s1", 2, &s1));
@@ -108,7 +108,7 @@ int main(void)
 
       chck_hash_table_for_each_call(&table, printstr);
       printf("[1] collisions: %u\n", chck_hash_table_collisions(&table));
-      chck_hash_table_release(&table);
+      chck_hash_table_flush(&table);
 
       chck_hash_table_str_set(&table, "s0", 2, &s0);
       chck_hash_table_str_set(&table, "s1", 2, &s1);
@@ -138,7 +138,7 @@ int main(void)
       }
 
       printf("[2] collisions: %u\n", chck_hash_table_collisions(&table));
-      chck_hash_table_release(&table);
+      chck_hash_table_flush(&table);
    }
 
    /* TEST: benchmark (default algorithm, number of collisions) */
@@ -164,7 +164,7 @@ int main(void)
       }
 
       printf("[3] collisions: %u\n", chck_hash_table_collisions(&table));
-      chck_hash_table_release(&table);
+      chck_hash_table_flush(&table);
    }
 
    /* TEST: benchmark (incremental algorithm with known range)
@@ -184,7 +184,7 @@ int main(void)
       }
 
       printf("[4] collisions: %u\n", chck_hash_table_collisions(&table));
-      chck_hash_table_release(&table);
+      chck_hash_table_flush(&table);
    }
 
    return EXIT_SUCCESS;
