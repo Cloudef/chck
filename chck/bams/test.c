@@ -1,5 +1,5 @@
 #include "bams.h"
-#include "math/math.h"
+#include <chck/math/math.h>
 #include <stdlib.h>
 
 #undef NDEBUG

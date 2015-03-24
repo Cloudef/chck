@@ -1,7 +1,7 @@
 #ifndef __chck_xdg__
 #define __chck_xdg__
 
-#include "macros.h"
+#include <chck/macros.h>
 #include <stdint.h>
 
 struct xdg_paths {

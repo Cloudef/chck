@@ -1,6 +1,6 @@
 #include "sjis.h"
 #include "utf8sjis.h"
-#include "overflow/overflow.h"
+#include <chck/overflow/overflow.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>

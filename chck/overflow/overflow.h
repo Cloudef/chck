@@ -1,7 +1,7 @@
 #ifndef __chck_overflow_h__
 #define __chck_overflow_h__
 
-#include "macros.h"
+#include <chck/macros.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>

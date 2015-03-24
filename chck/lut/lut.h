@@ -1,7 +1,7 @@
 #ifndef __chck_lut__
 #define __chck_lut__
 
-#include "macros.h"
+#include <chck/macros.h>
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>

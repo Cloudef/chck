@@ -1,7 +1,7 @@
 #ifndef __chck_dispatch_h__
 #define __chck_dispatch_h__
 
-#include "macros.h"
+#include <chck/macros.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <stdbool.h>

@@ -1,5 +1,5 @@
 #include "lut.h"
-#include "overflow/overflow.h"
+#include <chck/overflow/overflow.h>
 #include <stdlib.h> /* for calloc, free, etc.. */
 #include <string.h> /* for memcpy/memset */
 #include <assert.h> /* for assert */

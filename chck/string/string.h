@@ -1,7 +1,7 @@
 #ifndef __chck_string_h__
 #define __chck_string_h__
 
-#include "macros.h"
+#include <chck/macros.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdarg.h>

@@ -1,7 +1,7 @@
 #ifndef __chck_fs__
 #define __chck_fs__
 
-#include "macros.h"
+#include <chck/macros.h>
 #include <string.h>
 #include <assert.h>
 

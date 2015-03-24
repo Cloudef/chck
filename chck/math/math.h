@@ -1,7 +1,7 @@
 #ifndef __chck_math_h__
 #define __chck_math_h__
 
-#include "macros.h"
+#include <chck/macros.h>
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>

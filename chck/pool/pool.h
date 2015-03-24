@@ -1,7 +1,7 @@
 #ifndef __chck_pool__
 #define __chck_pool__
 
-#include "macros.h"
+#include <chck/macros.h>
 #include <stddef.h>
 #include <stdbool.h>
 

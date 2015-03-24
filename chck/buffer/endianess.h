@@ -1,7 +1,7 @@
 #ifndef __chck_endianess__
 #define __chck_endianess__
 
-#include "macros.h"
+#include <chck/macros.h>
 #include <stdint.h>
 #include <assert.h>
 #include <string.h>

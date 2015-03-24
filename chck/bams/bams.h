@@ -1,7 +1,7 @@
 #ifndef __chck_bams_h__
 #define __chck_bams_h__
 
-#include "macros.h"
+#include <chck/macros.h>
 #include <stdint.h>
 
 typedef int64_t bams64;

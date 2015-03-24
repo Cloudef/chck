@@ -1,7 +1,7 @@
 #ifndef __chck_atlas_h__
 #define __chck_atlas_h__
 
-#include "macros.h"
+#include <chck/macros.h>
 #include <stdint.h>
 #include <stdbool.h>
 

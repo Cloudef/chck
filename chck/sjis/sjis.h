@@ -1,7 +1,7 @@
 #ifndef __sjis_h__
 #define __sjis_h__
 
-#include "macros.h"
+#include <chck/macros.h>
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
