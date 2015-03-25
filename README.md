@@ -1,7 +1,8 @@
 # Chck
-[![buildhck status](http://cloudef.eu:9001/build/chck/master/linux%20x86_64/build-status.png)](#)
 
 Collection of C utilities taken and cleaned up from my other projects
+
+This is old branch, which contains the json code that hasn't yet been refactored.
 
 ## Building
 
