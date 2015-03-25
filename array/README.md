@@ -1,3 +1,0 @@
-# Pointer arrays
-
-Meh.

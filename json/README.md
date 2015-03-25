@@ -1,3 +1,0 @@
-# JSON decoder && encoder
-
-Yay.

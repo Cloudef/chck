@@ -23,6 +23,7 @@ However library containing all the utilities is built with the cmake.
 
 ## Some rules what goes here
 * Each utility should be independant.
+   * Though, it's ok to include macros.h and overflow.h
 * Each utility should contain tests.
 * Each utility should have use more than once.
 
