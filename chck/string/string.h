@@ -7,6 +7,8 @@
 #include <stdarg.h>
 #include <string.h>
 
+#define CSTRE(x) (x ? x : "")
+
 struct chck_string {
    char *data;
    size_t size;
@@ -23,14 +25,14 @@ static inline bool
 chck_cstr_ends_with(const char *a, const char *b)
 {
    const size_t lena = (a ? strlen(a) : 0), lenb = (b ? strlen(b) : 0);
-   return (lena >= lenb && !memcmp(a + lena - lenb, b, lenb));
+   return (lena >= lenb && !memcmp(a + lena - lenb, CSTRE(b), lenb));
 }
 
 static inline bool
 chck_cstr_starts_with(const char *a, const char *b)
 {
    const size_t lena = (a ? strlen(a) : 0), lenb = (b ? strlen(b) : 0);
-   return (lena >= lenb && !memcmp(a, b, lenb));
+   return (lena >= lenb && !memcmp(CSTRE(a), CSTRE(b), lenb));
 }
 
 static inline bool
@@ -55,40 +57,42 @@ static inline bool
 chck_string_ends_with_cstr(const struct chck_string *a, const char *cstr)
 {
    const size_t len = (cstr ? strlen(cstr) : 0);
-   return (a->size >= len && !memcmp(a->data + a->size - len, cstr, len));
+   return (a->size >= len && !memcmp(a->data + a->size - len, CSTRE(cstr), len));
 }
 
 static inline bool
 chck_string_starts_with_cstr(const struct chck_string *a, const char *cstr)
 {
    const size_t len = (cstr ? strlen(cstr) : 0);
-   return (a->size >= len && !memcmp(a->data, cstr, len));
+   return (a->size >= len && !memcmp(a->data, CSTRE(cstr), len));
 }
 
 static inline bool
 chck_string_ends_with(const struct chck_string *a, const struct chck_string *b)
 {
-   return (a->size >= b->size && !memcmp(a->data + a->size - b->size, b->data, b->size));
+   return (a->size >= b->size && !memcmp(a->data + a->size - b->size, CSTRE(b->data), b->size));
 }
 
 static inline bool
 chck_string_starts_with(const struct chck_string *a, const struct chck_string *b)
 {
-   return (a->size >= b->size && !memcmp(a->data, b->data, b->size));
+   return (a->size >= b->size && !memcmp(CSTRE(a->data), CSTRE(b->data), b->size));
 }
 
 static inline bool
 chck_string_eq(const struct chck_string *a, const struct chck_string *b)
 {
-   return (a->data == b->data) || (a->size == b->size && !memcmp(a->data, b->data, a->size));
+   return (a->data == b->data) || (a->size == b->size && !memcmp(CSTRE(a->data), CSTRE(b->data), a->size));
 }
 
 static inline bool
 chck_string_eq_cstr(const struct chck_string *a, const char *cstr)
 {
    const size_t len = (cstr ? strlen(cstr) : 0);
-   return (len == a->size) && (cstr == a->data || !memcmp(a->data, cstr, a->size));
+   return (len == a->size) && (cstr == a->data || !memcmp(CSTRE(a->data), CSTRE(cstr), a->size));
 }
+
+#undef CSTRE
 
 void chck_string_release(struct chck_string *string);
 CHCK_NONULLV(1) bool chck_string_set_cstr(struct chck_string *string, const char *data, bool is_heap);
