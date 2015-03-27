@@ -20,7 +20,6 @@
 #  define CHCK_NONULL
 #  define CHCK_NONULLV
 #  define CHCK_CONST
-#  define CHCK_PURE
 #  define CHCK_MALLOC
 #endif
 
