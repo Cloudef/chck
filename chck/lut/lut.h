@@ -31,6 +31,8 @@ struct chck_hash_table {
 struct chck_hash_table_iterator {
    struct chck_hash_table *table;
    size_t iter;
+   const char *str_key;
+   uint32_t uint_key;
 };
 
 // simply return the input, this is good for incrementing numbers
@@ -97,10 +99,10 @@ CHCK_NONULL void* chck_lut_iter(struct chck_lut *lut, size_t *iter);
  */
 
 #define chck_hash_table_for_each_call(table, function, ...) \
-{ struct chck_hash_table_iterator _I = { table, 0 }; void *_P; while ((_P = chck_hash_table_iter(&_I))) function(_P, ##__VA_ARGS__); }
+{ struct chck_hash_table_iterator _I = { table, 0, NULL, 0 }; void *_P; while ((_P = chck_hash_table_iter(&_I))) function(_P, ##__VA_ARGS__); }
 
 #define chck_hash_table_for_each(table, pos) \
-   for (struct chck_hash_table_iterator _I = { table, 0 }; (pos = chck_hash_table_iter(&_I));)
+   for (struct chck_hash_table_iterator _I = { table, 0, NULL, 0 }; (pos = chck_hash_table_iter(&_I));)
 
 CHCK_NONULL bool chck_hash_table(struct chck_hash_table *table, int set, size_t count, size_t member);
 CHCK_NONULL void chck_hash_table_uint_algorithm(struct chck_hash_table *table, uint32_t (*hashuint)(uint32_t uint));

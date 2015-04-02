@@ -430,13 +430,29 @@ chck_hash_table_iter(struct chck_hash_table_iterator *iterator)
 {
    assert(iterator && iterator->table);
 
-   if (iterator->iter >= iterator->table->lut.count) {
-      if (!iterator->table->next)
-         return NULL;
+   iterator->str_key = NULL;
+   iterator->uint_key = 0;
 
-      // switch to another set of luts, since we have collisions
-      iterator->table = iterator->table->next;
-      iterator->iter = 0;
+   bool placed = false;
+   while (!placed) {
+      if (iterator->iter >= iterator->table->lut.count) {
+         if (!iterator->table->next)
+            return NULL;
+
+         // switch to another set of luts, since we have collisions
+         iterator->table = iterator->table->next;
+         iterator->iter = 0;
+      }
+
+      struct header *h;
+      if ((h = lut_get_index(&iterator->table->meta, iterator->iter))) {
+         iterator->str_key = h->str_key;
+         iterator->uint_key = h->uint_key;
+         placed = h->placed;
+      }
+
+      if (!placed)
+         chck_lut_iter(&iterator->table->lut, &iterator->iter);
    }
 
    return chck_lut_iter(&iterator->table->lut, &iterator->iter);
