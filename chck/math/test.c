@@ -6,6 +6,8 @@
 
 int main(void)
 {
+   assert(chck_equalld(10.0, 10.000000000001l, 1000000.0l));
+   assert(!chck_equalld(10.0, 10.000000000001l, 1.0l));
    assert(chck_equal(10.0, 10.000000000001, 1000.0));
    assert(!chck_equal(10.0, 10.000000000001, 1.0));
    assert(chck_equalf(10.0f, 10.00001f, 10.0f));

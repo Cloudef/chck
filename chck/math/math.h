@@ -76,30 +76,35 @@
    CHCK_CONST static inline T chck_max##n(T a, T b) { return (a > b ? a : b); } \
    CHCK_CONST static inline T chck_clamp##n(T a, T min, T max) { return (chck_min##n(chck_max##n(a, min), max)); }
 
-// T = signed type, FT = floating point type, n = signed function suffix
-#define decl_signed_generics(T, FT, n) \
+// T = signed type, FT = floating point type, n = signed function suffix, fs = floating point suffix
+#define decl_signed_generics(T, FT, n, fs) \
    decl_generics_for_type(T, n) \
-   CHCK_CONST static inline T chck_modn##n(T x, T m) { return x - m * round((FT)x / (FT)m); } // modulus rounding to nearest int (-m/2, +m/2 range)
+   CHCK_CONST static inline T chck_modn##n(T x, T m) { return x - m * round##fs((FT)x / (FT)m); } // modulus rounding to nearest int (-m/2, +m/2 range)
 
 // UT = unsigned type, un = unsigned function suffix
 // T = signed type, FT = floating point type, n = signed function suffix
 #define decl_generics(UT, un, T, FT, n) \
    decl_generics_for_type(UT, un) \
-   decl_signed_generics(T, FT, n)
+   decl_signed_generics(T, FT, n, )
 
 decl_generics_for_type(size_t, sz)
 decl_generics(uint64_t, u64, int64_t, double, 64)
 decl_generics(uint32_t, u32, int32_t, float, 32)
 decl_generics(uint16_t, u16, int16_t, float, 16)
 decl_generics(uint8_t, u8, int8_t, float, 8)
-decl_signed_generics(double, double, )
-decl_signed_generics(float, float, f)
+decl_signed_generics(long double, long double, ld, l)
+decl_signed_generics(double, double, , )
+decl_signed_generics(float, float, f, f)
 
 #undef decl_generics
 #undef decl_signed_generics
 #undef decl_generics_for_type
 
 /** floating point almost equality checks */
+
+CHCK_CONST static inline bool chck_equalld(long double a, long double b, long double error) {
+   return (fabsl(a - b) < error * LDBL_EPSILON * fabsl(a + b) || fabsl(a - b) < LDBL_MIN);
+}
 
 CHCK_CONST static inline bool chck_equal(double a, double b, double error) {
    return (fabs(a - b) < error * DBL_EPSILON * fabs(a + b) || fabs(a - b) < DBL_MIN);
