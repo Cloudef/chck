@@ -2,10 +2,12 @@
 #define __chck_string_h__
 
 #include <chck/macros.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdarg.h>
 #include <string.h>
+#include <errno.h>
 
 #define CSTRE(x) (x ? x : "")
 
@@ -100,5 +102,78 @@ CHCK_NONULLV(1) bool chck_string_set_cstr_with_length(struct chck_string *string
 CHCK_NONULL bool chck_string_set(struct chck_string *string, const struct chck_string *other, bool is_heap);
 CHCK_NONULL CHCK_FORMAT(printf, 2, 3) bool chck_string_set_format(struct chck_string *string, const char *fmt, ...);
 CHCK_NONULL bool chck_string_set_varg(struct chck_string *string, const char *fmt, va_list args);
+
+#define decl_int_conv(T, PT, n, fun, range) \
+static inline bool chck_cstr_to_##n(const char *data, T *out) { \
+   if (chck_cstr_is_empty(data)) \
+      return false; \
+   char *end; \
+   errno = 0; \
+   const PT num = fun(data, &end, 10); \
+   if (!end || *end != 0 || errno == ERANGE || errno == EINVAL || (range)) \
+      return false; \
+   if (out) \
+      *out = num; \
+   return true; \
+}
+
+#define decl_flt_conv(T, n, fun) \
+static inline bool chck_cstr_to_##n(const char *data, T *out) { \
+   if (chck_cstr_is_empty(data)) \
+      return false; \
+   char *end; \
+   errno = 0; \
+   const T num = fun(data, &end); \
+   if (!end || *end != 0 || errno == ERANGE) \
+      return false; \
+   if (out) \
+      *out = num; \
+   return true; \
+}
+
+decl_int_conv(uint32_t, unsigned long int, u32, strtoul, num > UINT32_MAX);
+decl_int_conv(uint16_t, unsigned long int, u16, strtoul, num > UINT16_MAX);
+decl_int_conv(uint8_t, unsigned long int, u8, strtoul, num > UINT8_MAX);
+decl_int_conv(int64_t, long long int, i64, strtoll, num > INT64_MAX || num < INT64_MIN);
+decl_int_conv(int32_t, long int, i32, strtol, num > INT32_MAX || num < INT32_MIN);
+decl_int_conv(int16_t, long int, i16, strtol, num > INT16_MAX || num < INT16_MIN);
+decl_int_conv(int8_t, long int, i8, strtol, num > INT8_MAX || num < INT8_MIN);
+
+decl_flt_conv(double, d, strtod);
+decl_flt_conv(float, f, strtof);
+decl_flt_conv(long double, ld, strtold);
+
+#undef decl_int_conv
+#undef decl_flt_conv
+
+static inline bool
+chck_cstr_to_u64(const char *data, uint64_t *out)
+{
+   if (chck_cstr_is_empty(data) || strcspn(data, "-") == strspn(data, " "))
+      return false;
+
+   char *end;
+   errno = 0;
+   const unsigned long long num = strtoull(data, &end, 10);
+   if (!end || *end != 0 || errno == ERANGE)
+      return false;
+
+   if (out)
+      *out = num;
+
+   return true;
+}
+
+static inline bool
+chck_cstr_to_bool(const char *data, bool *out)
+{
+   if (!data || (!chck_cstreq(data, "true") && !chck_cstreq(data, "false")))
+      return false;
+
+   if (out)
+      *out = chck_cstreq(data, "true");
+
+   return true;
+}
 
 #endif /* __chck_string_h__ */
