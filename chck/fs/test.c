@@ -34,5 +34,19 @@ int main(void)
       assert(strcmp(chck_basename("foo/bar"), "foo"));
    }
 
+   /* TEST: safe filename */
+   {
+      assert(!chck_filename_is_safe(".."));
+      assert(!chck_filename_is_safe("."));
+      assert(!chck_filename_is_safe("foo/bar"));
+      assert(chck_filename_is_safe("foo"));
+      assert(chck_filename_is_safe("foo_01_bar"));
+
+      char f[FILENAME_MAX + 2];
+      memset(f, 'a', sizeof(f));
+      f[FILENAME_MAX + 1] = 0;
+      assert(!chck_filename_is_safe(f));
+   }
+
    return EXIT_SUCCESS;
 }
