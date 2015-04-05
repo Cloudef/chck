@@ -96,13 +96,6 @@ chck_string_eq_cstr(const struct chck_string *a, const char *cstr)
 
 #undef CSTRE
 
-void chck_string_release(struct chck_string *string);
-CHCK_NONULLV(1) bool chck_string_set_cstr(struct chck_string *string, const char *data, bool is_heap);
-CHCK_NONULLV(1) bool chck_string_set_cstr_with_length(struct chck_string *string, const char *data, size_t len, bool is_heap);
-CHCK_NONULL bool chck_string_set(struct chck_string *string, const struct chck_string *other, bool is_heap);
-CHCK_NONULL CHCK_FORMAT(printf, 2, 3) bool chck_string_set_format(struct chck_string *string, const char *fmt, ...);
-CHCK_NONULL bool chck_string_set_varg(struct chck_string *string, const char *fmt, va_list args);
-
 #define decl_int_conv(T, PT, n, fun, range) \
 static inline bool chck_cstr_to_##n(const char *data, T *out) { \
    if (chck_cstr_is_empty(data)) \
@@ -175,5 +168,17 @@ chck_cstr_to_bool(const char *data, bool *out)
 
    return true;
 }
+
+void chck_string_release(struct chck_string *string);
+CHCK_NONULLV(1) bool chck_string_set_cstr(struct chck_string *string, const char *data, bool is_heap);
+CHCK_NONULLV(1) bool chck_string_set_cstr_with_length(struct chck_string *string, const char *data, size_t len, bool is_heap);
+CHCK_NONULL bool chck_string_set(struct chck_string *string, const struct chck_string *other, bool is_heap);
+CHCK_NONULL CHCK_FORMAT(printf, 2, 3) bool chck_string_set_format(struct chck_string *string, const char *fmt, ...);
+CHCK_NONULL bool chck_string_set_varg(struct chck_string *string, const char *fmt, va_list args);
+
+CHCK_NONULL char* chck_cstr_strip(char *cstr); /* modifies inplace */
+CHCK_NONULL char* chck_cstr_remove_chars(char *cstr, const char *bad); /* modifies inplace */
+CHCK_NONULLV(2,3,5) const char* chck_cstr_tokenize(const char *cstr, size_t *out_len, const char *separator, bool skip_whitespace, const char **state);
+CHCK_NONULLV(2,3,5) const char* chck_cstr_tokenize_quoted(const char *cstr, size_t *out_len, const char *separator, const char *quotes, const char **state);
 
 #endif /* __chck_string_h__ */

@@ -7,6 +7,86 @@
 
 int main(void)
 {
+   /* TEST: stripping */
+   {
+      struct chck_string v = {0};
+      assert(chck_string_set_cstr(&v, "   contains some whitespace     ", true));
+      assert(chck_cstr_strip(v.data) == v.data + 3);
+      assert(strlen(v.data + 3) == 24);
+      assert(chck_cstreq(v.data + 3, "contains some whitespace"));
+
+      assert(chck_string_set_cstr(&v, "asd", true));
+      assert(chck_cstr_strip(v.data) == v.data);
+      assert(strlen(v.data) == 3);
+      assert(chck_cstreq(v.data, "asd"));
+
+      assert(chck_string_set_cstr(&v, "foo baz lol", true));
+      assert(chck_cstr_remove_chars(v.data, "baz") == v.data);
+      assert(chck_cstreq(v.data, "foo  lol"));
+      chck_string_release(&v);
+   }
+
+   /* TEST: tokenizing */
+   {
+      const char *v = "  token: this :please  ";
+
+      {
+         size_t len, i = 0;
+         const char *t, *state = NULL;
+         const char *except[] = { "  token", " this ", "please  " };
+         while ((t = chck_cstr_tokenize(v, &len, ":", false, &state))) {
+            assert(i < 3);
+            assert(len == strlen(except[i]));
+            assert(chck_cstrneq(except[i], t, len));
+            ++i;
+         }
+         assert(i == 3);
+      }
+
+      {
+         size_t len, i = 0;
+         const char *t, *state = NULL;
+         const char *except[] = { "token", "this", "please" };
+         while ((t = chck_cstr_tokenize(v, &len, ":", true, &state))) {
+            assert(i < 3);
+            assert(len == strlen(except[i]));
+            assert(chck_cstrneq(except[i], t, len));
+            ++i;
+         }
+         assert(i == 3);
+      }
+
+      v = "some : words : \"  but this is included  \" : \"yay : yoy\" : \"foo\"";
+
+      {
+         size_t len, i = 0;
+         const char *t, *state = NULL;
+         const char *except[] = { "some", "words", "  but this is included  ", "yay : yoy", "foo" };
+         while ((t = chck_cstr_tokenize_quoted(v, &len, ":", "\"", &state))) {
+            assert(i < 5);
+            assert(len == strlen(except[i]));
+            assert(chck_cstrneq(except[i], t, len));
+            ++i;
+         }
+         assert(i == 5);
+      }
+
+      v = "some words  \"  but this is included  \" \"yay  yoy\"  \"foo\"";
+
+      {
+         size_t len, i = 0;
+         const char *t, *state = NULL;
+         const char *except[] = { "some", "words", "  but this is included  ", "yay  yoy", "foo" };
+         while ((t = chck_cstr_tokenize_quoted(v, &len, " ", "\"", &state))) {
+            assert(i < 5);
+            assert(len == strlen(except[i]));
+            assert(chck_cstrneq(except[i], t, len));
+            ++i;
+         }
+         assert(i == 5);
+      }
+   }
+
    /* TEST: bool conversion tests */
    {
       bool v;

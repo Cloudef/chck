@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <assert.h>
 
+#define WHITESPACE " \t\n\r"
+
 static inline char*
 ccopy(const char *str, size_t len)
 {
@@ -91,4 +93,101 @@ chck_string_set(struct chck_string *string, const struct chck_string *other, boo
    }
 
    return chck_string_set_cstr_with_length(string, other->data, other->size, is_heap);
+}
+
+char*
+chck_cstr_strip(char *cstr)
+{
+   assert(cstr);
+
+   char *e;
+   cstr += strspn(cstr, WHITESPACE);
+   for (e = strchr(cstr, 0); e > cstr; --e)
+      if (!strchr(WHITESPACE, e[-1]))
+         break;
+
+   *e = 0;
+   return cstr;
+}
+
+char*
+chck_cstr_remove_chars(char *cstr, const char *bad)
+{
+   assert(cstr && bad);
+
+   char *t, *f;
+   for (f = cstr, t = cstr; *f; ++f) {
+      if (strchr(bad, *f))
+         continue;
+
+      *(t++) = *f;
+   }
+
+   *t = 0;
+   return cstr;
+}
+
+const char*
+chck_cstr_tokenize(const char *cstr, size_t *out_len, const char *separator, bool skip_whitespace, const char **state)
+{
+   assert(out_len && separator && state);
+   const char *current = (state && *state ? *state : cstr);
+
+   if (chck_cstr_is_empty(current) || chck_cstr_is_empty(cstr))
+      return NULL;
+
+   current += strspn(current, separator);
+
+   if (skip_whitespace)
+      current += strspn(current, WHITESPACE);
+
+   *out_len = strcspn(current, separator);
+   *state = current + *out_len;
+
+   if (skip_whitespace) {
+      const size_t ws = strcspn(current, WHITESPACE);
+      *out_len -= (ws < *out_len ? *out_len - ws : 0);
+   }
+
+   return current;
+}
+
+const char*
+chck_cstr_tokenize_quoted(const char *cstr, size_t *out_len, const char *separator, const char *quotes, const char **state)
+{
+   assert(out_len && separator && quotes && state);
+   const char *e, *current = chck_cstr_tokenize(cstr, out_len, separator, true, state);
+
+   if (!current)
+      return NULL;
+
+   for (const char *q = quotes; *q; ++q) {
+      if (*current != *q)
+         continue;
+
+      bool escaped = false;
+      for (e = ++current; *e; ++e) {
+         if (escaped)
+            escaped = false;
+         else if (*e == '\\')
+            escaped = true;
+         else if (*e == *q)
+            break;
+      }
+
+      *out_len = e - current;
+      e = (!*e ? e : e + 1);
+
+      if (*e) {
+         size_t tmp;
+         const char *state2 = NULL;
+         *state = chck_cstr_tokenize(e, &tmp, separator, true, &state2);
+      } else {
+         *state = e;
+      }
+
+      break;
+   }
+
+   return current;
 }
