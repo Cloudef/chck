@@ -144,6 +144,9 @@ chck_cstr_tokenize(const char *cstr, size_t *out_len, const char *separator, boo
    *out_len = strcspn(current, separator);
    *state = current + *out_len;
 
+   if (**state != 0)
+      ++(*state);
+
    if (skip_whitespace) {
       const size_t ws = strcspn(current, WHITESPACE);
       *out_len -= (ws < *out_len ? *out_len - ws : 0);
