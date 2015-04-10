@@ -125,8 +125,8 @@ pool_buffer_add_move(struct chck_pool_buffer *pb, const void *data, size_t pos, 
    assert(pb->used > pos);
 
    if (pb->used > pb->member) {
-      size_t shift = pb->used - pos;
-      memmove(pb->buffer + pos + pb->member, pb->buffer + (pb->used - shift), shift);
+      size_t shift = pb->used - (pos + pb->member);
+      memmove(pb->buffer + pos + pb->member, pb->buffer + pos, shift);
       ptr = pb->buffer + pos;
    }
 
