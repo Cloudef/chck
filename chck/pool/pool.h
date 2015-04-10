@@ -93,6 +93,7 @@ CHCK_NONULL bool chck_iter_pool(struct chck_iter_pool *pool, size_t grow, size_t
 CHCK_NONULL bool chck_iter_pool_from_c_array(struct chck_iter_pool *pool, const void *items, size_t memb, size_t grow_step, size_t member_size);
 void chck_iter_pool_release(struct chck_iter_pool *pool);
 CHCK_NONULL void chck_iter_pool_flush(struct chck_iter_pool *pool);
+CHCK_NONULL void chck_iter_pool_empty(struct chck_iter_pool *pool);
 CHCK_NONULL void* chck_iter_pool_get(const struct chck_iter_pool *pool, size_t index);
 CHCK_NONULL void* chck_iter_pool_get_last(const struct chck_iter_pool *pool);
 CHCK_NONULLV(1) void* chck_iter_pool_push_front(struct chck_iter_pool *pool, const void *data);

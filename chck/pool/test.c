@@ -181,13 +181,14 @@ int main(void)
    /* TEST: iter pool */
    {
       struct chck_iter_pool pool;
-      assert(chck_iter_pool(&pool, 32, 3, sizeof(struct item)));
+      assert(chck_iter_pool(&pool, 32, 2, sizeof(struct item)));
 
       assert(chck_iter_pool_push_back(&pool, (&(struct item){1, NULL})));
       assert(chck_iter_pool_push_back(&pool, (&(struct item){2, NULL})));
       chck_iter_pool_remove(&pool, 0);
       assert(((struct item*)chck_iter_pool_get(&pool, 0))->a == 2);
-      chck_iter_pool_flush(&pool);
+      chck_iter_pool_empty(&pool);
+      assert(pool.items.allocated == 2 * sizeof(struct item));
 
       assert(chck_iter_pool_push_front(&pool, (&(struct item){1, NULL})));
       assert(chck_iter_pool_insert(&pool, 55, (&(struct item){2, NULL}))); // same as push_back when index > count
@@ -204,7 +205,7 @@ int main(void)
 
          assert(pool.items.count == 3);
          assert(pool.items.used == 3 * sizeof(struct item));
-         assert(pool.items.allocated == 32 * sizeof(struct item));
+         assert(pool.items.allocated == 34 * sizeof(struct item));
          assert(iter == 3);
       }
 
@@ -218,7 +219,7 @@ int main(void)
 
          assert(pool.items.count == 2);
          assert(pool.items.used == 2 * sizeof(struct item));
-         assert(pool.items.allocated == 32 * sizeof(struct item));
+         assert(pool.items.allocated == 34 * sizeof(struct item));
          assert(iter == (size_t)-1);
       }
 
@@ -234,7 +235,7 @@ int main(void)
 
          assert(pool.items.count == 3);
          assert(pool.items.used == 3 * sizeof(struct item));
-         assert(pool.items.allocated == 32 * sizeof(struct item));
+         assert(pool.items.allocated == 34 * sizeof(struct item));
          assert(iter == 3);
       }
 
@@ -248,7 +249,7 @@ int main(void)
 
          assert(pool.items.count == 2);
          assert(pool.items.used == 2 * sizeof(struct item));
-         assert(pool.items.allocated == 32 * sizeof(struct item));
+         assert(pool.items.allocated == 34 * sizeof(struct item));
          assert(iter == 2);
       }
 
@@ -262,7 +263,7 @@ int main(void)
 
          assert(pool.items.count == 3);
          assert(pool.items.used == 3 * sizeof(struct item));
-         assert(pool.items.allocated == 32 * sizeof(struct item));
+         assert(pool.items.allocated == 34 * sizeof(struct item));
          assert(iter == 3);
       }
 
@@ -287,13 +288,13 @@ int main(void)
             chck_iter_pool_push_back(&pool, NULL);
 
          assert(pool.items.used == 35 * sizeof(struct item));
-         assert(pool.items.allocated == 64 * sizeof(struct item));
+         assert(pool.items.allocated == 66 * sizeof(struct item));
 
          for (uint32_t i = 0; i < 32; ++i)
             chck_iter_pool_remove(&pool, pool.items.count - 1);
 
          assert(pool.items.used == 3 * sizeof(struct item));
-         assert(pool.items.allocated == 32 * sizeof(struct item));
+         assert(pool.items.allocated == 34 * sizeof(struct item));
       }
 
       chck_iter_pool_release(&pool);

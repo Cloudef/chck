@@ -5,15 +5,17 @@
 #include <assert.h> /* for assert */
 
 static void
-pool_buffer_flush(struct chck_pool_buffer *pb)
+pool_buffer_flush(struct chck_pool_buffer *pb, bool release)
 {
    assert(pb);
 
-   if (pb->buffer)
+   if (release){
       free(pb->buffer);
+      pb->allocated = 0;
+      pb->buffer = NULL;
+   }
 
-   pb->buffer = NULL;
-   pb->count = pb->allocated = pb->used = 0;
+   pb->count = pb->used = 0;
 }
 
 static void
@@ -22,7 +24,7 @@ pool_buffer_release(struct chck_pool_buffer *pb)
    if (!pb)
       return;
 
-   pool_buffer_flush(pb);
+   pool_buffer_flush(pb, true);
    memset(pb, 0, sizeof(struct chck_pool_buffer));
 }
 
@@ -35,7 +37,7 @@ pool_buffer_resize(struct chck_pool_buffer *pb, size_t size)
       return true;
 
    if (unlikely(size == 0)) {
-      pool_buffer_flush(pb);
+      pool_buffer_flush(pb, true);
       return true;
    }
 
@@ -269,9 +271,9 @@ void
 chck_pool_flush(struct chck_pool *pool)
 {
    assert(pool);
-   pool_buffer_flush(&pool->items);
-   pool_buffer_flush(&pool->map);
-   pool_buffer_flush(&pool->removed);
+   pool_buffer_flush(&pool->items, true);
+   pool_buffer_flush(&pool->map, true);
+   pool_buffer_flush(&pool->removed, true);
 }
 
 void*
@@ -370,7 +372,7 @@ chck_pool_set_c_array(struct chck_pool *pool, const void *items, size_t memb)
    if (unlikely(!pool_buffer_set_c_array(&pool->items, items, memb)))
       return false;
 
-   pool_buffer_flush(&pool->removed);
+   pool_buffer_flush(&pool->removed, true);
    return true;
 }
 
@@ -412,7 +414,14 @@ void
 chck_iter_pool_flush(struct chck_iter_pool *pool)
 {
    assert(pool);
-   pool_buffer_flush(&pool->items);
+   pool_buffer_flush(&pool->items, true);
+}
+
+void
+chck_iter_pool_empty(struct chck_iter_pool *pool)
+{
+   assert(pool);
+   pool_buffer_flush(&pool->items, false);
 }
 
 void*
@@ -514,7 +523,7 @@ void
 chck_ring_pool_flush(struct chck_ring_pool *pool)
 {
    assert(pool);
-   pool_buffer_flush(&pool->items);
+   pool_buffer_flush(&pool->items, true);
    free(pool->popped);
    pool->popped = NULL;
 }
