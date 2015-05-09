@@ -1,5 +1,5 @@
 # Chck
-[![buildhck status](http://build.cloudef.pw/build/chck/master/linux x86_64/current/build-status.png)](http://build.cloudef.pw/build/chck/master/linux%20x86_64)
+[![buildhck status](http://build.cloudef.pw/build/chck/master/linux x86_64/current/status.svg)](http://build.cloudef.pw/build/chck/master/linux%20x86_64)
 
 Collection of C utilities taken and cleaned up from my other projects
 
