@@ -68,31 +68,61 @@ chck_endianess chck_endianess(void)
 #endif
 
 CHCK_NONULL static inline void
+chck_bswap_generic(void *p, size_t size)
+{
+   size_t s;
+   uint8_t b[size];
+   memcpy(b, p, size);
+   for (s = 0; s < size; ++s) memset(p + s, b[size - s - 1], 1);
+}
+
+CHCK_NONULL static inline void
+chck_bswap_single(void *p, size_t size)
+{
+#if HAS_BYTESWAP
+   assert(p);
+   switch (size) {
+      case sizeof(uint32_t):
+         *((uint32_t*)p) = bswap32(*((uint32_t*)p));
+         break;
+      case sizeof(uint16_t):
+         *((uint16_t*)p) = bswap16(*((uint16_t*)p));
+         break;
+      case sizeof(uint64_t):
+         *((uint64_t*)p) = bswap64(*((uint64_t*)p));
+         break;
+      default:
+         chck_bswap_generic(p, size);
+         break;
+   }
+#else
+   chck_bswap_generic(p, size);
+#endif
+}
+
+CHCK_NONULL static inline void
 chck_bswap(void *v, size_t size, size_t memb)
 {
    assert(v);
 
-   for (void *p = v; p < v + (memb * size); p += size) {
-#if HAS_BYTESWAP
-      if (size == sizeof(uint32_t)) *((uint32_t*)p) = bswap32(*((uint32_t*)p));
-      else if (size == sizeof(uint16_t)) *((uint16_t*)p) = bswap16(*((uint16_t*)p));
-      else if (size == sizeof(uint64_t)) *((uint64_t*)p) = bswap64(*((uint64_t*)p));
-#else
-      size_t s;
-      uint8_t b[size];
-      memcpy(b, p, size);
-      for (s = 0; s < size; ++s) memset(p + s, b[size - s - 1], 1);
-#endif
-   }
+   for (void *p = v; p < v + (memb * size); p += size)
+      chck_bswap_single(p, size);
 }
 
-CHCK_NONULL static inline void
-chck_bswap1(void *p, size_t size)
-{
-   assert(p);
-   if (size == sizeof(uint32_t)) *((uint32_t*)p) = bswap32(*((uint32_t*)p));
-   else if (size == sizeof(uint16_t)) *((uint16_t*)p) = bswap16(*((uint16_t*)p));
-   else if (size == sizeof(uint64_t)) *((uint64_t*)p) = bswap64(*((uint64_t*)p));
-}
+/** define chck_bswap{16,32,64} for use **/
+
+#if HAS_BYTESWAP
+#  define generic_swap(T, n) \
+   CHCK_NONULL static inline T chck_bswap##n(T v) { return bswap##n(v); }
+#else
+#  define generic_swap(T, n) \
+   CHCK_NONULL static inline T chck_bswap##n(T v) { chck_bswap_generic(&v, sizeof(v)); return v; }
+#endif
+
+generic_swap(uint16_t, 16)
+generic_swap(uint32_t, 32)
+generic_swap(uint64_t, 64)
+
+#undef generic_swap
 
 #endif /* __chck_endianess__ */

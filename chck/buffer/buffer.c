@@ -242,7 +242,7 @@ chck_buffer_read_int(void *i, enum chck_bits bits, struct chck_buffer *buf)
       return false;
 
    if (!chck_buffer_native_endianess(buf))
-      chck_bswap1(i, bits);
+      chck_bswap_single(i, bits);
 
    return true;
 }
@@ -329,7 +329,7 @@ chck_buffer_write_int(const void *i, enum chck_bits bits, struct chck_buffer *bu
    if (!chck_buffer_native_endianess(buf)) {
       uint8_t b[sizeof(uint64_t)];
       memcpy(b, i, bits);
-      chck_bswap1(b, bits);
+      chck_bswap_single(b, bits);
       ret = (chck_buffer_write(b, bits, 1, buf) == 1);
    } else {
       ret = (chck_buffer_write(i, bits, 1, buf) == 1);
