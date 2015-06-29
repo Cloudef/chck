@@ -75,7 +75,22 @@ on_thread(void *arg)
       VALGRIND_HG_DISABLE_CHECKING(data, tasks->msize);
 
       work(data);
-      *processed = true;
+
+      // Collectless mode when no callback specified.
+      if (!tasks->callback) {
+         if (tasks->destructor)
+            tasks->destructor(data);
+
+         memset(data, 0, tasks->msize);
+
+         pthread_mutex_lock(&tasks->mutex);
+         assert(tasks->count >= 1);
+         tasks->head = (tasks->head + 1) % tasks->qsize;
+         tasks->count -= 1;
+         pthread_mutex_unlock(&tasks->mutex);
+      } else {
+         *processed = true;
+      }
 
       VALGRIND_HG_ENABLE_CHECKING(data, tasks->msize);
 
@@ -146,7 +161,7 @@ chck_tqueue_add_task(struct chck_tqueue *tqueue, void *data, useconds_t block)
          if (block) {
             pthread_mutex_unlock(&tqueue->tasks.mutex);
 
-            if (tqueue->threads.self == pthread_self())
+            if (tqueue->threads.self == pthread_self() && tqueue->tasks.callback)
                chck_tqueue_collect(tqueue);
 
             usleep(block);
@@ -178,6 +193,9 @@ size_t
 chck_tqueue_collect(struct chck_tqueue *tqueue)
 {
    assert(tqueue);
+
+   // Collect is unneccessary when no callback specified
+   assert(tqueue->tasks.callback);
 
    // For simplicity, we only allow collection on creator thread.
    // Collecting anywhere else does not make sense anyways.

@@ -53,6 +53,21 @@ int main(void)
       chck_tqueue_release(&tqueue);
    }
 
+   /* TEST: thread pools, no collect */
+   {
+      struct chck_tqueue tqueue;
+      assert(chck_tqueue(&tqueue, 1, 1, sizeof(struct item), work, NULL, destructor));
+
+      struct item a = { 1, 10 };
+      assert(chck_tqueue_add_task(&tqueue, &a, 100));
+
+      struct item b = { 2, 5 };
+      assert(chck_tqueue_add_task(&tqueue, &b, 100));
+
+      usleep(100);
+      chck_tqueue_release(&tqueue);
+   }
+
 #ifdef __linux__
    /* TEST: fd support */
    {
