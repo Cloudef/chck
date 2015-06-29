@@ -62,6 +62,8 @@ on_thread(void *arg)
       bool *processed = &tasks->processed[tasks->thead];
       void *data = get_data(tasks, tasks->thead);
       void (*work)() = tasks->work;
+
+      assert(tasks->qsize > 0);
       tasks->thead = (tasks->thead + 1) % tasks->qsize;
       tasks->tcount -= 1;
 
@@ -132,6 +134,7 @@ chck_tqueue_add_task(struct chck_tqueue *tqueue, void *data, useconds_t block)
    if (!tqueue->threads.running && !start(tqueue))
       return false;
 
+   assert(tqueue->tasks.qsize > 0);
    const size_t next = (tqueue->tasks.tail + 1) % tqueue->tasks.qsize;
    assert(next < tqueue->tasks.qsize);
 
