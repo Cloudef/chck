@@ -57,6 +57,7 @@ int main(void)
    {
       struct chck_tqueue tqueue;
       assert(chck_tqueue(&tqueue, 1, 1, sizeof(struct item), work, NULL, destructor));
+      chck_tqueue_set_keep_alive(&tqueue, true);
 
       struct item a = { 1, 10 };
       assert(chck_tqueue_add_task(&tqueue, &a, 100));

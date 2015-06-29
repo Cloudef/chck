@@ -243,7 +243,7 @@ chck_tqueue_collect(struct chck_tqueue *tqueue)
    const size_t rcount = tqueue->tasks.count;
    pthread_mutex_unlock(&tqueue->tasks.mutex);
 
-   if (!rcount)
+   if (!tqueue->threads.keep_alive && !rcount)
       stop(tqueue);
 
    return rcount;
@@ -299,6 +299,21 @@ chck_tqueue_get_fd(struct chck_tqueue *tqueue)
       return -1;
 
    return tqueue->tasks.fd;
+}
+
+void
+chck_tqueue_set_keep_alive(struct chck_tqueue *tqueue, bool keep_alive)
+{
+   assert(tqueue);
+   // Whether to destroy or keep thread alive when no tasks.
+   tqueue->threads.keep_alive = keep_alive;
+}
+
+bool
+chck_tqueue_get_keep_alive(struct chck_tqueue *tqueue)
+{
+   assert(tqueue);
+   return tqueue->threads.keep_alive;
 }
 
 bool
