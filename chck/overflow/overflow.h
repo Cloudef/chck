@@ -107,7 +107,7 @@ chck_calloc_sub_of(size_t size, size_t sub)
    return calloc(1, r);
 }
 
-CHCK_NONULL static inline void*
+static inline void*
 chck_realloc_add_of(void *ptr, size_t size, size_t add)
 {
    size_t r;
@@ -117,7 +117,7 @@ chck_realloc_add_of(void *ptr, size_t size, size_t add)
    return realloc(ptr, r);
 }
 
-CHCK_NONULL static inline void*
+static inline void*
 chck_realloc_sub_of(void *ptr, size_t size, size_t sub)
 {
    size_t r;
@@ -127,7 +127,7 @@ chck_realloc_sub_of(void *ptr, size_t size, size_t sub)
    return realloc(ptr, r);
 }
 
-CHCK_NONULL static inline void*
+static inline void*
 chck_realloc_mul_of(void *ptr, size_t size, size_t mul)
 {
    size_t r;
