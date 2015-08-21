@@ -1,4 +1,5 @@
 #include "atlas.h"
+#include <chck/math/math.h>
 #include <stdlib.h> /* for malloc */
 #include <string.h> /* for memset */
 #include <limits.h> /* for UINT_MAX */
@@ -258,11 +259,11 @@ chck_atlas_pack(struct chck_atlas *atlas, bool force_pot, bool one_px_border, ui
    if (force_pot)
       height = next_pow_2(height);
 
-   if (width > height && height != width * 0.5f) {
+   if (width > height && !chck_equalf(height, width * 0.5f, 10.0f)) {
       height = width * 0.5f;
       width *= 0.5f;
       check_dimensions(atlas, &width, &height);
-   } else if (height > width && width != height * 0.5f) {
+   } else if (height > width && !chck_equalf(width, height * 0.5f, 10.0f)) {
       width = height * 0.5f;
       height *= 0.5f;
       check_dimensions(atlas, &width, &height);

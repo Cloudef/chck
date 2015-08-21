@@ -23,10 +23,10 @@ int main(void)
       assert(chck_clampu32(i, i + 20, i + 40) == i + 20);
       assert(chck_modn32(i, i * 2 + 20) == (int32_t)i);
       assert(chck_modn32(i, i * 2 - 20) == -(int32_t)(i - 20));
-      assert(chck_modnf(i, i * 2 + 20) == (int32_t)i);
-      assert(chck_modnf(i, i * 2 - 20) == -(int32_t)(i - 20));
-      assert(chck_modn(i, i * 2 + 20) == (int32_t)i);
-      assert(chck_modn(i, i * 2 - 20) == -(int32_t)(i - 20));
+      assert((int32_t)chck_modnf(i, i * 2 + 20) == (int32_t)i);
+      assert((int32_t)chck_modnf(i, i * 2 - 20) == -(int32_t)(i - 20));
+      assert((int32_t)chck_modn(i, i * 2 + 20) == (int32_t)i);
+      assert((int32_t)chck_modn(i, i * 2 - 20) == -(int32_t)(i - 20));
    }
 
    assert(chck_max32(-20, 20) == 20);
@@ -37,9 +37,9 @@ int main(void)
    assert(chck_clamp32(40, 50, 60) == 50);
    assert(chck_clamp32(40, -20, 20) == 20);
 
-   assert(chck_modn(20 - 340, 360) == 40);
-   assert(chck_modn(340 - 20, 360) == -40);
-   assert(chck_modnf(20 - 340, 360) == 40);
-   assert(chck_modnf(340 - 20, 360) == -40);
+   assert((int32_t)chck_modn(20 - 340, 360) == 40);
+   assert((int32_t)chck_modn(340 - 20, 360) == -40);
+   assert((int32_t)chck_modnf(20 - 340, 360) == 40);
+   assert((int32_t)chck_modnf(340 - 20, 360) == -40);
    return EXIT_SUCCESS;
 }
