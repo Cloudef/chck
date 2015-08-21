@@ -79,4 +79,13 @@ int main(void)
       assert(chck_utf8_codepoint("\xc3\x28") == CHCK_REPLACEMENT_CHAR);
       assert(chck_utf8_codepoint("a") == 'a');
    }
+
+   // test: utf8 strlen
+   {
+      size_t len;
+      assert(chck_utf8_strlen("🏩", strlen("🏩"), &len) && len == 1);
+      assert(chck_utf8_strlen("a", strlen("a"), &len) && len == 1);
+      assert(chck_utf8_strlen("ab", strlen("ab"), &len) && len == 2);
+      assert(!chck_utf8_strlen("\xc3\x28", strlen("\xc3\x28"), &len) && len == 0);
+   }
 }

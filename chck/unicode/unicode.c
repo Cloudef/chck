@@ -148,10 +148,11 @@ bool
 chck_utf8_strlen(const char *u8, size_t len, size_t *out_len)
 {
    assert(u8 && out_len);
+   *out_len = 0;
 
    uint32_t state = CHCK_UTF8_ACCEPT, cp;
-   for (size_t i = 0, *out_len = 0; i < len; ++i) {
-      while (!chck_utf8_decode(&state, &cp, u8[i]))
+   for (size_t i = 0; i < len; ++i) {
+      if (chck_utf8_decode(&state, &cp, u8[i]) == CHCK_UTF8_ACCEPT)
          ++*out_len;
    }
 
