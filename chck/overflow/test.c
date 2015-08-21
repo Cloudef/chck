@@ -56,17 +56,17 @@ int main(void)
       assert(!(ptr = chck_calloc_of(8, SIZE_MAX))); free(ptr);
       assert(!(ptr = chck_calloc_of(SIZE_MAX, 8))); free(ptr);
 
-      assert((ptr = chck_realloc_add_of(ptr, 8, 8))); free(ptr);
-      assert(!(ptr = chck_realloc_add_of(ptr, SIZE_MAX, 8))); free(ptr);
+      assert((ptr = chck_realloc_add_of(ptr, 8, 8))); free(ptr); ptr = NULL;
+      assert(!(ptr = chck_realloc_add_of(ptr, SIZE_MAX, 8))); free(ptr); ptr = NULL;
       assert(!(ptr = chck_realloc_add_of(ptr, 8, SIZE_MAX))); free(ptr);
       ptr = NULL;
 
-      assert((ptr = chck_realloc_sub_of(ptr, 8, 4))); free(ptr);
+      assert((ptr = chck_realloc_sub_of(ptr, 8, 4))); free(ptr); ptr = NULL;
       assert(!(ptr = chck_realloc_sub_of(ptr, 4, 8))); free(ptr);
       ptr = NULL;
 
-      assert((ptr = chck_realloc_mul_of(ptr, 8, 8))); free(ptr);
-      assert(!(ptr = chck_realloc_mul_of(ptr, 8, SIZE_MAX))); free(ptr);
+      assert((ptr = chck_realloc_mul_of(ptr, 8, 8))); free(ptr); ptr = NULL;
+      assert(!(ptr = chck_realloc_mul_of(ptr, 8, SIZE_MAX))); free(ptr); ptr = NULL;
       assert(!(ptr = chck_realloc_mul_of(ptr, SIZE_MAX, 8))); free(ptr);
    }
 
