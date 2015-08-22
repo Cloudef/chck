@@ -34,9 +34,9 @@ struct chck_tqueue {
 CHCK_NONULL bool chck_tqueue_add_task(struct chck_tqueue *tqueue, void *data, useconds_t block);
 CHCK_NONULL size_t chck_tqueue_collect(struct chck_tqueue *tqueue);
 CHCK_NONULL void chck_tqueue_set_fd(struct chck_tqueue *tqueue, int fd);
-CHCK_NONULL int chck_tqueue_get_fd(struct chck_tqueue *tqueue);
+CHCK_PURE CHCK_NONULL int chck_tqueue_get_fd(struct chck_tqueue *tqueue);
 CHCK_NONULL void chck_tqueue_set_keep_alive(struct chck_tqueue *tqueue, bool keep_alive);
-CHCK_NONULL bool chck_tqueue_get_keep_alive(struct chck_tqueue *tqueue);
+CHCK_PURE CHCK_NONULL bool chck_tqueue_get_keep_alive(struct chck_tqueue *tqueue);
 void chck_tqueue_release(struct chck_tqueue *tqueue);
 CHCK_NONULLV(1, 5) bool chck_tqueue(struct chck_tqueue *tqueue, size_t nthreads, size_t qsize, size_t msize, void (*work)(), void (*callback)(), void (*destructor)());
 

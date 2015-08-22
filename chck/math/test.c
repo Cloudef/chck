@@ -4,6 +4,8 @@
 #undef NDEBUG
 #include <assert.h>
 
+#pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"
+
 int main(void)
 {
    assert(chck_equalld(10.0, 10.000000000001l, 1000000.0l));

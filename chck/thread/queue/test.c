@@ -22,14 +22,14 @@ work(struct item *item)
    item->c /= 5;
 }
 
-static void
+CHCK_PURE static void
 callback(struct item *item)
 {
    assert(item);
    assert((item->a == 1 && item->c == 2) || (item->a == 2 && item->c == 1));
 }
 
-static void
+CHCK_PURE static void
 destructor(struct item *item)
 {
    assert(item);

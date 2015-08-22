@@ -5,6 +5,8 @@
 #undef NDEBUG
 #include <assert.h>
 
+#pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"
+
 int main(void)
 {
    for (uint32_t x = 0; x < 360; x += 10) {

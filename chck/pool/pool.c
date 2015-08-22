@@ -294,7 +294,7 @@ chck_pool_get_last(const struct chck_pool *pool)
    return chck_pool_get(pool, pool->items.count - 1);
 }
 
-static size_t
+CHCK_PURE static size_t
 pool_get_used(struct chck_pool_buffer *pb, size_t removed, struct chck_pool *pool)
 {
    assert(pb && pool);
