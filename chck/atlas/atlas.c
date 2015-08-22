@@ -224,17 +224,6 @@ chck_atlas_get(const struct chck_atlas *atlas, uint32_t index, struct chck_atlas
    return t;
 }
 
-static inline uint32_t
-next_pow_2(uint32_t v)
-{
-   if (v && !(v & (v - 1)))
-      return v;
-
-   uint32_t p;
-   for (p = 1; p < v; p = p * 2);
-   return p;
-}
-
 uint32_t
 chck_atlas_pack(struct chck_atlas *atlas, bool force_pot, bool one_px_border, uint32_t *out_w, uint32_t *out_h)
 {
@@ -250,14 +239,14 @@ chck_atlas_pack(struct chck_atlas *atlas, bool force_pot, bool one_px_border, ui
    }
 
    if (force_pot)
-      atlas->longest_edge = next_pow_2(atlas->longest_edge);
+      atlas->longest_edge = chck_npotu32(atlas->longest_edge);
 
    uint32_t width = atlas->longest_edge;
    uint32_t count = (uint32_t)((float)atlas->total_area/(atlas->longest_edge * atlas->longest_edge) + 0.5f);
    uint32_t height = (count + 2) * atlas->longest_edge;
 
    if (force_pot)
-      height = next_pow_2(height);
+      height = chck_npotu32(height);
 
    if (width > height && !chck_equalf(height, width * 0.5f, 10.0f)) {
       height = width * 0.5f;
@@ -425,8 +414,8 @@ chck_atlas_pack(struct chck_atlas *atlas, bool force_pot, bool one_px_border, ui
    }
 
    if (force_pot) {
-      width = next_pow_2(width);
-      height = next_pow_2(height);
+      width = chck_npotu32(width);
+      height = chck_npotu32(height);
    }
 
 out:

@@ -76,6 +76,10 @@
    CHCK_CONST static inline T chck_max##n(T a, T b) { return (a > b ? a : b); } \
    CHCK_CONST static inline T chck_clamp##n(T a, T min, T max) { return (chck_min##n(chck_max##n(a, min), max)); }
 
+// T = type name, n = function suffix
+#define decl_unsigned_generics_for_type(T, n) \
+   CHCK_CONST static inline T chck_npot##n(T v) { if (v && !(v & (v - 1))) return v; T p; for (p = 1; p < v; p *= 2); return p; }
+
 // T = signed type, FT = floating point type, n = signed function suffix, fs = floating point suffix
 #define decl_signed_generics(T, FT, n, fs) \
    decl_generics_for_type(T, n) \
@@ -85,9 +89,11 @@
 // T = signed type, FT = floating point type, n = signed function suffix
 #define decl_generics(UT, un, T, FT, n) \
    decl_generics_for_type(UT, un) \
-   decl_signed_generics(T, FT, n, )
+   decl_signed_generics(T, FT, n, ) \
+   decl_unsigned_generics_for_type(UT, un) \
 
 decl_generics_for_type(size_t, sz)
+decl_unsigned_generics_for_type(size_t, sz)
 decl_generics(uint64_t, u64, int64_t, double, 64)
 decl_generics(uint32_t, u32, int32_t, float, 32)
 decl_generics(uint16_t, u16, int16_t, float, 16)

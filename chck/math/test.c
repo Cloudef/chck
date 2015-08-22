@@ -41,5 +41,13 @@ int main(void)
    assert((int32_t)chck_modn(340 - 20, 360) == -40);
    assert((int32_t)chck_modnf(20 - 340, 360) == 40);
    assert((int32_t)chck_modnf(340 - 20, 360) == -40);
+
+   assert(chck_npotu8(3) == 4);
+   assert(chck_npotu8(1) == 1);
+   assert(chck_npotu16(25) == 32);
+   assert(chck_npotu16(48) == 64);
+   assert(chck_npotu32(0) == 1);
+   assert(chck_npotu32(4097) == 8192);
+   assert(chck_npotsz(1025) == 2048);
    return EXIT_SUCCESS;
 }
