@@ -57,7 +57,9 @@ int main(void)
    {
       struct chck_tqueue tqueue;
       assert(chck_tqueue(&tqueue, 1, 1, sizeof(struct item), work, NULL, destructor));
+      assert(!chck_tqueue_get_keep_alive(&tqueue));
       chck_tqueue_set_keep_alive(&tqueue, true);
+      assert(chck_tqueue_get_keep_alive(&tqueue));
 
       struct item a = { 1, 10 };
       assert(chck_tqueue_add_task(&tqueue, &a, 100));
@@ -75,9 +77,14 @@ int main(void)
       struct chck_tqueue tqueue;
       assert(chck_tqueue(&tqueue, 1, 2, sizeof(struct item), work, callback, destructor));
 
+      assert(chck_tqueue_get_fd(&tqueue) == -1);
+      chck_tqueue_set_fd(&tqueue, 100); // fd that doesn't exist
+      assert(chck_tqueue_get_fd(&tqueue) == -1);
+
       int fd;
       assert((fd = eventfd(0, EFD_CLOEXEC)) >= 0);
       chck_tqueue_set_fd(&tqueue, fd);
+      assert((chck_tqueue_get_fd(&tqueue) != -1)); // dup'd
       close(fd);
 
       struct item a = { 1, 10 };
