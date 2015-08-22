@@ -391,6 +391,9 @@ chck_buffer_write_varg(struct chck_buffer *buf, const char *fmt, va_list args)
    return wrote;
 }
 
+#if !HAS_ZLIB
+CHCK_CONST
+#endif
 bool
 chck_buffer_compress_zlib(struct chck_buffer *buf)
 {
@@ -433,6 +436,9 @@ fail:
 #endif
 }
 
+#if !HAS_ZLIB
+CHCK_CONST
+#endif
 bool
 chck_buffer_decompress_zlib(struct chck_buffer *buf)
 {
