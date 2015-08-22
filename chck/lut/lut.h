@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 struct chck_lut {
-   void *table;
+   uint8_t *table;
 
    // count and member size (lut size == count * member)
    size_t count, member;

@@ -1,3 +1,4 @@
+#include "fs.h"
 #include <chck/overflow/overflow.h>
 #include <stdlib.h>
 #include <stdbool.h>

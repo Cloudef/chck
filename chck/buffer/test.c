@@ -134,7 +134,7 @@ int main(void)
    /* TEST: zlib compression && decompression */
    {
       char uncompressed[] = ".....................";
-      char compressed[] = { 0x78, 0x9c, 0xd3, 0xd3, 0xc3, 0x2, 0x18, 0x0, 0x2d, 0x5e, 0x3, 0xc7 };
+      uint8_t compressed[] = { 0x78, 0x9c, 0xd3, 0xd3, 0xc3, 0x2, 0x18, 0x0, 0x2d, 0x5e, 0x3, 0xc7 };
       struct chck_buffer buf;
       chck_buffer_from_pointer(&buf, uncompressed, sizeof(uncompressed), CHCK_ENDIANESS_NATIVE);
 #if HAS_ZLIB

@@ -5,10 +5,11 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 struct chck_tqueue {
    struct chck_tasks {
-      void *buffer;
+      uint8_t *buffer;
       bool *processed;
       void (*work)();
       void (*callback)();

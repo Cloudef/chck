@@ -17,7 +17,7 @@ enum chck_bits {
 
 struct chck_buffer {
    // pointer to current buffer and the current position
-   void *buffer, *curpos;
+   uint8_t *buffer, *curpos;
 
    // size of the buffer
    size_t size;

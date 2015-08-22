@@ -7,6 +7,8 @@
 #include <assert.h>
 #include <stdbool.h>
 
+#pragma GCC diagnostic ignored "-Woverflow"
+
 static inline bool
 resize(uint8_t **buf, size_t *size, size_t nsize)
 {

@@ -103,7 +103,7 @@ chck_buffer_resize(struct chck_buffer *buf, size_t size)
       return true;
    }
 
-   void *tmp = NULL;
+   uint8_t *tmp = NULL;
    if (!(tmp = realloc((buf->copied ? buf->buffer : NULL), size)))
       return false;
 

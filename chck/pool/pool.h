@@ -3,11 +3,13 @@
 
 #include <chck/macros.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 struct chck_pool_buffer {
    // pointer to contents
-   void *buffer;
+   uint8_t *buffer;
 
    // growth step and member size (growth is 'n' in n * step)
    size_t step, member;

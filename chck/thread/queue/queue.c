@@ -24,7 +24,7 @@ creator_thread(const struct chck_tqueue *tqueue, const char *function)
    }
    return true;
 }
-#define creator_thread(x) creator_thread(x, __FUNCTION__)
+#define creator_thread(x) creator_thread(x, __func__)
 
 CHCK_PURE static void*
 get_data(struct chck_tasks *tasks, size_t index)

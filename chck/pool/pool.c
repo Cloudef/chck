@@ -41,7 +41,7 @@ pool_buffer_resize(struct chck_pool_buffer *pb, size_t size)
       return true;
    }
 
-   void *tmp = NULL;
+   uint8_t *tmp = NULL;
    if (!(tmp = realloc(pb->buffer, size)))
       return false;
 

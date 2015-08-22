@@ -152,7 +152,7 @@ chck_atlas_release(struct chck_atlas *atlas)
       }
    }
 
-   memset(atlas, 0, sizeof(chck_atlas));
+   memset(atlas, 0, sizeof(struct chck_atlas));
 }
 
 uint32_t

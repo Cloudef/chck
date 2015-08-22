@@ -73,7 +73,7 @@ chck_bswap_generic(void *p, size_t size)
    size_t s;
    uint8_t b[size];
    memcpy(b, p, size);
-   for (s = 0; s < size; ++s) memset(p + s, b[size - s - 1], 1);
+   for (s = 0; s < size; ++s) memset((uint8_t*)p + s, b[size - s - 1], 1);
 }
 
 CHCK_NONULL static inline void
@@ -105,7 +105,7 @@ chck_bswap(void *v, size_t size, size_t memb)
 {
    assert(v);
 
-   for (void *p = v; p < v + (memb * size); p += size)
+   for (uint8_t *p = v; p < (uint8_t*)v + (memb * size); p += size)
       chck_bswap_single(p, size);
 }
 
