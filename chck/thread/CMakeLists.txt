@@ -17,3 +17,5 @@ if (THREADS_FOUND)
 
    add_subdirectory(queue)
 endif (THREADS_FOUND)
+
+set(CHCK_COMPONENTS ${CHCK_COMPONENTS} PARENT_SCOPE)
