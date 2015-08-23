@@ -124,13 +124,13 @@ static inline bool chck_cstr_to_##n(const char *data, T *out) { \
    return true; \
 }
 
-decl_int_conv(uint32_t, unsigned long int, u32, strtoul, num > UINT32_MAX);
-decl_int_conv(uint16_t, unsigned long int, u16, strtoul, num > UINT16_MAX);
-decl_int_conv(uint8_t, unsigned long int, u8, strtoul, num > UINT8_MAX);
-decl_int_conv(int64_t, long long int, i64, strtoll, num > INT64_MAX || num < INT64_MIN);
-decl_int_conv(int32_t, long int, i32, strtol, num > INT32_MAX || num < INT32_MIN);
-decl_int_conv(int16_t, long int, i16, strtol, num > INT16_MAX || num < INT16_MIN);
-decl_int_conv(int8_t, long int, i8, strtol, num > INT8_MAX || num < INT8_MIN);
+decl_int_conv(uint32_t, uint64_t, u32, strtoull, num > UINT32_MAX);
+decl_int_conv(uint16_t, uint32_t, u16, strtoul, num > UINT16_MAX);
+decl_int_conv(uint8_t, uint16_t, u8, strtoul, num > UINT8_MAX);
+decl_int_conv(int64_t, int64_t, i64, strtoll, num > INT64_MAX || num < INT64_MIN);
+decl_int_conv(int32_t, int64_t, i32, strtol, num > INT32_MAX || num < INT32_MIN);
+decl_int_conv(int16_t, int32_t, i16, strtol, num > INT16_MAX || num < INT16_MIN);
+decl_int_conv(int8_t, int16_t, i8, strtol, num > INT8_MAX || num < INT8_MIN);
 
 decl_flt_conv(double, d, strtod);
 decl_flt_conv(float, f, strtof);
@@ -147,7 +147,7 @@ chck_cstr_to_u64(const char *data, uint64_t *out)
 
    char *end;
    errno = 0;
-   const unsigned long long num = strtoull(data, &end, 10);
+   const uint64_t num = strtoull(data, &end, 10);
    if (!end || *end != 0 || errno == ERANGE)
       return false;
 

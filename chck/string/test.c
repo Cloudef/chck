@@ -104,7 +104,7 @@ int main(void)
       float v;
       assert(chck_cstr_to_f("0.123", &v) && chck_equalf(v, 0.123, 1.0f));
       assert(chck_cstr_to_f("0.1e2", &v) && chck_equalf(v, 0.1e2, 1.0f));
-      assert(!chck_cstr_to_f("0.1e100", NULL));
+      assert(!chck_cstr_to_f("0.1e1000", NULL));
       assert(!chck_cstr_to_f("not-float", NULL));
    }
 
