@@ -64,4 +64,8 @@ add_subdirectory(chck)
 # Documentation
 add_subdirectory(doxygen)
 
+set(CHCK_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" CACHE STRING "Include directories of chck" FORCE)
+set(CHCK_LIBRARIES ${CHCK_COMPONENTS} CACHE STRING "Libraries needed for chck" FORCE)
+mark_as_advanced(CHCK_LIBRARIES CHCK_INCLUDE_DIRS)
+
 feature_summary(WHAT ALL)
