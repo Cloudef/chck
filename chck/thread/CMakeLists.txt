@@ -1,5 +1,7 @@
 set(CMAKE_THREAD_PREFER_PTHREAD 1)
 find_package(Threads)
+set_package_properties(Threads PROPERTIES TYPE PURPOSE "Enables threading support")
+
 if (THREADS_FOUND)
    find_package(Valgrind)
    if (VALGRIND_FOUND)

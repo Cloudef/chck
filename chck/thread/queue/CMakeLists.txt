@@ -1,3 +1,10 @@
-add_executable(thread_queue_test queue.c test.c)
-target_link_libraries(thread_queue_test ${THREAD_LIB})
-add_test_ex(thread_queue_test)
+add_library(chck_tqueue queue.c)
+target_link_libraries(chck_tqueue PRIVATE ${THREAD_LIB})
+install_libraries(chck_tqueue)
+install_headers(queue.h)
+
+if (CHCK_BUILD_TESTS)
+   add_executable(thread_queue_test test.c)
+   target_link_libraries(thread_queue_test PRIVATE chck_tqueue)
+   add_test_ex(thread_queue_test)
+endif ()

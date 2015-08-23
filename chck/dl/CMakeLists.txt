@@ -1,9 +1,10 @@
-set(libs "")
+add_library(chck_dl dl.c)
+target_link_libraries(chck_dl PRIVATE ${CMAKE_DL_LIBS})
+install_libraries(chck_dl)
+install_headers(dl.h)
 
-if (UNIX)
-   list(APPEND libs "dl")
+if (CHCK_BUILD_TESTS)
+   add_executable(dl_test test.c)
+   target_link_libraries(dl_test PRIVATE chck_dl)
+   add_test_ex(dl_test)
 endif ()
-
-add_executable(dl_test test.c dl.c)
-target_link_libraries(dl_test ${libs})
-add_test_ex(dl_test)

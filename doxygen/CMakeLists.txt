@@ -1,4 +1,5 @@
 find_package(Doxygen)
+set_package_properties(Doxygen PROPERTIES TYPE PURPOSE "Enables documentation")
 
 if (DOXYGEN_FOUND)
     configure_file(Doxyfile.in Doxyfile @ONLY)

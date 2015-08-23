@@ -1,7 +1,6 @@
-set(incs "")
-set(libs "")
-
 find_package(ZLIB)
+set_package_properties(ZLIB PROPERTIES TYPE PURPOSE "Enables compression support")
+
 if (ZLIB_FOUND)
    list(APPEND incs ${ZLIB_INCLUDE_DIRS})
    list(APPEND libs ${ZLIB_LIBRARIES})
@@ -9,6 +8,13 @@ if (ZLIB_FOUND)
 endif (ZLIB_FOUND)
 
 include_directories(${incs})
-add_executable(buffer_test test.c buffer.c)
-target_link_libraries(buffer_test ${libs})
-add_test_ex(buffer_test)
+add_library(chck_buffer buffer.c)
+target_link_libraries(chck_buffer PRIVATE ${libs})
+install_libraries(chck_buffer)
+install_headers(endianess.h buffer.h)
+
+if (CHCK_BUILD_TESTS)
+   add_executable(buffer_test test.c)
+   target_link_libraries(buffer_test PRIVATE chck_buffer)
+   add_test_ex(buffer_test)
+endif ()
