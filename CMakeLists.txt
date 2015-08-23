@@ -52,7 +52,7 @@ endif ()
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
-set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_definitions(-D_DEFAULT_SOURCE)
 
 # <chck/**/foobar.h> include prefix is allowed
