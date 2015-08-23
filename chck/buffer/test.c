@@ -134,10 +134,11 @@ int main(void)
    /* TEST: zlib compression && decompression */
    {
       char uncompressed[] = ".....................";
-      uint8_t compressed[] = { 0x78, 0x9c, 0xd3, 0xd3, 0xc3, 0x2, 0x18, 0x0, 0x2d, 0x5e, 0x3, 0xc7 };
       struct chck_buffer buf;
       chck_buffer_from_pointer(&buf, uncompressed, sizeof(uncompressed), CHCK_ENDIANESS_NATIVE);
 #if HAS_ZLIB
+      uint8_t compressed[] = { 0x78, 0x9c, 0xd3, 0xd3, 0xc3, 0x2, 0x18, 0x0, 0x2d, 0x5e, 0x3, 0xc7 };
+      assert(chck_buffer_has_zlib());
       assert(chck_buffer_compress_zlib(&buf));
       assert(buf.size == sizeof(compressed));
       assert(memcmp(buf.buffer, compressed, sizeof(compressed)) == 0);
@@ -146,6 +147,7 @@ int main(void)
       assert(buf.size == sizeof(uncompressed));
       assert(memcmp(buf.buffer, uncompressed, sizeof(uncompressed)) == 0);
 #else
+      assert(!chck_buffer_has_zlib());
       assert(!chck_buffer_compress_zlib(&buf));
       assert(!chck_buffer_decompress_zlib(&buf));
 #endif

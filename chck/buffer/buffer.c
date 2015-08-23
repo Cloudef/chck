@@ -391,6 +391,16 @@ chck_buffer_write_varg(struct chck_buffer *buf, const char *fmt, va_list args)
    return wrote;
 }
 
+CHCK_CONST bool
+chck_buffer_has_zlib(void)
+{
+#if HAS_ZLIB
+   return true;
+#else
+   return false;
+#endif
+}
+
 #if !HAS_ZLIB
 CHCK_CONST
 #endif
@@ -431,7 +441,6 @@ fail:
    return false;
 #else
    (void)buf;
-   assert(0 && "not compiled with zlib support");
    return false;
 #endif
 }
@@ -483,7 +492,6 @@ fail:
    return false;
 #else
    (void)buf;
-   assert(0 && "not compiled with zlib support");
    return false;
 #endif
 }
