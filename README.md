@@ -16,12 +16,11 @@ Collection of C utilities taken and cleaned up from my other projects
 
 ## Installing
 
-No systemwide install yet provided.
-
 The utilites are small and mainly meant to be copied to your project.
-However library containing all the utilities is built with the cmake.
+However libraries for each component is built with the cmake.
 
 ## Some rules what goes here
+
 * Each utility should be independant.
    * Though, it's ok to include macros.h and overflow.h
 * Each utility should contain tests.
