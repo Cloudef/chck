@@ -27,31 +27,30 @@ if (NOT CHCK_BUILD_STATIC)
    set(BUILD_SHARED_LIBS ON)
 endif ()
 
+if (MINGW)
+   set(BUILD_SHARED_LIBS OFF)
+endif ()
+
 set(CTEST_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/test")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CTEST_OUTPUT_DIRECTORY}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
 
+# Compiler options
 if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-   set(ldflags -Wl,-O1,--no-undefined,--sort-common,--as-needed)
+   include(GCCCompatibleCompilerOptions)
+   add_compiler_warnings(-Wall -Wextra -Wno-variadic-macros -Wno-long-long -Wformat=2 -Winit-self -Wfloat-equal -Wcast-align -Wpointer-arith -Wmissing-prototypes -Wsuggest-attribute=pure -Wsuggest-attribute=const)
    if (NOT MINGW)
-      set(ldflags ${ldflags},-z,relro,-z,now)
+      create_custom_linker_flags(Upstream -O1 --sort-common --as-needed -z,relro -z,now)
    else ()
-      set(ldflags ${ldflags},-static)
+      create_custom_linker_flags(Upstream -O1 --sort-common --as-needed -static)
    endif ()
-
-   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ldflags}")
-   set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${ldflags}")
-   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${ldflags}")
-
-   if ("${CMAKE_C_FLAGS}" STREQUAL "")
-      add_definitions(-O2)
-      add_definitions(-fstack-protector-strong -fstack-check -flto)
+   check_c_compiler_flag(-fstack-protector-strong ok)
+   if (ok)
+      create_custom_compiler_flags(Upstream -g -O2 -fstack-protector-strong --param ssp-buffer-size=4 -fstack-check -flto)
+   else ()
+      create_custom_compiler_flags(Upstream -g -O2 -fstack-protector-all --param ssp-buffer-size=4 -fstack-check -flto)
    endif ()
-
-   add_definitions(
-      -Wall -Wextra -Wno-variadic-macros -Wno-long-long -Wformat=2 -Winit-self -Wfloat-equal
-      -Wcast-align -Wpointer-arith -Wmissing-prototypes -Wsuggest-attribute=pure -Wsuggest-attribute=const)
 endif ()
 
 # -std=c99 -fpic -fpie -D_DEFAULT_SOURCE
