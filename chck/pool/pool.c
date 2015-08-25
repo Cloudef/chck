@@ -220,6 +220,12 @@ pool_buffer_to_c_array(struct chck_pool_buffer *pb, size_t *out_memb)
 {
    assert(pb);
 
+   if (!pb->member) {
+      if (out_memb)
+         *out_memb = 0;
+      return NULL;
+   }
+
    if (out_memb)
       *out_memb = (pb->used / pb->member);
 

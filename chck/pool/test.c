@@ -180,7 +180,13 @@ int main(void)
 
    /* TEST: iter pool */
    {
-      struct chck_iter_pool pool;
+      struct chck_iter_pool pool = {0};
+
+      {
+         size_t memb;
+         assert(!chck_iter_pool_to_c_array(&pool, &memb) && memb == 0);
+      }
+
       assert(chck_iter_pool(&pool, 32, 2, sizeof(struct item)));
 
       assert(chck_iter_pool_push_back(&pool, (&(struct item){1, NULL})));
