@@ -298,6 +298,20 @@ chck_pool_get_last(const struct chck_pool *pool)
    return chck_pool_get(pool, pool->items.count - 1);
 }
 
+void
+chck_pool_print(const struct chck_pool *pool, FILE *out)
+{
+   assert(pool && out);
+
+   fprintf(out, "pool: %p member: %zu items: %zu reversed: %zu used: %zu allocated: %zu\n",
+         pool, pool->items.member, pool->map.used, pool->map.allocated, pool->items.used, pool->items.allocated);
+
+   for (size_t i = 0; i < pool->map.used; ++i)
+      fprintf(out, "%s%s", (*(bool*)(pool->map.buffer + i) ? "1" : "0"), ((i + 1) % 80 == 0 ? "\n" : ""));
+
+   fprintf(out, "%s^^^\n", (pool->map.used % 80 == 0 ? "" : "\n"));
+}
+
 CHCK_PURE static size_t
 pool_get_used(struct chck_pool_buffer *pb, size_t removed, struct chck_pool *pool)
 {
