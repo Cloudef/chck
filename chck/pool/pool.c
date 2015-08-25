@@ -51,6 +51,7 @@ pool_buffer_resize(struct chck_pool_buffer *pb, size_t size)
 
    pb->buffer = tmp;
    pb->allocated = size;
+   pb->used = (pb->allocated < pb->used ? pb->allocated : pb->used);
    return true;
 }
 
@@ -364,6 +365,7 @@ chck_pool_remove(struct chck_pool *pool, size_t index)
 
    *(bool*)(pool->map.buffer + index * pool->map.member) = false;
    pool_buffer_resize(&pool->map, (pool->items.allocated / pool->items.member) * pool->map.member);
+   pool->map.used = (pool->items.used / pool->items.member) * pool->map.member;
 
    if (!last) {
       // Some heuristics to avoid large amount of heap allocations
