@@ -151,13 +151,14 @@ pool_buffer_remove(struct chck_pool_buffer *pb, size_t index, size_t (*get_used)
       return;
 
    if (slot + pb->member >= pb->used)
-      pb->used = (index > 0 ? get_used(pb, index, userdata) : 0);
+      pb->used = get_used(pb, index, userdata);
 
    if (pb->used + pb->member * pb->step < pb->allocated)
-      pool_buffer_resize(pb, pb->allocated - pb->member * pb->step);
+      pool_buffer_resize(pb, pb->used + pb->member);
 
    assert(pb->count > 0);
    pb->count--;
+   assert((pb->count > 0 && pb->used > 0) || (!pb->count && !pb->used));
 }
 
 static void
@@ -173,10 +174,13 @@ pool_buffer_remove_move(struct chck_pool_buffer *pb, size_t index)
       memmove(pb->buffer + slot, pb->buffer + slot + pb->member, pb->used - slot - pb->member);
 
    pb->used -= pb->member;
-   pb->count--;
 
    if (pb->used + pb->member * pb->step < pb->allocated)
-      pool_buffer_resize(pb, pb->allocated - pb->member * pb->step);
+      pool_buffer_resize(pb, pb->used + pb->member);
+
+   assert(pb->count > 0);
+   pb->count--;
+   assert((pb->count > 0 && pb->used > 0) || (!pb->count && !pb->used));
 }
 
 static void*
@@ -299,13 +303,14 @@ pool_get_used(struct chck_pool_buffer *pb, size_t removed, struct chck_pool *poo
 {
    assert(pb && pool);
    assert(removed * pool->map.member + pool->map.member <= pool->map.used);
+   assert(pb->used > 0);
 
    // for chck_pool's, chck_pool_buffer can not know alone the used size,
    // so we need to help a bit with this function.
 
-   size_t largest;
-   for (largest = (removed > 0 ? removed - 1 : 0); largest > 0 && !*(bool*)(pool->map.buffer + largest * pool->map.member); --largest);
-   return largest * pb->member + pb->member;
+   size_t largest = removed + 1;
+   for (; largest > 0 && (largest - 1 == removed || !*(bool*)(pool->map.buffer + (largest - 1) * pool->map.member)); --largest);
+   return largest * pb->member;
 }
 
 void*

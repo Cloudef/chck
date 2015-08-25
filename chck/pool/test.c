@@ -170,7 +170,7 @@ int main(void)
             chck_pool_remove(&pool, 7 + i);
 
          assert(pool.items.used == 7 * sizeof(struct item));
-         assert(pool.items.allocated == 32 * sizeof(struct item));
+         assert(pool.items.allocated == 8 * sizeof(struct item));
       }
 
       chck_pool_release(&pool);
