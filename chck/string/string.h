@@ -173,7 +173,7 @@ void chck_string_release(struct chck_string *string);
 CHCK_NONULLV(1) bool chck_string_set_cstr(struct chck_string *string, const char *data, bool is_heap);
 CHCK_NONULLV(1) bool chck_string_set_cstr_with_length(struct chck_string *string, const char *data, size_t len, bool is_heap);
 CHCK_NONULL bool chck_string_set(struct chck_string *string, const struct chck_string *other, bool is_heap);
-CHCK_NONULL CHCK_FORMAT(printf, 2, 3) bool chck_string_set_format(struct chck_string *string, const char *fmt, ...);
+CHCK_NONULLV(1,2) CHCK_FORMAT(printf, 2, 3) bool chck_string_set_format(struct chck_string *string, const char *fmt, ...);
 CHCK_NONULL bool chck_string_set_varg(struct chck_string *string, const char *fmt, va_list args);
 
 CHCK_NONULL char* chck_cstr_strip(char *cstr); /* modifies inplace */
