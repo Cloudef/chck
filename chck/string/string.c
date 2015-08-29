@@ -127,6 +127,20 @@ chck_cstr_remove_chars(char *cstr, const char *bad)
    return cstr;
 }
 
+char*
+chck_cstr_replace_char(char *cstr, char replace, char with)
+{
+   assert(cstr && replace != with);
+
+   if (replace == with)
+      return cstr;
+
+   char *s = cstr;
+   while ((s = strchr(s, replace)))
+      *s = with;
+   return cstr;
+}
+
 const char*
 chck_cstr_tokenize(const char *cstr, size_t *out_len, const char *separator, bool skip_whitespace, const char **state)
 {
