@@ -160,11 +160,11 @@ chck_cstr_to_u64(const char *data, uint64_t *out)
 static inline bool
 chck_cstr_to_bool(const char *data, bool *out)
 {
-   if (!data || (!chck_cstreq(data, "true") && !chck_cstreq(data, "false")))
+   if (!data || (!chck_cstreq(data, "true") && !chck_cstreq(data, "false") && !chck_cstreq(data, "1") && !chck_cstreq(data, "0")))
       return false;
 
    if (out)
-      *out = chck_cstreq(data, "true");
+      *out = (chck_cstreq(data, "true") || chck_cstreq(data, "1"));
 
    return true;
 }

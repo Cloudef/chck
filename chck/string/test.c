@@ -92,11 +92,14 @@ int main(void)
       bool v;
       assert(chck_cstr_to_bool("true", &v) && v == true);
       assert(chck_cstr_to_bool("false", &v) && v == false);
+      assert(chck_cstr_to_bool("1", &v) && v == true);
+      assert(chck_cstr_to_bool("0", &v) && v == false);
       assert(!chck_cstr_to_bool("falsef", NULL));
       assert(!chck_cstr_to_bool("fals", NULL));
       assert(!chck_cstr_to_bool("truee", NULL));
       assert(!chck_cstr_to_bool("tru", NULL));
       assert(!chck_cstr_to_bool("not-a-bool", NULL));
+      assert(!chck_cstr_to_bool("5", NULL));
    }
 
    /* TEST: float conversion tests */
