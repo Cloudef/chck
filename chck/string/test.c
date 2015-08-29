@@ -24,6 +24,11 @@ int main(void)
       assert(chck_cstr_remove_chars(v.data, "baz") == v.data);
       assert(chck_cstreq(v.data, "foo  lol"));
       chck_string_release(&v);
+
+      assert(chck_string_set_cstr(&v, "foo baz lol", true));
+      assert(chck_cstr_remove_chars(v.data, "qwerty") == v.data);
+      assert(chck_cstreq(v.data, "foo baz lol"));
+      chck_string_release(&v);
    }
 
    /* TEST: tokenizing */
