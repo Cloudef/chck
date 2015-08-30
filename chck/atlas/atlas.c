@@ -1,4 +1,5 @@
 #include "atlas.h"
+#include <chck/overflow/overflow.h>
 #include <chck/math/math.h>
 #include <stdlib.h> /* for malloc */
 #include <string.h> /* for memset */
@@ -160,12 +161,16 @@ chck_atlas_push(struct chck_atlas *atlas, uint32_t width, uint32_t height)
 {
    assert(atlas);
 
+   size_t ncount;
+   if (unlikely(chck_add_ofsz(atlas->count, 1, &ncount)) || !ncount)
+      return atlas->count;
+
    void *tmp;
-   if (!(tmp = realloc(atlas->textures, (atlas->count + 1) * sizeof(struct chck_atlas_texture))))
+   if (!(tmp = chck_realloc_mul_of(atlas->textures, ncount, sizeof(*atlas->textures))))
       return atlas->count;
 
    atlas->textures = tmp;
-   atlas->count += 1;
+   atlas->count = ncount;
 
    texture(&atlas->textures[atlas->count - 1], width, height);
 
@@ -192,7 +197,7 @@ chck_atlas_pop(struct chck_atlas *atlas)
 
    void *tmp = NULL;
    if (atlas->count > 1) {
-      if (!(tmp = realloc(atlas->textures, (atlas->count - 1) * sizeof(struct chck_atlas_texture))))
+      if (!(tmp = chck_realloc_mul_of(atlas->textures, (atlas->count - 1), sizeof(*atlas->textures))))
          return atlas->count;
    } else {
       free(atlas->textures);
