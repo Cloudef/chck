@@ -19,12 +19,13 @@ ccopy(const char *str)
 static inline char*
 strip_slash(char *str)
 {
-   assert(str);
    size_t size;
-   if ((size = strlen(str)) > 0) {
-      for (char *s = str + size - 1; s >= str && *s == '/'; --s)
-         *s = 0;
-   }
+   if (!str || !(size = strlen(str)))
+      return NULL;
+
+   for (char *s = str + size - 1; s >= str && *s == '/'; --s)
+      *s = 0;
+
    return str;
 }
 
