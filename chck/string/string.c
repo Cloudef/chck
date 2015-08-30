@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-#define WHITESPACE " \t\n\r"
+#define WHITESPACE " \t\n\v\f\r"
 
 static inline char*
 ccopy(const char *str, size_t len)
