@@ -19,6 +19,10 @@ ccopy(const char *str)
 static inline char*
 strip_slash(char *str)
 {
+   // if you get invalid read of size 4 here with valgrind
+   // it means that you compiled with O2 or higher optimizations on gcc
+   // gcc has builtin optimized strlen that reads bytes in aligned chunks
+
    size_t size;
    if (!str || !(size = strlen(str)))
       return NULL;
