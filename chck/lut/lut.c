@@ -8,7 +8,7 @@ static inline char*
 ccopy(const char *str)
 {
    assert(str);
-   size_t size = strlen(str);
+   const size_t size = strlen(str);
    char *cpy = chck_calloc_add_of(size, 1);
    return (cpy ? memcpy(cpy, str, size) : NULL);
 }
