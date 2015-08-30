@@ -24,7 +24,7 @@ chck_string_release(struct chck_string *string)
    if (string->is_heap)
       free(string->data);
 
-   memset(string, 0, sizeof(struct chck_string));
+   *string = (struct chck_string){0};
 }
 
 bool

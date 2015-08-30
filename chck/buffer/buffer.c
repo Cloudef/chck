@@ -36,15 +36,14 @@ chck_buffer_release(struct chck_buffer *buf)
       return;
 
    chck_buffer_flush(buf);
-   memset(buf, 0, sizeof(struct chck_buffer));
+   *buf = (struct chck_buffer){0};
 }
 
 bool
 chck_buffer_from_pointer(struct chck_buffer *buf, void *ptr, size_t size, enum chck_endianess endianess)
 {
    assert(buf);
-   memset(buf, 0, sizeof(struct chck_buffer));
-   buf->step = 32;
+   *buf = (struct chck_buffer){ .step = 32 };
    chck_buffer_set_pointer(buf, ptr, size, endianess);
    return true;
 }

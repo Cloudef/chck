@@ -67,12 +67,7 @@ chck_lut(struct chck_lut *lut, int set, size_t count, size_t member)
    if (!count || !member)
       return false;
 
-   memset(lut, 0, sizeof(struct chck_lut));
-   lut->set = set;
-   lut->count = count;
-   lut->member = member;
-   lut->hashuint = chck_default_uint_hash;
-   lut->hashstr = chck_default_str_hash;
+   *lut = (struct chck_lut){ .set = set, .count = count, .member = member, .hashuint = chck_default_uint_hash, .hashstr = chck_default_str_hash };
    return true;
 }
 
@@ -108,7 +103,7 @@ chck_lut_release(struct chck_lut *lut)
       return;
 
    chck_lut_flush(lut);
-   memset(lut, 0, sizeof(struct chck_lut));
+   *lut = (struct chck_lut){0};
 }
 
 bool
@@ -162,7 +157,7 @@ header(struct header *hdr, const char *str_key, uint32_t uint_key)
 {
    void *str_copy = NULL;
    if (str_key && !(str_copy = ccopy(str_key))) {
-      memset(hdr, 0, sizeof(struct header));
+      *hdr = (struct header){0};
       return false;
    }
 
@@ -191,7 +186,7 @@ next_table(struct chck_hash_table *table)
    assert(table);
 
    // create new table
-   if (!(table->next = malloc(sizeof(struct chck_hash_table))))
+   if (!(table->next = malloc(sizeof(*table->next))))
       return false;
 
    if (!chck_hash_table(table->next, table->lut.set, table->lut.count, table->lut.member))
@@ -273,7 +268,8 @@ hash_table_set_str(struct chck_hash_table *table, uint32_t index, const char *ke
 bool
 chck_hash_table(struct chck_hash_table *table, int set, size_t count, size_t member)
 {
-   memset(table, 0, sizeof(struct chck_hash_table));
+   assert(table);
+   *table = (struct chck_hash_table){0};
 
    if (!chck_lut(&table->lut, set, count, member))
       return false;
@@ -341,7 +337,7 @@ chck_hash_table_release(struct chck_hash_table *table)
       return;
 
    chck_hash_table_flush(table);
-   memset(table, 0, sizeof(struct chck_hash_table));
+   *table = (struct chck_hash_table){0};
 }
 
 uint32_t

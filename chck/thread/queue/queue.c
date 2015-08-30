@@ -118,7 +118,7 @@ stop(struct chck_tqueue *tqueue)
    for (size_t i = 0; i < tqueue->threads.count; ++i)
       pthread_join(tqueue->threads.t[i], NULL);
 
-   memset(tqueue->threads.t, 0, sizeof(pthread_t) * tqueue->threads.count);
+   memset(tqueue->threads.t, 0, sizeof(*tqueue->threads.t) * tqueue->threads.count);
    tqueue->threads.running = false;
 }
 
@@ -271,7 +271,7 @@ chck_tqueue_release(struct chck_tqueue *tqueue)
    free(tqueue->tasks.processed);
    free(tqueue->tasks.buffer);
    free(tqueue->threads.t);
-   memset(tqueue, 0, sizeof(struct chck_tqueue));
+   *tqueue = (struct chck_tqueue){0};
 }
 
 void
@@ -320,8 +320,7 @@ bool
 chck_tqueue(struct chck_tqueue *tqueue, size_t nthreads, size_t qsize, size_t msize, void (*work)(), void (*callback)(), void (*destructor)())
 {
    assert(tqueue && work && msize > 0);
-   memset(tqueue, 0, sizeof(struct chck_tqueue));
-   tqueue->tasks.fd = -1;
+   *tqueue = (struct chck_tqueue){ .tasks = { .fd = - 1 } };
 
    if (!msize || !work)
       return false;

@@ -26,8 +26,7 @@ main(void)
       printf("%s\n", (ret = xdg_get_path("XDG_THIS_DOES_NOT_EXIST", "but_mah_path_is_still_here"))); free(ret);
 
       const char *path;
-      struct xdg_paths state;
-      memset(&state, 0, sizeof(state));
+      struct xdg_paths state = {0};
       while ((path = xdg_get_paths("XDG_DATA_DIRS", "/usr/share:/foo/bar:asd:/the/relative/got/skipped:asd", &state, -1)))
          printf("=> %s\n", path);
    }
@@ -65,8 +64,7 @@ main(void)
       setenv("XDG_DATA_DIRS", "/test:/test2:relative:/relative/skipped:/ignored/by/max/iter/arg", 1);
 
       const char *path;
-      struct xdg_paths state;
-      memset(&state, 0, sizeof(state));
+      struct xdg_paths state = {0};
       while ((path = xdg_get_paths("XDG_DATA_DIRS", "/does:/not:/trigger", &state, 3))) {
          assert(i < 3 && !strcmp(path, paths[i]));
          ++i;
@@ -80,8 +78,7 @@ main(void)
       unsetenv("XDG_DATA_DIRS");
 
       const char *path;
-      struct xdg_paths state;
-      memset(&state, 0, sizeof(state));
+      struct xdg_paths state = {0};
       while ((path = xdg_get_paths("XDG_DATA_DIRS", "/default:relative:skip/path", &state, 1))) {
          assert(i < 1 && !strcmp(path, paths[i]));
          ++i;

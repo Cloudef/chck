@@ -1,7 +1,7 @@
 #include "pool.h"
 #include <chck/overflow/overflow.h>
 #include <stdlib.h> /* for calloc, free, etc.. */
-#include <string.h> /* for memcpy/memset */
+#include <string.h> /* for memcpy */
 #include <assert.h> /* for assert */
 
 static void
@@ -25,7 +25,7 @@ pool_buffer_release(struct chck_pool_buffer *pb)
       return;
 
    pool_buffer_flush(pb, true);
-   memset(pb, 0, sizeof(struct chck_pool_buffer));
+   *pb = (struct chck_pool_buffer){0};
 }
 
 static bool
@@ -255,7 +255,7 @@ chck_pool(struct chck_pool *pool, size_t grow, size_t capacity, size_t member_si
    if (unlikely(!member_size))
       return false;
 
-   memset(pool, 0, sizeof(struct chck_pool));
+   *pool = (struct chck_pool){0};
    return (pool_buffer(&pool->items, grow, capacity, member_size) &&
            pool_buffer(&pool->map, grow, capacity, sizeof(bool)) &&
            pool_buffer(&pool->removed, grow, 0, sizeof(size_t)));
@@ -418,7 +418,7 @@ chck_iter_pool(struct chck_iter_pool *pool, size_t grow, size_t capacity, size_t
    if (unlikely(!member_size))
       return false;
 
-   memset(pool, 0, sizeof(struct chck_iter_pool));
+   *pool = (struct chck_iter_pool){0};
    return pool_buffer(&pool->items, grow, capacity, member_size);
 }
 
@@ -525,7 +525,7 @@ chck_ring_pool(struct chck_ring_pool *pool, size_t grow, size_t capacity, size_t
    if (unlikely(!member_size))
       return false;
 
-   memset(pool, 0, sizeof(struct chck_ring_pool));
+   *pool = (struct chck_ring_pool){0};
    return pool_buffer(&pool->items, grow, capacity, member_size);
 }
 

@@ -2,7 +2,6 @@
 #include <chck/overflow/overflow.h>
 #include <chck/math/math.h>
 #include <stdlib.h> /* for malloc */
-#include <string.h> /* for memset */
 #include <limits.h> /* for UINT_MAX */
 #include <assert.h> /* for assert */
 
@@ -10,11 +9,7 @@ static void
 texture(struct chck_atlas_texture *texture, uint32_t width, uint32_t height)
 {
    assert(texture);
-   memset(texture, 0, sizeof(struct chck_atlas_texture));
-   texture->rect.w = width;
-   texture->rect.h = height;
-   texture->area = width * height;
-   texture->longest_edge = (width >= height ? width : height);
+   *texture = (struct chck_atlas_texture){ .rect = { .w = width, .h = height }, .area = width * height, .longest_edge = (width >= height ? width : height) };
 }
 
 static void
@@ -80,7 +75,7 @@ atlas_node_add(struct chck_atlas *atlas, uint32_t x, uint32_t y, uint32_t width,
    assert(atlas);
 
    struct chck_atlas_node *node;
-   if (!(node = calloc(1, sizeof(struct chck_atlas_node))))
+   if (!(node = calloc(1, sizeof(*node))))
       return false;
 
    node->rect.x = x;
@@ -132,7 +127,7 @@ bool
 chck_atlas(struct chck_atlas *atlas)
 {
    assert(atlas);
-   memset(atlas, 0, sizeof(struct chck_atlas));
+   *atlas = (struct chck_atlas){0};
    return true;
 }
 
@@ -153,7 +148,7 @@ chck_atlas_release(struct chck_atlas *atlas)
       }
    }
 
-   memset(atlas, 0, sizeof(struct chck_atlas));
+   *atlas = (struct chck_atlas){0};
 }
 
 uint32_t
@@ -214,7 +209,7 @@ chck_atlas_get(const struct chck_atlas *atlas, uint32_t index, struct chck_atlas
    assert(atlas && index > 0);
 
    if (out_transformed)
-      memset(out_transformed, 0, sizeof(struct chck_atlas_rect));
+      *out_transformed = (struct chck_atlas_rect){0};
 
    if (index - 1 >= atlas->count)
       return NULL;
