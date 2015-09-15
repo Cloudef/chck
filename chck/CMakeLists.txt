@@ -21,3 +21,5 @@ foreach (module ${modules})
 endforeach (module)
 
 set(CHCK_COMPONENTS ${CHCK_COMPONENTS} PARENT_SCOPE)
+
+install_headers(macros.h)
