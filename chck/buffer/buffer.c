@@ -461,6 +461,9 @@ chck_buffer_decompress_zlib(struct chck_buffer *buf)
       dsize = bsize = sz;
    }
 
+   if (!dsize)
+      return false;
+
    void *decompressed;
    if (!(decompressed = malloc(dsize)))
       return false;
