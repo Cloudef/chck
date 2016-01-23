@@ -44,11 +44,11 @@ CHCK_NONULLV(1) bool chck_buffer_from_pointer(struct chck_buffer *buf, void *ptr
 CHCK_NONULL bool chck_buffer(struct chck_buffer *buf, size_t size, enum chck_endianess endianess);
 CHCK_NONULLV(1) void chck_buffer_set_pointer(struct chck_buffer *buf, void *ptr, size_t size, enum chck_endianess endianess);
 
-CHCK_NONULL size_t chck_buffer_fill(const void *src, size_t size, size_t memb, struct chck_buffer *buf);
+CHCK_NONULLV(4) size_t chck_buffer_fill(const void *src, size_t size, size_t memb, struct chck_buffer *buf);
 CHCK_NONULL size_t chck_buffer_fill_from_file(FILE *src, size_t size, size_t memb, struct chck_buffer *buf);
 CHCK_NONULL size_t chck_buffer_fill_from_fd(int fd, size_t size, size_t memb, struct chck_buffer *buf);
 
-CHCK_NONULL size_t chck_buffer_write(const void *src, size_t size, size_t nmemb, struct chck_buffer *buf);
+CHCK_NONULLV(4) size_t chck_buffer_write(const void *src, size_t size, size_t nmemb, struct chck_buffer *buf);
 CHCK_NONULL size_t chck_buffer_write_from_file(FILE *src, size_t size, size_t nmemb, struct chck_buffer *buf);
 CHCK_NONULL size_t chck_buffer_write_from_fd(int fd, size_t size, size_t nmemb, struct chck_buffer *buf);
 
@@ -58,8 +58,8 @@ CHCK_NONULLV(1, 3) bool chck_buffer_read_string(char **str, size_t *len, struct 
 CHCK_NONULLV(1, 4) bool chck_buffer_read_string_of_type(char **str, size_t *len, enum chck_bits bits, struct chck_buffer *buf);
 
 CHCK_NONULL bool chck_buffer_write_int(const void *i, enum chck_bits bits, struct chck_buffer *buf);
-CHCK_NONULL bool chck_buffer_write_string(const char *str, size_t len, struct chck_buffer *buf);
-CHCK_NONULL bool chck_buffer_write_string_of_type(const char *str, size_t len, enum chck_bits bits, struct chck_buffer *buf);
+CHCK_NONULLV(3) bool chck_buffer_write_string(const char *str, size_t len, struct chck_buffer *buf);
+CHCK_NONULLV(4) bool chck_buffer_write_string_of_type(const char *str, size_t len, enum chck_bits bits, struct chck_buffer *buf);
 
 CHCK_NONULL CHCK_FORMAT(printf, 2, 3) size_t chck_buffer_write_format(struct chck_buffer *buf, const char *fmt, ...);
 CHCK_NONULL size_t chck_buffer_write_varg(struct chck_buffer *buf, const char *fmt, va_list args);
