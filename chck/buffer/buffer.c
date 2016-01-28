@@ -51,10 +51,10 @@ chck_buffer_from_pointer(struct chck_buffer *buf, void *ptr, size_t size, enum c
 bool
 chck_buffer(struct chck_buffer *buf, size_t size, enum chck_endianess endianess)
 {
-   assert(buf && size > 0);
+   assert(buf);
 
-   void *data;
-   if (!(data = malloc(size)))
+   void *data = NULL;
+   if (size > 0 && !(data = malloc(size)))
       return false;
 
    if (unlikely(!chck_buffer_from_pointer(buf, data, size, endianess)))
