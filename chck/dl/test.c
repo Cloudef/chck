@@ -12,12 +12,12 @@ int main(void)
       const char *error = NULL;
 
 #if defined(__APPLE__)
-      assert((handle = chck_dl_load("/usr/lib/libdl.dylib", &error)) != NULL);
+      assert((handle = chck_dl_load(DL_LIBRARY, &error)) != NULL);
       assert(error == NULL);
       assert(chck_dl_load_symbol(handle, "dlsym", &error) != NULL);
       assert(error == NULL);
 #elif __unix__
-      assert((handle = chck_dl_load("/usr/lib/libdl.so", &error)) != NULL);
+      assert((handle = chck_dl_load(DL_LIBRARY, &error)) != NULL);
       assert(error == NULL);
       assert(chck_dl_load_symbol(handle, "dlsym", &error) != NULL);
       assert(error == NULL);
@@ -27,7 +27,7 @@ int main(void)
       assert(chck_dl_load_symbol(handle, "GetNativeSystemInfo", &error) != NULL);
       assert(error == NULL);
 #else
-      assert((handle = chck_dl_load("/usr/lib/libdl.so", &error)) == NULL);
+      assert((handle = chck_dl_load("unsupported.os", &error)) == NULL);
       assert(error != NULL);
       return EXIT_SUCCESS;
 #endif
