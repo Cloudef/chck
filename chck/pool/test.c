@@ -25,6 +25,12 @@ int main(void)
    {
       struct chck_pool pool;
       assert(chck_pool(&pool, 32, 3, sizeof(struct item)));
+      assert(pool.items.step == 32 * sizeof(struct item));
+      assert(pool.items.member == sizeof(struct item));
+      assert(pool.items.allocated == 3 * sizeof(struct item));
+      assert(pool.items.used == 0);
+      assert(pool.items.count == 0);
+      assert(pool.items.buffer);
 
       for (uint32_t i = 0; i < 3; ++i)
          assert(!chck_pool_get(&pool, i));
@@ -188,6 +194,12 @@ int main(void)
       }
 
       assert(chck_iter_pool(&pool, 32, 2, sizeof(struct item)));
+      assert(pool.items.step == 32 * sizeof(struct item));
+      assert(pool.items.member == sizeof(struct item));
+      assert(pool.items.allocated == 2 * sizeof(struct item));
+      assert(pool.items.used == 0);
+      assert(pool.items.count == 0);
+      assert(pool.items.buffer);
 
       assert(chck_iter_pool_push_back(&pool, (&(struct item){1, NULL})));
       assert(chck_iter_pool_push_back(&pool, (&(struct item){2, NULL})));
@@ -312,6 +324,12 @@ int main(void)
    {
       struct chck_ring_pool pool;
       assert(chck_ring_pool(&pool, 32, 0, sizeof(struct item)));
+      assert(pool.items.step == 32 * sizeof(struct item));
+      assert(pool.items.member == sizeof(struct item));
+      assert(pool.items.allocated == 0);
+      assert(pool.items.used == 0);
+      assert(pool.items.count == 0);
+      assert(!pool.items.buffer);
 
       void *a, *b, *c;
       a = chck_ring_pool_push_back(&pool, (&(struct item){1, NULL}));
