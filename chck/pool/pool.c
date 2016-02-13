@@ -56,23 +56,37 @@ pool_buffer_resize(struct chck_pool_buffer *pb, size_t size)
 }
 
 static bool
+pool_buffer_resize_add(struct chck_pool_buffer *pb, size_t base, size_t add)
+{
+   size_t sz;
+   if (unlikely(chck_add_ofsz(base, add, &sz)))
+      return false;
+
+   return pool_buffer_resize(pb, sz);
+}
+
+static bool
+pool_buffer_resize_mul(struct chck_pool_buffer *pb, size_t base, size_t mul)
+{
+   size_t sz;
+   if (unlikely(chck_mul_ofsz(base, mul, &sz)))
+      return false;
+
+   return pool_buffer_resize(pb, sz);
+}
+
+static bool
 pool_buffer(struct chck_pool_buffer *pb, size_t grow, size_t capacity, size_t member_size)
 {
    assert(pb && member_size > 0);
 
-   if (unlikely(!member_size))
+   if (unlikely(!member_size) || unlikely(chck_mul_ofsz((grow ? grow : 32), member_size, &pb->step)))
       return false;
 
    pb->member = member_size;
-   pb->step = (grow ? grow : 32);
 
-   if (capacity > 0) {
-      size_t sz;
-      if (unlikely(chck_mul_ofsz(capacity, member_size, &sz)))
-         return false;
-
-      pool_buffer_resize(pb, sz);
-   }
+   if (capacity > 0)
+      pool_buffer_resize_mul(pb, capacity, member_size);
 
    return true;
 }
@@ -87,11 +101,7 @@ pool_buffer_add(struct chck_pool_buffer *pb, const void *data, size_t pos, size_
       return NULL;
 
    while (pb->allocated < pos + pb->member) {
-      size_t sz;
-      if (unlikely(chck_mul_ofsz(pb->member, pb->step, &sz)) || unlikely(chck_add_ofsz(pb->allocated, sz, &sz)))
-         return NULL;
-
-      if (unlikely(!pool_buffer_resize(pb, pb->allocated + pb->member * pb->step)))
+      if (unlikely(!pool_buffer_resize_add(pb, pb->allocated, pb->step)))
          return NULL;
    }
 
@@ -154,8 +164,8 @@ pool_buffer_remove(struct chck_pool_buffer *pb, size_t index, size_t (*get_used)
    if (slot + pb->member >= pb->used)
       pb->used = get_used(pb, index, userdata);
 
-   if (pb->used + pb->member * pb->step < pb->allocated)
-      pool_buffer_resize(pb, pb->used + pb->member);
+   if (pb->used + pb->step < pb->allocated)
+      pool_buffer_resize_add(pb, pb->used, pb->member);
 
    assert(pb->count > 0);
    pb->count--;
@@ -176,8 +186,8 @@ pool_buffer_remove_move(struct chck_pool_buffer *pb, size_t index)
 
    pb->used -= pb->member;
 
-   if (pb->used + pb->member * pb->step < pb->allocated)
-      pool_buffer_resize(pb, pb->used + pb->member);
+   if (pb->used + pb->step < pb->allocated)
+      pool_buffer_resize_add(pb, pb->used, pb->member);
 
    assert(pb->count > 0);
    pb->count--;
@@ -364,7 +374,7 @@ chck_pool_remove(struct chck_pool *pool, size_t index)
    pool_buffer_remove(&pool->items, index, pool_get_used, pool);
 
    *(bool*)(pool->map.buffer + index * pool->map.member) = false;
-   pool_buffer_resize(&pool->map, (pool->items.allocated / pool->items.member) * pool->map.member);
+   pool_buffer_resize_mul(&pool->map, (pool->items.allocated / pool->items.member), pool->map.member);
    pool->map.used = (pool->items.used / pool->items.member) * pool->map.member;
 
    if (!last) {

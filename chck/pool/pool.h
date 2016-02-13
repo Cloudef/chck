@@ -11,7 +11,7 @@ struct chck_pool_buffer {
    // pointer to contents
    uint8_t *buffer;
 
-   // growth step and member size (growth is 'n' in n * step)
+   // growth step and member size (step == grow * member_size)
    size_t step, member;
 
    // how many bytes are used and allocated
