@@ -4,5 +4,5 @@
 # Also uses CTEST_OUTPUT_DIRECTORY to set global output directory
 
 function(add_test_ex target)
-   add_test(${target} ${CTEST_EXEC_WITH} "${CTEST_OUTPUT_DIRECTORY}/${target}${CMAKE_EXECUTABLE_SUFFIX}")
+   add_test(NAME ${target} COMMAND ${CTEST_EXEC_WITH} "${CTEST_OUTPUT_DIRECTORY}/${target}${CMAKE_EXECUTABLE_SUFFIX}")
 endfunction()
