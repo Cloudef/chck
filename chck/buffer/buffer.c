@@ -160,7 +160,7 @@ bounds_check(struct chck_buffer *buf, size_t size, size_t memb)
    if (unlikely(chck_mul_ofsz(size, memb, &nsz)))
       return false;
 
-   size_t sz = buf->size - (buf->curpos - buf->buffer);
+   const size_t sz = buf->size - (buf->curpos - buf->buffer);
    if (nsz > sz) {
       /* buf->size + size * memb + buf->step */
       if (unlikely(chck_add_ofsz(buf->size, nsz, &nsz)) || unlikely(chck_add_ofsz(buf->step, nsz, &nsz)))
@@ -204,7 +204,7 @@ chck_buffer_fill_from_fd(int fd, size_t size, size_t memb, struct chck_buffer *b
    if (!bounds_check(buf, size, memb) || !buf->curpos)
       return 0;
 
-   ssize_t ret = read(fd, buf->curpos, size * memb);
+   const ssize_t ret = read(fd, buf->curpos, size * memb);
    if (unlikely(ret == -1 || ret == 0))
       return 0;
 

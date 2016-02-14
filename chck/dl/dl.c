@@ -58,7 +58,7 @@ chck_dl_load_symbol(void *handle, const char *name, const char **out_error)
       error = "Failed to load symbol.";
 #elif defined(__posix__) || defined(__unix__) || defined(__linux__) || defined(__APPLE__)
    if (!(symbol = dlsym(handle, name))) {
-      size_t len = strlen(name) + 1;
+      const size_t len = strlen(name) + 1;
       char *nname = calloc(1, len + 1);
 
       if (nname) {

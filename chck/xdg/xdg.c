@@ -63,7 +63,7 @@ xdg_get_path(const char *xdg_env, const char *default_path)
    if (!(home = get_home()))
       return NULL; /** fatal! */
 
-   size_t len = snprintf(NULL, 0, "%s/%s", home, default_path) + 1;
+   const size_t len = snprintf(NULL, 0, "%s/%s", home, default_path) + 1;
 
    char *path;
    if (!(path = calloc(1, len))) {
