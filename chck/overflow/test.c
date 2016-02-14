@@ -18,6 +18,9 @@ int main(void)
       assert(!chck_add_of##n(4, 4, &r)); \
       assert(!chck_sub_of##n(8, 4, &r)); \
       assert(!chck_mul_of##n(5, 5, &r)); \
+      assert(!chck_add_of##n(s, 0, &r)); \
+      assert(!chck_sub_of##n(s, 0, &r)); \
+      assert(!chck_mul_of##n(s, 0, &r)); \
    }
 
    // TEST: overflow functions
