@@ -23,7 +23,16 @@ int main(void)
 
    /* TEST: pool */
    {
-      struct chck_pool pool;
+      struct chck_pool pool = {0};
+
+      {
+         size_t iter = 0;
+         assert(!chck_pool_iter(&pool, &iter, false));
+         assert(!iter);
+         assert(!chck_pool_iter(&pool, &iter, true));
+         assert(!iter);
+      }
+
       assert(chck_pool(&pool, 32, 3, sizeof(struct item)));
       assert(pool.items.step == 32 * sizeof(struct item));
       assert(pool.items.member == sizeof(struct item));
@@ -195,6 +204,14 @@ int main(void)
       struct chck_iter_pool pool = {0};
 
       {
+         size_t iter = 0;
+         assert(!chck_iter_pool_iter(&pool, &iter, false));
+         assert(!iter);
+         assert(!chck_iter_pool_iter(&pool, &iter, true));
+         assert(!iter);
+      }
+
+      {
          size_t memb;
          assert(!chck_iter_pool_to_c_array(&pool, &memb) && memb == 0);
       }
@@ -334,7 +351,16 @@ int main(void)
 
    /* TEST: ring pool */
    {
-      struct chck_ring_pool pool;
+      struct chck_ring_pool pool = {0};
+
+      {
+         size_t iter = 0;
+         assert(!chck_ring_pool_iter(&pool, &iter, false));
+         assert(!iter);
+         assert(!chck_ring_pool_iter(&pool, &iter, true));
+         assert(!iter);
+      }
+
       assert(chck_ring_pool(&pool, 32, 0, sizeof(struct item)));
       assert(pool.items.step == 32 * sizeof(struct item));
       assert(pool.items.member == sizeof(struct item));

@@ -94,7 +94,7 @@ pool_buffer(struct chck_pool_buffer *pb, size_t grow, size_t capacity, size_t me
 static void*
 pool_buffer_add(struct chck_pool_buffer *pb, const void *data, size_t pos, size_t *out_index)
 {
-   assert(pb);
+   assert(pb && pb->member > 0);
 
    size_t tail;
    if (unlikely(chck_add_ofsz(pos, pb->member, &tail)))
@@ -211,7 +211,7 @@ pool_buffer_iter(const struct chck_pool_buffer *pb, size_t *iter, bool reverse)
 {
    assert(pb && iter);
 
-   if (*iter >= pb->used / pb->member)
+   if (!pb->member || *iter >= pb->used / pb->member)
       return NULL;
 
    void *ptr = pool_buffer_get(pb, *iter);
@@ -410,6 +410,9 @@ void*
 chck_pool_iter(const struct chck_pool *pool, size_t *iter, bool reverse)
 {
    assert(pool && iter);
+
+   if (!pool->items.member)
+      return NULL;
 
    void *current = NULL;
    do {
