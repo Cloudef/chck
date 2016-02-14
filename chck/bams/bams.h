@@ -16,7 +16,7 @@ typedef int8_t bams8;
 #define decl_bams(B, R) \
    static const R B##_erro = (sizeof(B) < sizeof(uint32_t)); \
    static const R B##_most = (B)~0; \
-   static const R B##_half = (B)~0 >> 1; \
+   static const R B##_half = ((B)~0 >> 1) + 1; \
    decl_bams_func(B, R, double) \
    decl_bams_func(B, R, float)
 
