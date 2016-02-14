@@ -37,20 +37,33 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
 
 # Compiler options
+include(GCCCompatibleCompilerOptions)
+
+if (MINGW)
+   set(ldflags -O1 --sort-common --as-needed -static)
+   set(cflags -flto -fuse-linker-plugin)
+   add_definitions(-D__USE_MINGW_ANSI_STDIO=1)
+elseif (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+   set(ldflags -O1 --sort-common --as-needed -z,relro -z,now)
+   set(cflags -flto -fuse-linker-plugin)
+endif ()
+
+check_c_compiler_flag(-fstack-protector-strong has_fstack_protector_strong)
+if (has_fstack_protector_strong)
+   list(APPEND cflags -fstack-protector-strong -fstack-check --param ssp-buffer-size=4)
+else ()
+   list(APPEND cflags -fstack-protector-all -fstack-check --param ssp-buffer-size=4)
+endif ()
+
+create_custom_linker_flags(Upstream ${ldflags})
+create_custom_compiler_flags(Upstream -g -O2 ${cflags})
+
+add_compiler_warnings(-Wall -Wextra -Wno-variadic-macros -Wno-long-long -Wformat=2 -Winit-self -Wfloat-equal -Wcast-align -Wpointer-arith -Wmissing-prototypes)
+
 if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-   include(GCCCompatibleCompilerOptions)
-   add_compiler_warnings(-Wall -Wextra -Wno-variadic-macros -Wno-long-long -Wformat=2 -Winit-self -Wfloat-equal -Wcast-align -Wpointer-arith -Wmissing-prototypes -Wsuggest-attribute=pure -Wsuggest-attribute=const)
-   if (NOT MINGW)
-      create_custom_linker_flags(Upstream -O1 --sort-common --as-needed -z,relro -z,now)
-   else ()
-      create_custom_linker_flags(Upstream -O1 --sort-common --as-needed -static)
-   endif ()
-   check_c_compiler_flag(-fstack-protector-strong ok)
-   if (ok)
-      create_custom_compiler_flags(Upstream -g -O2 -fstack-protector-strong --param ssp-buffer-size=4 -fstack-check -flto)
-   else ()
-      create_custom_compiler_flags(Upstream -g -O2 -fstack-protector-all --param ssp-buffer-size=4 -fstack-check -flto)
-   endif ()
+   add_compiler_warnings(-Wsuggest-attribute=pure -Wsuggest-attribute=const)
+elseif (CMAKE_C_COMPILER_ID MATCHES "Clang")
+   add_compiler_warnings(-Wno-pointer-bool-conversion -Wno-missing-field-initializers -Wno-missing-braces)
 endif ()
 
 # -std=c99 -fpic -fpie -D_DEFAULT_SOURCE
