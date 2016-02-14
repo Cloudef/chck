@@ -89,10 +89,7 @@ void
 chck_lut_flush(struct chck_lut *lut)
 {
    assert(lut);
-
-   if (lut->table)
-      free(lut->table);
-
+   free(lut->table);
    lut->table = NULL;
 }
 
