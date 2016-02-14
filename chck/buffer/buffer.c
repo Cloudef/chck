@@ -363,6 +363,9 @@ chck_buffer_write_string(const char *str, size_t len, struct chck_buffer *buf)
    return likely(chck_buffer_write_string_of_type(str, len, bits, buf));
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+
 size_t
 chck_buffer_write_format(struct chck_buffer *buf, const char *fmt, ...)
 {
@@ -389,6 +392,8 @@ chck_buffer_write_varg(struct chck_buffer *buf, const char *fmt, va_list args)
    free(str);
    return wrote;
 }
+
+#pragma GCC diagnostic pop
 
 CHCK_CONST bool
 chck_buffer_has_zlib(void)

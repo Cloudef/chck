@@ -50,6 +50,9 @@ chck_string_set_cstr(struct chck_string *string, const char *data, bool is_heap)
    return chck_string_set_cstr_with_length(string, data, (data ? strlen(data) : 0), is_heap);
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+
 bool
 chck_string_set_varg(struct chck_string *string, const char *fmt, va_list args)
 {
@@ -81,6 +84,8 @@ chck_string_set_format(struct chck_string *string, const char *fmt, ...)
    va_end(argp);
    return ret;
 }
+
+#pragma GCC diagnostic pop
 
 bool
 chck_string_set(struct chck_string *string, const struct chck_string *other, bool is_heap)
