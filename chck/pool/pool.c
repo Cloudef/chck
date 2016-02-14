@@ -41,7 +41,7 @@ pool_buffer_resize(struct chck_pool_buffer *pb, size_t size)
       return true;
    }
 
-   uint8_t *tmp = NULL;
+   uint8_t *tmp;
    if (!(tmp = realloc(pb->buffer, size)))
       return false;
 
@@ -138,7 +138,7 @@ pool_buffer_add_move(struct chck_pool_buffer *pb, const void *data, size_t pos, 
    assert(pb->used > pos);
 
    if (pb->used > pb->member) {
-      size_t shift = pb->used - (pos + pb->member);
+      const size_t shift = pb->used - (pos + pb->member);
       memmove(pb->buffer + pos + pb->member, pb->buffer + pos, shift);
       ptr = pb->buffer + pos;
    }
@@ -194,15 +194,29 @@ pool_buffer_remove_move(struct chck_pool_buffer *pb, size_t index)
    assert((pb->count > 0 && pb->used > 0) || (!pb->count && !pb->used));
 }
 
+CHCK_PURE static void*
+pool_buffer_get(const struct chck_pool_buffer *pb, size_t index)
+{
+   assert(pb);
+
+   size_t slot;
+   if (unlikely(chck_mul_ofsz(index, pb->member, &slot)) || unlikely(slot >= pb->used))
+      return NULL;
+
+   return pb->buffer + slot;
+}
+
 static void*
 pool_buffer_iter(const struct chck_pool_buffer *pb, size_t *iter, bool reverse)
 {
-   assert(iter);
+   assert(pb && iter);
 
-   if (*iter * pb->member >= pb->used)
+   if (*iter >= pb->used / pb->member)
       return NULL;
 
-   return pb->buffer + (reverse ? (*iter)-- : (*iter)++) * pb->member;
+   void *ptr = pool_buffer_get(pb, *iter);
+   (*iter) += (reverse ? -1 : 1);
+   return ptr;
 }
 
 static bool
@@ -210,18 +224,17 @@ pool_buffer_set_c_array(struct chck_pool_buffer *pb, const void *items, size_t m
 {
    assert(pb);
 
-   void *copy = NULL;
    if (items && memb > 0) {
-      if (!(copy = chck_malloc_mul_of(memb, pb->member)))
+      if (!pool_buffer_resize_mul(pb, memb, pb->member))
          return false;
 
-      memcpy(copy, items, memb * pb->member);
+      memcpy(pb->buffer, items, pb->allocated);
+   } else {
+      pool_buffer_release(pb);
+      memb = 0;
    }
 
-   pool_buffer_release(pb);
-
-   pb->buffer = copy;
-   pb->used = pb->allocated = memb * pb->member;
+   pb->used = pb->allocated;
    pb->count = memb;
    return true;
 }
@@ -243,13 +256,21 @@ pool_buffer_to_c_array(struct chck_pool_buffer *pb, size_t *out_memb)
    return pb->buffer;
 }
 
+CHCK_PURE static bool
+pool_is_mapped(const struct chck_pool *pool, size_t index)
+{
+   assert(pool);
+   const bool *mapped = pool_buffer_get(&pool->map, index);
+   return (mapped ? *mapped : false);
+}
+
 static size_t
 pool_get_free_slot(struct chck_pool *pool)
 {
    assert(pool);
 
    if (pool->removed.count > 0) {
-      const size_t last = *(size_t*)(pool->removed.buffer + pool->removed.used - pool->removed.member);
+      const size_t last = *(size_t*)pool_buffer_get(&pool->removed, pool->removed.count - 1);
       pool_buffer_remove_move(&pool->removed, pool->removed.count - 1);
       return last;
    }
@@ -297,16 +318,16 @@ chck_pool_flush(struct chck_pool *pool)
    pool_buffer_flush(&pool->removed, true);
 }
 
-void*
+CHCK_PURE void*
 chck_pool_get(const struct chck_pool *pool, size_t index)
 {
    assert(pool);
 
-   if (unlikely(index * pool->items.member >= pool->items.used) ||
-      !unlikely(*(bool*)(pool->map.buffer + index * pool->map.member)))
+   void *ptr;
+   if (!(ptr = pool_buffer_get(&pool->items, index)))
       return NULL;
 
-   return pool->items.buffer + index * pool->items.member;
+   return (likely(pool_is_mapped(pool, index)) ? ptr : NULL);
 }
 
 void*
@@ -324,7 +345,7 @@ chck_pool_print(const struct chck_pool *pool, FILE *out)
          pool, pool->items.member, pool->map.used, pool->map.allocated, pool->items.used, pool->items.allocated);
 
    for (size_t i = 0; i < pool->map.used; ++i)
-      fprintf(out, "%s%s", (*(bool*)(pool->map.buffer + i) ? "1" : "0"), ((i + 1) % 80 == 0 ? "\n" : ""));
+      fprintf(out, "%s%s", (pool_is_mapped(pool, i) ? "1" : "0"), ((i + 1) % 80 == 0 ? "\n" : ""));
 
    fprintf(out, "%s^^^\n", (pool->map.used % 80 == 0 ? "" : "\n"));
 }
@@ -333,14 +354,14 @@ CHCK_PURE static size_t
 pool_get_used(struct chck_pool_buffer *pb, size_t removed, struct chck_pool *pool)
 {
    assert(pb && pool);
-   assert(removed * pool->map.member + pool->map.member <= pool->map.used);
+   assert(removed + 1 <= pool->map.used / pool->map.member);
    assert(pb->used > 0);
 
    // for chck_pool's, chck_pool_buffer can not know alone the used size,
    // so we need to help a bit with this function.
 
    size_t largest = removed + 1;
-   for (; largest > 0 && (largest - 1 == removed || !*(bool*)(pool->map.buffer + (largest - 1) * pool->map.member)); --largest);
+   for (; largest > 0 && (largest - 1 == removed || !pool_is_mapped(pool, largest - 1)); --largest);
    return largest * pb->member;
 }
 
@@ -367,13 +388,14 @@ chck_pool_remove(struct chck_pool *pool, size_t index)
 {
    assert(pool);
 
-   if (!unlikely(*(bool*)(pool->map.buffer + index * pool->map.member)))
+   if (unlikely(!pool_is_mapped(pool, index)))
       return;
 
-   const bool last = (index * pool->items.member == pool->items.used);
+   const bool last = (index == pool->items.used / pool->items.member);
    pool_buffer_remove(&pool->items, index, pool_get_used, pool);
 
-   *(bool*)(pool->map.buffer + index * pool->map.member) = false;
+   *((bool*)pool_buffer_get(&pool->map, index)) = false;
+
    pool_buffer_resize_mul(&pool->map, (pool->items.allocated / pool->items.member), pool->map.member);
    pool->map.used = (pool->items.used / pool->items.member) * pool->map.member;
 
@@ -390,13 +412,11 @@ chck_pool_iter(const struct chck_pool *pool, size_t *iter, bool reverse)
    assert(pool && iter);
 
    void *current = NULL;
-   while (!current && *iter * pool->items.member < pool->items.used) {
+   do {
+      const bool mapped = pool_is_mapped(pool, *iter);
       current = pool_buffer_iter(&pool->items, iter, reverse);
-
-      // We don't want to return pointer to removed indexes.
-      if (!*(bool*)(pool->map.buffer + (*iter - (reverse ? -1 : 1)) * pool->map.member))
-         current = NULL;
-   }
+      current = (mapped ? current : NULL);
+   } while (!current && *iter < pool->map.used / pool->map.member);
 
    return current;
 }
@@ -465,11 +485,7 @@ void*
 chck_iter_pool_get(const struct chck_iter_pool *pool, size_t index)
 {
    assert(pool);
-
-   if (unlikely(index * pool->items.member >= pool->items.used))
-      return NULL;
-
-   return pool->items.buffer + index * pool->items.member;
+   return pool_buffer_get(&pool->items, index);
 }
 
 void*
@@ -603,10 +619,10 @@ chck_ring_pool_pop_last(struct chck_ring_pool *pool)
    if (unlikely(pool->items.count <= 0))
       return NULL;
 
-   if (!pool->popped && !(pool->popped = malloc(pool->items.member)))
+   const void *ptr = pool_buffer_get(&pool->items, pool->items.count - 1);
+   if (!ptr || (!pool->popped && !(pool->popped = malloc(pool->items.member))))
       return NULL;
 
-   void *ptr = pool->items.buffer + pool->items.used - pool->items.member;
    memcpy(pool->popped, ptr, pool->items.member);
    pool_buffer_remove_move(&pool->items, pool->items.count - 1);
    return pool->popped;
