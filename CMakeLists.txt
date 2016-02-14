@@ -66,6 +66,11 @@ elseif (CMAKE_C_COMPILER_ID MATCHES "Clang")
    add_compiler_warnings(-Wno-pointer-bool-conversion -Wno-missing-field-initializers -Wno-missing-braces)
 endif ()
 
+# - Each utility should be independant.
+# This makes sure everything that isn't visible is marked as static in source files.
+# Thus we can simply set -fvisibilty=default and have only relevant symbols in shared libraries.
+add_compile_options(-fvisibility=default)
+
 # -std=c99 -fpic -fpie -D_DEFAULT_SOURCE
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
