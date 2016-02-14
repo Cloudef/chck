@@ -179,6 +179,12 @@ int main(void)
          assert(pool.items.allocated == 8 * sizeof(struct item));
       }
 
+      struct item bars[4] = {{.a = 1}};
+      assert(chck_pool_set_c_array(&pool, &bars, 4));
+      assert(pool.items.allocated == 4 * sizeof(struct item));
+      assert(pool.items.used == 4 * sizeof(struct item));
+      assert(!memcmp(pool.items.buffer, bars, sizeof(bars)));
+
       chck_pool_release(&pool);
       assert(pool.items.allocated == 0);
       assert(pool.items.used == 0);
@@ -315,6 +321,12 @@ int main(void)
          assert(pool.items.allocated == 34 * sizeof(struct item));
       }
 
+      struct item bars[4] = {{.a = 1}};
+      assert(chck_iter_pool_set_c_array(&pool, &bars, 4));
+      assert(pool.items.allocated == 4 * sizeof(struct item));
+      assert(pool.items.used == 4 * sizeof(struct item));
+      assert(!memcmp(pool.items.buffer, bars, sizeof(bars)));
+
       chck_iter_pool_release(&pool);
       assert(pool.items.allocated == 0);
       assert(pool.items.used == 0);
@@ -436,6 +448,12 @@ int main(void)
          assert(pool.items.used == 1 * sizeof(struct item));
          assert(pool.items.allocated == 32 * sizeof(struct item));
       }
+
+      struct item bars[4] = {{.a = 1}};
+      assert(chck_ring_pool_set_c_array(&pool, &bars, 4));
+      assert(pool.items.allocated == 4 * sizeof(struct item));
+      assert(pool.items.used == 4 * sizeof(struct item));
+      assert(!memcmp(pool.items.buffer, bars, sizeof(bars)));
 
       chck_ring_pool_release(&pool);
       assert(pool.items.allocated == 0);
