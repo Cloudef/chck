@@ -90,6 +90,17 @@ add_subdirectory(doxygen)
 # Phony for add_subproject
 add_custom_target(chck)
 
+set(CHCK_LINKABLE)
+foreach (c ${CHCK_COMPONENTS})
+   list(APPEND CHCK_LINKABLE -l${c})
+endforeach ()
+string(REPLACE ";" " " CHCK_LINKABLE "${CHCK_LINKABLE}")
+string(REPLACE "_" "-" CHCK_LINKABLE "${CHCK_LINKABLE}")
+
+# Add pkgconfig
+configure_file(chck.pc.in chck.pc @ONLY)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/chck.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+
 set(CHCK_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" CACHE STRING "Include directories of chck" FORCE)
 set(CHCK_LIBRARIES ${CHCK_COMPONENTS} CACHE STRING "Libraries needed for chck" FORCE)
 mark_as_advanced(CHCK_LIBRARIES CHCK_INCLUDE_DIRS)

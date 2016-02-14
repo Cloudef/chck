@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/@CMAKE_INSTALL_LIBDIR@
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+
+Name: @PROJECT_NAME@
+Description: Collection of C utilities (Shared linking not recommended)
+Version: @PROJECT_VERSION@
+Libs: -L${libdir} @CHCK_LINKABLE@
+Libs.private: -lm -ldl
+Cflags: -I${includedir}
