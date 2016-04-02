@@ -63,10 +63,13 @@ chck_string_set_varg(struct chck_string *string, const char *fmt, va_list args)
 
    char *str = NULL;
    const size_t len = vsnprintf(NULL, 0, fmt, args);
-   if (len > 0 && !(str = chck_malloc_add_of(len, 1)))
+   if (len > 0 && !(str = chck_malloc_add_of(len, 1))) {
+      va_end(cpy);
       return false;
+   }
 
    vsnprintf(str, len + 1, fmt, cpy);
+   va_end(cpy);
 
    chck_string_release(string);
    string->is_heap = true;
