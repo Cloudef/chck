@@ -413,7 +413,7 @@ bool
 chck_buffer_compress_zlib(struct chck_buffer *buf)
 {
 #if HAS_ZLIB
-   size_t dsize, bsize;
+   uLongf dsize, bsize;
    dsize = bsize = compressBound(buf->size);
 
    void *compressed;
@@ -454,11 +454,11 @@ bool
 chck_buffer_decompress_zlib(struct chck_buffer *buf)
 {
 #if HAS_ZLIB
-   size_t dsize, bsize;
+   uLongf dsize, bsize;
 
    {
       size_t sz;
-      if (unlikely(chck_mul_ofsz(buf->size, 2, &sz)))
+      if (unlikely(chck_mul_ofsz(buf->size, 2, &sz)) || (uLongf)sz < sz)
          return false;
 
       dsize = bsize = sz;
