@@ -15,14 +15,6 @@ main(void)
       printf("%s\n", (ret = xdg_get_path("XDG_CONFIG_HOME", ".config"))); free(ret);
       printf("%s\n", (ret = xdg_get_path("XDG_DATA_HOME", ".local/share"))); free(ret);
       printf("%s\n", (ret = xdg_get_path("XDG_CACHE_HOME", ".cache"))); free(ret);
-      printf("%s\n", (ret = xdg_get_path("XDG_DESKTOP_DIR", "Desktop"))); free(ret);
-      printf("%s\n", (ret = xdg_get_path("XDG_DOWNLOAD_DIR", "Downloads"))); free(ret);
-      printf("%s\n", (ret = xdg_get_path("XDG_TEMPLATES_DIR", "Templates"))); free(ret);
-      printf("%s\n", (ret = xdg_get_path("XDG_PUBLICSHARE_DIR", "Public"))); free(ret);
-      printf("%s\n", (ret = xdg_get_path("XDG_DOCUMENTS_DIR", "Documents"))); free(ret);
-      printf("%s\n", (ret = xdg_get_path("XDG_MUSIC_DIR", "Music"))); free(ret);
-      printf("%s\n", (ret = xdg_get_path("XDG_PICTURES_DIR", "Pictures"))); free(ret);
-      printf("%s\n", (ret = xdg_get_path("XDG_VIDEOS_DIR", "Videos"))); free(ret);
       printf("%s\n", (ret = xdg_get_path("XDG_THIS_DOES_NOT_EXIST", "but_mah_path_is_still_here"))); free(ret);
 
       const char *path;
