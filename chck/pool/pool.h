@@ -107,34 +107,4 @@ CHCK_NONULL void* chck_iter_pool_iter(const struct chck_iter_pool *pool, size_t 
 CHCK_NONULLV(1) bool chck_iter_pool_set_c_array(struct chck_iter_pool *pool, const void *items, size_t memb); /* struct item *c_array; */
 CHCK_NONULLV(1) void* chck_iter_pool_to_c_array(struct chck_iter_pool *pool, size_t *memb); /* struct item *c_array; */
 
-/**
- * RingPools are circular pools.
- * You push items to them and the pool grows as needed.
- * You can push and pop to/from both sides.
- */
-
-#define chck_ring_pool_for_each_call(pool, function, ...) \
-{ void *_P; for (size_t _I = 0; (_P = chck_ring_pool_iter(pool, &_I, false));) function(_P, ##__VA_ARGS__); }
-
-#define chck_ring_pool_for_each_call_reverse(pool, function, ...) \
-{ void *_P; for (size_t _I = (pool)->items.count - 1; (_P = chck_ring_pool_iter(pool, &_I, true));) function(_P, ##__VA_ARGS__); }
-
-#define chck_ring_pool_for_each(pool, pos) \
-   for (size_t _I = 0; (pos = chck_ring_pool_iter(pool, &_I, false));)
-
-#define chck_ring_pool_for_each_reverse(pool, pos) \
-   for (size_t _I = (pool)->items.count - 1; (pos = chck_ring_pool_iter(pool, &_I, true));)
-
-CHCK_NONULL bool chck_ring_pool(struct chck_ring_pool *pool, size_t grow, size_t capacity, size_t member_size);
-CHCK_NONULL bool chck_ring_pool_from_c_array(struct chck_ring_pool *pool, const void *items, size_t memb, size_t growStep, size_t memberSize);
-void chck_ring_pool_release(struct chck_ring_pool *pool);
-CHCK_NONULL void chck_ring_pool_flush(struct chck_ring_pool *pool);
-CHCK_NONULLV(1) void* chck_ring_pool_push_front(struct chck_ring_pool *pool, const void *data);
-CHCK_NONULLV(1) void* chck_ring_pool_push_back(struct chck_ring_pool *pool, const void *data);
-CHCK_NONULL void* chck_ring_pool_pop_first(struct chck_ring_pool *pool);
-CHCK_NONULL void* chck_ring_pool_pop_last(struct chck_ring_pool *pool);
-CHCK_NONULL void* chck_ring_pool_iter(const struct chck_ring_pool *pool, size_t *iter, bool reverse);
-CHCK_NONULLV(1) bool chck_ring_pool_set_c_array(struct chck_ring_pool *pool, const void *items, size_t memb); /* struct item *c_array; */
-CHCK_NONULLV(1) void* chck_ring_pool_to_c_array(struct chck_ring_pool *pool, size_t *memb); /* struct item *c_array; */
-
 #endif /* __chck_pool__ */
