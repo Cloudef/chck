@@ -150,6 +150,8 @@ chck_get_executable_path(void)
    path = NULL;
 #elif defined(EMSCRIPTEN)
    path = NULL;
+#elif defined(__FreeBSD__)
+   path = NULL;
 #else
 #  error insert your OS here
 #endif
