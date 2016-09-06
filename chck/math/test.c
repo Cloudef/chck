@@ -8,12 +8,12 @@
 
 int main(void)
 {
-   assert(chck_equalld(10.0, 10.000000000001l, 1000000.0l));
-   assert(!chck_equalld(10.0, 10.000000000001l, 1.0l));
-   assert(chck_equal(10.0, 10.000000000001, 1000.0));
-   assert(!chck_equal(10.0, 10.000000000001, 1.0));
-   assert(chck_equalf(10.0f, 10.00001f, 10.0f));
-   assert(!chck_equalf(10.0f, 10.00001f, 1.0f));
+   assert(chck_equalld(LDBL_MIN, LDBL_MIN + LDBL_MIN, LDBL_DIG / LDBL_EPSILON));
+   assert(!chck_equalld(LDBL_MIN, LDBL_MIN + LDBL_MIN, 1.0l));
+   assert(chck_equal(DBL_MIN, DBL_MIN + DBL_MIN, DBL_DIG / DBL_EPSILON));
+   assert(!chck_equal(DBL_MIN, DBL_MIN + DBL_MIN, 1.0));
+   assert(chck_equalf(FLT_MIN, FLT_MIN + FLT_MIN, FLT_DIG / FLT_EPSILON));
+   assert(!chck_equalf(FLT_MIN, FLT_MIN + FLT_MIN, 1.0f));
 
    for (uint32_t i = 0xFFFF; i < 0xFFFFFF; ++i) {
       assert(chck_minu32(i, i - 20) == i - 20);
