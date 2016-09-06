@@ -10,6 +10,17 @@
 #  define HAS_ZLIB 0
 #endif
 
+struct chck_variant {
+   union {
+      uint64_t u64;
+      uint32_t u32;
+      uint16_t u16;
+      uint8_t u8;
+      uint8_t b[sizeof(uint64_t)];
+   };
+   enum chck_bits bits;
+};
+
 static inline bool
 valid_bits(enum chck_bits bits)
 {
@@ -17,6 +28,46 @@ valid_bits(enum chck_bits bits)
            bits == CHCK_BUFFER_B16 ||
            bits == CHCK_BUFFER_B32 ||
            bits == CHCK_BUFFER_B64);
+}
+
+static inline enum chck_bits
+smallest_bits_for_value(uintmax_t v)
+{
+   static const struct {
+      uintmax_t off;
+      enum chck_bits bits;
+   } map[3] = {
+      { ~(uint32_t)0, CHCK_BUFFER_B64 },
+      { ~(uint16_t)0, CHCK_BUFFER_B32 },
+      { ~(uint8_t)0, CHCK_BUFFER_B16 },
+   };
+
+   for (size_t i = 0; i < sizeof(map) / sizeof(map[0]); ++i) {
+      if (v <= map[i].off)
+         continue;
+
+      return map[i].bits;
+   }
+
+   return CHCK_BUFFER_B8;
+}
+
+static inline uintmax_t
+variant_get_value(struct chck_variant v)
+{
+   switch (v.bits) {
+      case CHCK_BUFFER_B8:
+         return v.u8;
+      case CHCK_BUFFER_B16:
+         return v.u16;
+      case CHCK_BUFFER_B32:
+         return v.u32;
+      case CHCK_BUFFER_B64:
+         return v.u64;
+   }
+
+   assert(0 && "should not happen");
+   return 0;
 }
 
 void
@@ -257,9 +308,11 @@ chck_buffer_read_string_of_type(char **str, size_t *out_len, enum chck_bits bits
    if (out_len)
       *out_len = 0;
 
-   size_t len = 0;
-   if (unlikely(!chck_buffer_read_int(&len, bits, buf)))
+   struct chck_variant v = { .bits = bits };
+   if (unlikely(!chck_buffer_read_int(v.b, bits, buf)))
       return false;
+
+   const size_t len = variant_get_value(v);
 
    if (out_len)
       *out_len = len;
@@ -288,7 +341,7 @@ chck_buffer_read_string(char **str, size_t *len, struct chck_buffer *buf)
       *len = 0;
 
    uint8_t bits;
-   if (unlikely(!chck_buffer_read_int(&bits, sizeof(uint8_t), buf)))
+   if (unlikely(!chck_buffer_read_int(&bits, sizeof(bits), buf)))
       return false;
 
    return likely(chck_buffer_read_string_of_type(str, len, bits, buf));
@@ -344,11 +397,24 @@ chck_buffer_write_string_of_type(const char *str, size_t len, enum chck_bits bit
 {
    assert(buf);
 
-   if (unlikely(!chck_buffer_write_int(&len, bits, buf)))
-      return false;
+   bool ret = false;
+   switch (bits) {
+      case CHCK_BUFFER_B8:
+         ret = chck_buffer_write_int((uint8_t[]){len}, bits, buf);
+         break;
+      case CHCK_BUFFER_B16:
+         ret = chck_buffer_write_int((uint16_t[]){len}, bits, buf);
+         break;
+      case CHCK_BUFFER_B32:
+         ret = chck_buffer_write_int((uint32_t[]){len}, bits, buf);
+         break;
+      case CHCK_BUFFER_B64:
+         ret = chck_buffer_write_int((uint64_t[]){len}, bits, buf);
+         break;
+   }
 
-   if (len <= 0)
-      return true;
+   if (unlikely(!ret))
+      return false;
 
    return likely(chck_buffer_write(str, 1, len, buf) == len);
 }
@@ -357,9 +423,9 @@ bool
 chck_buffer_write_string(const char *str, size_t len, struct chck_buffer *buf)
 {
    assert(buf);
-   const enum chck_bits bits = (len > 0xffff ? sizeof(uint32_t) : (len > 0xff ? sizeof(uint16_t) : sizeof(uint8_t)));
 
-   if (unlikely(!chck_buffer_write_int(&bits, sizeof(uint8_t), buf)))
+   const uint8_t bits = smallest_bits_for_value(len);
+   if (unlikely(!chck_buffer_write_int(&bits, sizeof(bits), buf)))
       return false;
 
    return likely(chck_buffer_write_string_of_type(str, len, bits, buf));
