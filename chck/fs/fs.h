@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-CHCK_PURE CHCK_NONULL static inline const char*
+CHCK_PURE static inline const char*
 chck_basename(const char *path)
 {
    assert(path);
@@ -15,7 +15,7 @@ chck_basename(const char *path)
    return (base ? base + 1 : path);
 }
 
-CHCK_NONULL static inline bool
+static inline bool
 chck_filename_is_safe(const char *name)
 {
    if (!name || !*name)

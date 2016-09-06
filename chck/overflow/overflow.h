@@ -38,9 +38,9 @@
 
 // T = type name, n = function suffix, s = is type signed?
 #define decl_generics_for_type(T, n, s) \
-   of_attr CHCK_NONULL static inline bool chck_add_of##n(T a, T b, T *r) { assert((!s || b >= 0) && r); return add_of(a, b, r); } \
-   of_attr CHCK_NONULL static inline bool chck_sub_of##n(T a, T b, T *r) { assert((!s || b >= 0) && r); return sub_of(a, b, r); } \
-   of_attr CHCK_NONULL static inline bool chck_mul_of##n(T a, T b, T *r) { assert(r); return mul_of(a, b, r); }
+   of_attr static inline bool chck_add_of##n(T a, T b, T *r) { assert((!s || b >= 0) && r); return add_of(a, b, r); } \
+   of_attr static inline bool chck_sub_of##n(T a, T b, T *r) { assert((!s || b >= 0) && r); return sub_of(a, b, r); } \
+   of_attr static inline bool chck_mul_of##n(T a, T b, T *r) { assert(r); return mul_of(a, b, r); }
 
 // UT = unsigned type, un = unsigned function suffix
 // T = signed type, n = signed function suffix

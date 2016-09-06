@@ -56,7 +56,7 @@ enum chck_endianess {
 #  define chck_endianess() CHCK_ENDIANESS_LITTLE
 #else
 // runtime endianess check
-static inline enum
+CHCK_CONST static inline enum
 chck_endianess chck_endianess(void)
 {
    union {
@@ -67,7 +67,7 @@ chck_endianess chck_endianess(void)
 };
 #endif
 
-CHCK_NONULL static inline void
+static inline void
 chck_bswap_generic(void *p, size_t size)
 {
    if (size <= sizeof(uint8_t))
@@ -81,7 +81,7 @@ chck_bswap_generic(void *p, size_t size)
       memset((uint8_t*)p + s, b[size - s - 1], 1);
 }
 
-CHCK_NONULL static inline void
+static inline void
 chck_bswap_single(void *p, size_t size)
 {
 #if HAS_BYTESWAP
@@ -105,7 +105,7 @@ chck_bswap_single(void *p, size_t size)
 #endif
 }
 
-CHCK_NONULL static inline void
+static inline void
 chck_bswap(void *v, size_t size, size_t memb)
 {
    assert(v);
@@ -118,10 +118,10 @@ chck_bswap(void *v, size_t size, size_t memb)
 
 #if HAS_BYTESWAP
 #  define generic_swap(T, n) \
-   CHCK_NONULL static inline T chck_bswap##n(T v) { return bswap##n(v); }
+   static inline T chck_bswap##n(T v) { return bswap##n(v); }
 #else
 #  define generic_swap(T, n) \
-   CHCK_NONULL static inline T chck_bswap##n(T v) { chck_bswap_generic(&v, sizeof(v)); return v; }
+   static inline T chck_bswap##n(T v) { chck_bswap_generic(&v, sizeof(v)); return v; }
 #endif
 
 generic_swap(uint16_t, 16)

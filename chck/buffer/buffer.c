@@ -21,7 +21,7 @@ struct chck_variant {
    enum chck_bits bits;
 };
 
-static inline bool
+CHCK_CONST static inline bool
 valid_bits(enum chck_bits bits)
 {
    return (bits == CHCK_BUFFER_B8  ||
@@ -30,7 +30,7 @@ valid_bits(enum chck_bits bits)
            bits == CHCK_BUFFER_B64);
 }
 
-static inline enum chck_bits
+CHCK_CONST static inline enum chck_bits
 smallest_bits_for_value(uintmax_t v)
 {
    static const struct {
@@ -52,7 +52,7 @@ smallest_bits_for_value(uintmax_t v)
    return CHCK_BUFFER_B8;
 }
 
-static inline uintmax_t
+CHCK_PURE static inline uintmax_t
 variant_get_value(struct chck_variant v)
 {
    switch (v.bits) {
