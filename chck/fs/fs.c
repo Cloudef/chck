@@ -14,7 +14,7 @@
 #  include <mach-o/dyld.h>
 #endif
 
-#if defined(BSD)
+#if defined(BSD) || defined(__FreeBSD__)
 #  include <sys/param.h>
 #  include <sys/sysctl.h>
 #endif
@@ -121,7 +121,7 @@ chck_get_executable_path(void)
 #elif defined(_WIN32) || defined(_WIN64)
    if (_pgmptr && !(exepath = ccopy(_pgmptr))) return NULL;
    if (exepath) return exepath;
-#elif defined(BSD) /* works on all BSD's? */
+#elif defined(BSD) || defined(__FreeBSD__) /* works on all BSD's? */
    int mib[4];
    mib[0] = CTL_KERN;
    mib[1] = KERN_PROC;
@@ -140,7 +140,7 @@ chck_get_executable_path(void)
    path = "/proc/self/exe";
 #elif defined(__NetBSD__)
    path = "/proc/curproc/exe";
-#elif defined(BSD)
+#elif defined(BSD) || defined(__FreeBSD__)
    path = "/proc/curproc/file";
 #elif defined(__sun)
    path = "/proc/self/path/a.out";
@@ -149,8 +149,6 @@ chck_get_executable_path(void)
 #elif defined(__APPLE__) && defined(__MACH__)
    path = NULL;
 #elif defined(EMSCRIPTEN)
-   path = NULL;
-#elif defined(__FreeBSD__)
    path = NULL;
 #else
 #  error insert your OS here
