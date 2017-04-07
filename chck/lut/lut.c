@@ -215,7 +215,7 @@ hash_table_set(struct chck_hash_table *table, struct chck_hash_table *l, struct 
 
    // removal
    if (!data) {
-      assert(lut_set_index(&table->meta, index, NULL));
+      lut_set_index(&table->meta, index, NULL);
       return lut_set_index(&table->lut, index, NULL);
    }
 
