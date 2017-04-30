@@ -37,14 +37,14 @@ struct chck_hash_table_iterator {
 
 // simply return the input, this is good for incrementing numbers
 // or, when you know that the input will be somewhere around range of your hash table's size
-CHCK_CONST static inline uint32_t
+static inline uint32_t
 chck_incremental_uint_hash(uint32_t uint)
 {
    return uint;
 }
 
 // default simple hash from <http://stackoverflow.com/a/12996028>
-CHCK_CONST static inline uint32_t
+static inline uint32_t
 chck_default_uint_hash(uint32_t uint)
 {
    uint = ((uint >> 16) ^ uint) * 0x45d9f3b;
@@ -53,7 +53,7 @@ chck_default_uint_hash(uint32_t uint)
 }
 
 // default simple string hash
-CHCK_CONST static inline uint32_t
+static inline uint32_t
 chck_default_str_hash(const char *str, size_t len)
 {
    (void)len;

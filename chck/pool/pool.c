@@ -194,7 +194,7 @@ pool_buffer_remove_move(struct chck_pool_buffer *pb, size_t index)
    assert((pb->count > 0 && pb->used > 0) || (!pb->count && !pb->used));
 }
 
-CHCK_PURE static void*
+static void*
 pool_buffer_get(const struct chck_pool_buffer *pb, size_t index)
 {
    assert(pb);
@@ -256,7 +256,7 @@ pool_buffer_to_c_array(struct chck_pool_buffer *pb, size_t *out_memb)
    return pb->buffer;
 }
 
-CHCK_PURE static bool
+static bool
 pool_is_mapped(const struct chck_pool *pool, size_t index)
 {
    assert(pool);
@@ -318,7 +318,7 @@ chck_pool_flush(struct chck_pool *pool)
    pool_buffer_flush(&pool->removed, true);
 }
 
-CHCK_PURE void*
+void*
 chck_pool_get(const struct chck_pool *pool, size_t index)
 {
    assert(pool);
@@ -350,7 +350,7 @@ chck_pool_print(const struct chck_pool *pool, FILE *out)
    fprintf(out, "%s^^^\n", (pool->map.used % 80 == 0 ? "" : "\n"));
 }
 
-CHCK_PURE static size_t
+static size_t
 pool_get_used(struct chck_pool_buffer *pb, size_t removed, struct chck_pool *pool)
 {
    assert(pb && pool);

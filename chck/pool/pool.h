@@ -64,8 +64,8 @@ bool chck_pool_from_c_array(struct chck_pool *pool, const void *items, size_t me
 void chck_pool_release(struct chck_pool *pool);
 void chck_pool_flush(struct chck_pool *pool);
 void chck_pool_print(const struct chck_pool *pool, FILE *out);
-CHCK_PURE void* chck_pool_get(const struct chck_pool *pool, size_t index);
-CHCK_PURE void* chck_pool_get_last(const struct chck_pool *pool);
+void* chck_pool_get(const struct chck_pool *pool, size_t index);
+void* chck_pool_get_last(const struct chck_pool *pool);
 void* chck_pool_add(struct chck_pool *pool, const void *data, size_t *out_index);
 void chck_pool_remove(struct chck_pool *pool, size_t index);
 void* chck_pool_iter(const struct chck_pool *pool, size_t *iter, bool reverse);
@@ -97,8 +97,8 @@ bool chck_iter_pool_from_c_array(struct chck_iter_pool *pool, const void *items,
 void chck_iter_pool_release(struct chck_iter_pool *pool);
 void chck_iter_pool_flush(struct chck_iter_pool *pool);
 void chck_iter_pool_empty(struct chck_iter_pool *pool);
-CHCK_PURE void* chck_iter_pool_get(const struct chck_iter_pool *pool, size_t index);
-CHCK_PURE void* chck_iter_pool_get_last(const struct chck_iter_pool *pool);
+void* chck_iter_pool_get(const struct chck_iter_pool *pool, size_t index);
+void* chck_iter_pool_get_last(const struct chck_iter_pool *pool);
 void* chck_iter_pool_push_front(struct chck_iter_pool *pool, const void *data);
 void* chck_iter_pool_push_back(struct chck_iter_pool *pool, const void *data);
 void* chck_iter_pool_insert(struct chck_iter_pool *pool, size_t index, const void *data);

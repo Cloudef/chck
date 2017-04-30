@@ -56,7 +56,7 @@ enum chck_endianess {
 #  define chck_endianess() CHCK_ENDIANESS_LITTLE
 #else
 // runtime endianess check
-CHCK_CONST static inline enum
+static inline enum
 chck_endianess chck_endianess(void)
 {
    union {

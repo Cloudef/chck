@@ -68,7 +68,7 @@ ptrdiff_t chck_buffer_seek(struct chck_buffer *buf, long offset, int whence);
 bool chck_buffer_resize(struct chck_buffer *buf, size_t size);
 
 /* -DHAS_ZLIB=1 -lz */
-CHCK_CONST bool chck_buffer_has_zlib(void);
+bool chck_buffer_has_zlib(void);
 bool chck_buffer_compress_zlib(struct chck_buffer *buf);
 bool chck_buffer_decompress_zlib(struct chck_buffer *buf);
 

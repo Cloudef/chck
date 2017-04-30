@@ -72,18 +72,18 @@
 
 // T = type name, n = function suffix
 #define decl_generics_for_type(T, n) \
-   CHCK_CONST static inline T chck_min##n(T a, T b) { return (a < b ? a : b); } \
-   CHCK_CONST static inline T chck_max##n(T a, T b) { return (a > b ? a : b); } \
-   CHCK_CONST static inline T chck_clamp##n(T a, T min, T max) { return (chck_min##n(chck_max##n(a, min), max)); }
+   static inline T chck_min##n(T a, T b) { return (a < b ? a : b); } \
+   static inline T chck_max##n(T a, T b) { return (a > b ? a : b); } \
+   static inline T chck_clamp##n(T a, T min, T max) { return (chck_min##n(chck_max##n(a, min), max)); }
 
 // T = type name, n = function suffix
 #define decl_unsigned_generics_for_type(T, n) \
-   CHCK_CONST static inline T chck_npot##n(T v) { if (v && !(v & (v - 1))) return v; T p; for (p = 1; p < v; p *= 2); return p; }
+   static inline T chck_npot##n(T v) { if (v && !(v & (v - 1))) return v; T p; for (p = 1; p < v; p *= 2); return p; }
 
 // T = signed type, FT = floating point type, n = signed function suffix, fs = floating point suffix
 #define decl_signed_generics(T, FT, n, fs) \
    decl_generics_for_type(T, n) \
-   CHCK_CONST static inline T chck_modn##n(T x, T m) { return x - m * round##fs((FT)x / (FT)m); } // modulus rounding to nearest int (-m/2, +m/2 range)
+   static inline T chck_modn##n(T x, T m) { return x - m * round##fs((FT)x / (FT)m); } // modulus rounding to nearest int (-m/2, +m/2 range)
 
 // UT = unsigned type, un = unsigned function suffix
 // T = signed type, FT = floating point type, n = signed function suffix
@@ -108,15 +108,15 @@ decl_signed_generics(float, float, f, f)
 
 /** floating point almost equality checks */
 
-CHCK_CONST static inline bool chck_equalld(long double a, long double b, long double error) {
+static inline bool chck_equalld(long double a, long double b, long double error) {
    return (fabsl(a - b) < error * LDBL_EPSILON * fabsl(a + b) || fabsl(a - b) < LDBL_MIN);
 }
 
-CHCK_CONST static inline bool chck_equal(double a, double b, double error) {
+static inline bool chck_equal(double a, double b, double error) {
    return (fabs(a - b) < error * DBL_EPSILON * fabs(a + b) || fabs(a - b) < DBL_MIN);
 }
 
-CHCK_CONST static inline bool chck_equalf(float a, float b, float error) {
+static inline bool chck_equalf(float a, float b, float error) {
    return (fabsf(a - b) < error * FLT_EPSILON * fabsf(a + b) || fabsf(a - b) < FLT_MIN);
 }
 

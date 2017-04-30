@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-CHCK_PURE static inline const char*
+static inline const char*
 chck_basename(const char *path)
 {
    assert(path);
